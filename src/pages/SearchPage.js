@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getProducts } from '../services/api';
 
+
 function SearchPage() {
   const [products, setProducts] = useState([]);
 

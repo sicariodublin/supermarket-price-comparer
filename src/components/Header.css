@@ -1,0 +1,72 @@
+/* Header.css */
+
+@import "~@fortawesome/fontawesome-free/css/all.css";
+
+.header {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #fff; /* Change the color to match your theme */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar {
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .navbar__logo {
+    background-color: #fff; /* Same color as the navbar */
+    padding: 5px;  /* Optional: Add padding if needed */
+  }
+  
+  .navbar__logo img {
+    display: block;  /* Removes extra space below the image */
+    width: 300px;  /* Adjust the width as needed */
+    height: auto;  /* Adjust the height as needed */
+  }
+  
+  .navbar__links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .navbar__links li {
+    margin: 0 10px;
+  }
+  
+  .navbar__links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .navbar__links a:hover {
+    color: #007bff; /* Highlight color when hovered */
+  }
+  
+  .navbar__search {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar__search input[type="text"] {
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    margin-right: 5px;
+  }
+  
+  .navbar__search button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .navbar__search i {
+    color: #333;
+    font-size: 1.2em;
+  }
+  
