@@ -4,27 +4,33 @@
 
 .header {
     width: 100%;
-    padding: 10px 20px;
-    background-color: #fff; /* Change the color to match your theme */
+    padding: 0 20px;
+    background-color: #f9f4f9; /* Change the color to match your theme */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    
   }
   
   .navbar {
-    background-color: #fff;
+    background-color: #f9f4f9;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-left: 3%;
+    margin-right: 3%;
+    
   }
   
   .navbar__logo {
-    background-color: #fff; /* Same color as the navbar */
+    background-color: #f9f4f9; /* Same color as the navbar */
     padding: 5px;  /* Optional: Add padding if needed */
+    border: none; 
   }
   
   .navbar__logo img {
     display: block;  /* Removes extra space below the image */
-    width: 300px;  /* Adjust the width as needed */
+    width: 350px;  /* Adjust the width as needed */
     height: auto;  /* Adjust the height as needed */
+    background-color: #f9f4f9;
   }
   
   .navbar__links {

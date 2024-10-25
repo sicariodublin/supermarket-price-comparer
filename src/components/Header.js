@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/images/logo2.png';
+import logo from '../assets/images/logo4.png';
 import './Header.css'; // Create a separate CSS file to style the header
 
 
