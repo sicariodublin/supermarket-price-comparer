@@ -2,6 +2,7 @@
 
 html, body {
   height: 100%;
+  
   margin: 0;
   padding: 0;
   display: flex;
@@ -41,7 +42,8 @@ main {
 }
 
 .footer h5 {
-  font-family: 'Montserrat', 'sans-serif';
+  font-family: 'Arial', 'sans-serif';
+  font-weight: 500;
   color: #6c63ff;
   margin-bottom: 10px;
   font-size: 21px;
@@ -58,6 +60,7 @@ main {
 
 .footer__logo-section img {
   width: 250px;
+  border-radius: 5px;
 }
 
 .social-icons {

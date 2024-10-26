@@ -1,38 +1,57 @@
 /* src/styles/FeedbackForm.css */
 
 .feedback-section {
-    margin-top: 20px;
+    margin-top: 10px;
+    text-align: center;
+    background-color: #2438bc;
+    padding: 5px;
+    font-weight: 350;
   }
   
   .feedback-title {
+    position: relative;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 500;
+    padding-top: 0;
+    margin-top: 5px;
+    margin-bottom: 2px;
+    
   }
   
   .feedback-form {
     display: flex;
+    position: relative;
+    width: calc(100% - 50px);
     align-items: center;
-    gap: 10px;
     margin-top: 10px;
+    padding-left: 90px;
+    padding-right: 60px;
   }
   
   .feedback-input {
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 10px;
     flex: 1;
   }
   
   .feedback-button {
-    background-color: #007bff;
+    position: absolute;
+    background-color: #0061c8;
     color: #fff;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 10px 14px;
+    border-radius: 10px;
     cursor: pointer;
+    right: 61px;
   }
   
   .feedback-button:hover {
     background-color: #0056b3;
   }
   
+  @media (max-width: 768px) {
+    .feedback-form {
+      width: calc(100% - 10px);
+    } 
+  }

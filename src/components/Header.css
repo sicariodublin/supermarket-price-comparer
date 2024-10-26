@@ -55,7 +55,7 @@
     flex-grow: 1;
     justify-content: flex-start;
     list-style: none;
-    padding-left: 55px; /* Add left padding to move it closer to center */
+    padding-left: 25px; /* Add left padding to move it closer to center */
 }
 
 .navbar__links-left li a {
@@ -73,7 +73,7 @@
     flex-grow: 1;
     justify-content: flex-end;
     list-style: none;
-    padding-right: 15px; /* Add right padding to move it closer to center */
+    padding-right: 2px; /* Add right padding to move it closer to center */
 }
 
 .navbar__links-right li a {
@@ -168,6 +168,8 @@
     .quick-search-form {
         width: 50%;
         margin-top: 10px;
+        margin-left: 20px;
+        margin-bottom: 10px;
     }
 
     .quick-search-form input {

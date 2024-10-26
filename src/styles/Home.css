@@ -1,0 +1,63 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.home-container {
+  width: 100vw; /* Full width of the viewport */
+  height: 100vh; /* Full height of the viewport */
+  padding: 20px;
+  width: 100%;
+  text-align: center;
+  background-image: url('../assets/images/veg-7.png'); /* Ensure this path is correct */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: rgb(35 131 129);
+}
+
+.header-content {
+  margin-top: 110px;
+  background-color: rgba(175,173,173,0.5);
+  padding: 20px;
+  border-radius: 8px; /* Rounded corners */
+  color: #333;
+  display: inline-block; /* Only takes the necessary width */
+}
+
+/*.header-content h1, .header-content p {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Shadow behind text 
+}*/
+
+.become-member-button {
+  background-color: #0061c8;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 18px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+}
+
+.become-member-button:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    background-image: url('../assets/images/veg-7.png'); /* Use a different image for smaller screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-container {
+    background-image: url('../assets/images/veg-7.png'); /* Higher-resolution image for larger screens */
+    
+  }
+}
