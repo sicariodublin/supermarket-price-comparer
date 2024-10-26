@@ -3,24 +3,31 @@
 @import "~@fortawesome/fontawesome-free/css/all.css";
 
 .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    padding: 0 20px;
+    padding: 0;
     background-color: #f9f4f9; /* Change the color to match your theme */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     
   }
   
   .navbar {
+    z-index: 1000;
+    width: 100%;
     background-color: #f9f4f9;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-left: 3%;
-    margin-right: 3%;
+    padding: 0 2%;
+    flex-flow: nowrap;
+    flex-wrap: wrap; /* Allows wrapping of items for smaller screens */
     
   }
   
   .navbar__logo {
+    display: flex;
     background-color: #f9f4f9; /* Same color as the navbar */
     padding: 5px;  /* Optional: Add padding if needed */
     border: none; 
@@ -28,30 +35,65 @@
   
   .navbar__logo img {
     display: block;  /* Removes extra space below the image */
-    width: 350px;  /* Adjust the width as needed */
+    width: 250px;  /* Adjust the width as needed */
     height: auto;  /* Adjust the height as needed */
     background-color: #f9f4f9;
   }
   
   .navbar__links {
-    list-style: none;
     display: flex;
-    gap: 20px;
-  }
-  
-  .navbar__links li {
-    margin: 0 10px;
-  }
-  
-  .navbar__links a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-  }
-  
-  .navbar__links a:hover {
-    color: #007bff; /* Highlight color when hovered */
-  }
+    flex-grow: 1;
+    justify-content: space-between;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 20px; /* Space between navigation items */
+}
+
+  .navbar__links-left {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-start;
+    list-style: none;
+    padding-left: 55px; /* Add left padding to move it closer to center */
+}
+
+.navbar__links-left li a {
+  color: #333; /* Set the desired text color */
+  text-decoration: none; /* Remove the underline */
+  transition: color 0.3s ease; /* Optional: Add a smooth transition for hover effect */
+}
+
+.navbar__links-left li a:hover {
+  color: #0000f3; /* Optional: Set a color for hover state */
+}
+
+.navbar__links-right {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+    list-style: none;
+    padding-right: 15px; /* Add right padding to move it closer to center */
+}
+
+.navbar__links-right li a {
+  color: #333; /* Set the desired text color */
+  text-decoration: none; /* Remove the underline */
+  transition: color 0.3s ease; /* Optional: Add a smooth transition for hover effect */
+}
+
+.navbar__links-right li a:hover {
+  color: #0000f3; /* Optional: Set a color for hover state */
+} 
+
+.navbar__links-left li,
+.navbar__links-right li {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0 10px;
+  transition: background-color 0.3s ease;
+}
   
   .navbar__search {
     display: flex;
@@ -65,14 +107,75 @@
     margin-right: 5px;
   }
   
-  .navbar__search button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+  .quick-search-form {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 23px;
+    padding: 5px 10px;
+    padding-left: 0;
   }
   
-  .navbar__search i {
-    color: #333;
-    font-size: 1.2em;
+  .quick-search-form input[type="text"] {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 3px;
+    flex-grow: 1;
+    margin-left: 40px;
+  }
+  
+  .quick-search-form button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 10px;
+    position: absolute;
+    padding-left: 0;
+  }
+
+  .quick-search-form button:hover {
+    filter: brightness(1.6); /* Increase brightness on hover */
+    transition: filter 0.3s ease; /* Smooth transition */
+  }
+  
+  .quick-search-form button img {
+    width: 35px; /* Adjust icon size */
+    border-radius: 50%;
+    padding-top: 4px;
+  }
+  
+ /* Media Queries for Small Screens */
+  @media (max-width: 1080px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .navbar__links {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .quick-search-form {
+        width: 50%;
+        margin-top: 10px;
+    }
+
+    .quick-search-form input {
+        width: calc(100% - 50px);
+    }
+
+    .quick-search-form button {
+        width: 40px;
+    }
   }
   
