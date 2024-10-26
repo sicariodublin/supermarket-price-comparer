@@ -17,26 +17,21 @@ import TermsOfService from './pages/Terms-of-service.js';
 function App() {
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={
-          <>
-            <Home />
-            <FeedbackForm />
-            <Footer />
-          </>
-        } />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/feedback" element={<FeedbackForm />} />
-        <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      </Routes>
-    </Router>
-  );
+    <Header />
+    <FeedbackForm />
+    <Routes>
+      <Route path="/" element={<Home />} exact />
+      <Route path="/search" element={<SearchPage />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/about-us" element={<AboutUs />} />
+      <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="/terms-of-service" element={<TermsOfService />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+    </Routes>
+    <Footer />
+  </Router>
+);
 }
 export default App;
