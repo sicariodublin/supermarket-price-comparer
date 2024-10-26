@@ -67,17 +67,46 @@ main {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
 .social-icons img {
   width: 35px;
   height: 35px;
   transition: filter 0.3s;
+  
 }
 
-.social-icons img:hover {
+/* Base style for social icons */
+.social-icons a {
+  display: inline-block;
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+/* Facebook hover effect */
+.facebook-icon:hover {
+  transform: scale(1.2);
   filter: brightness(1.5);
 }
+
+/* Instagram hover effect */
+.instagram-icon:hover img {
+  transform: scale(1.2);
+  filter: hue-rotate(45deg); /* Changes hue slightly */
+}
+
+/* Twitter hover effect */
+.twitter-icon:hover img {
+  transform: scale(1.2);
+  filter: saturate(2); /* Increases saturation */
+}
+
+/* LinkedIn hover effect */
+.linkedin-icon:hover img {
+  transform: scale(1.2);
+  filter: contrast(1.5); /* Increases contrast */
+}
+
 
 .footer__links {
   display: flex;

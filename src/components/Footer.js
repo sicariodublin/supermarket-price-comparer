@@ -1,9 +1,5 @@
 // src/components/Footer.js
 import React from 'react';
-import FacebookIcon from '../assets/images/Facebook-48.png';
-import InstagramIcon from '../assets/images/Instagram-48.png';
-import LinkedInIcon from '../assets/images/Linkedin-48.png';
-import TwitterIcon from '../assets/images/X-48.png';
 import './Footer.css';
 
 function Footer() {
@@ -13,18 +9,18 @@ function Footer() {
         <div className="footer__logo-section">
           <img src={require('../assets/images/logo4.png')} alt="addandcompare" className="logo" />
           <div className="social-icons">
-            <a href="#" aria-label="Facebook" style={{ pointerEvents: 'none' }}>
-              <img src={FacebookIcon} alt="Facebook" />
-            </a>
-            <a href="#" aria-label="Instagram" style={{ pointerEvents: 'none' }}>
-              <img src={InstagramIcon} alt="Instagram" />
-            </a>
-            <a href="#" aria-label="Twitter" style={{ pointerEvents: 'none' }}>
-              <img src={TwitterIcon} alt="Twitter" />
-            </a>
-            <a href="#" aria-label="LinkedIn" style={{ pointerEvents: 'none' }}>
-              <img src={LinkedInIcon} alt="LinkedIn" />
-            </a>
+          <a href="#" className="facebook-icon" aria-label="Facebook">
+          <img src="/Facebook-48.png" alt="Facebook" />
+          </a>
+          <a href="#" className="instagram-icon" aria-label="Instagram">
+            <img src="/Instagram-48.png" alt="Instagram" />
+          </a>
+          <a href="#" className="twitter-icon" aria-label="Twitter">
+            <img src="/X-48.png" alt="Twitter" />
+          </a>
+          <a href="#" className="linkedin-icon" aria-label="LinkedIn">
+            <img src="/Linkedin-48.png" alt="LinkedIn" />
+          </a>
           </div>
         </div>
         <div className="footer__links">
