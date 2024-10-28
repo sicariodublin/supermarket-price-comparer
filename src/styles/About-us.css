@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif; /* Ensures the font is sans-serif */
+    margin: 0;
+    padding: 0;
+    background-color: #dbd7d7; /* Light grey background for the whole page */
+}
+
+.about-container {
+    display: flex;
+    flex-direction: row; /* Position text and image side by side */
+    width: 100%; /* Takes up full container width */
+    justify-content: space-between; /* Space between text and image */
+    align-items: stretch; /* Stretch image and text to the same height */
+    max-width: 1500px; /* Set a max width to avoid excessive stretching */
+    margin: 0 auto; /* Center the container horizontally */
+    gap: 50px; /* Space between the image and text */
+    padding: 40px; /* Padding inside the container */
+}
+
+.about-image {
+    width: 50%; /* Image container takes half of the available space */
+    background-image: url('../assets/images/supermarket2.jpg'); /* Ensure this path is correct */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: auto; /* Maintain height proportional to width */
+    border-radius: 8px; /* Rounded corners for better appearance */
+}
+
+.about-text {
+    width: 50%; /* Text container takes half of the available space */
+    /* background-color: rgba(255, 255, 255, 0.9); /* Light background for better readability * */
+    padding: 20px; /* Add padding around the text */
+    border-radius: 8px; /* Rounded corners for better appearance */
+    text-align: justify;
+}
+
+.about-text h1 {
+    color: #0d4d92; /* Dark blue color for headers */
+    font-size: 40px;
+    text-align: left;
+}
+
+.about-text h2 {
+    color: #0d4d92;
+    font-size: 25px;
+    margin-top: 20px;
+}
+
+p {
+    line-height: 1.5; /* Increases line height for better readability */
+    color: #666; /* Text color */
+    font-size: 16px;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .about-container {
+        flex-direction: column; /* Stack elements vertically on smaller screens */
+        align-items: center;
+        padding: 20px;
+    }
+
+    .about-image {
+        width: 100%; /* Full width for small screens */
+        height: 200px; /* Set a specific height for better scaling on small screens */
+    }
+
+    .about-text {
+        width: 90%; /* Reduce width for smaller screens */
+        margin: 0 auto; /* Center the text */
+    }
+
+    p {
+        font-size: 14px; /* Reduce font size for better fit */
+    }
+}

@@ -1,0 +1,56 @@
+
+.how-it-works-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.how-it-works-container {
+    width: 100vw; /* Full width of the viewport */
+    padding: 20px;
+    text-align: center;
+    background-image: url('../assets/images/veg-7.png'); /* Ensure this path is correct */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: rgb(35 131 129);
+    margin-bottom: -15px;
+}
+
+.header-works {
+  margin-top: 20px;
+  margin-bottom: 50px;
+  background-color: rgb(123 107 107 / 50%);
+  padding: 20px;
+  border-radius: 8px; /* Rounded corners */
+  display: inline-block; /* Only takes the necessary width */
+  width: 90%;
+}
+
+.how-it-works-page h1{
+  font-size: 40px;
+  color: aliceblue;
+  font-weight: 400;
+  align-items: center; /* Center the bullet points and numbers */
+  justify-content: center;
+  padding-left: 0; /* Remove default padding */
+  list-style-position: inside; /* Make the bullet points inside the container */
+}
+
+.how-it-works-page h2 {
+  font-size: 18px;
+  color: aliceblue;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  line-height: 1.3;
+  font-weight: 300;
+  text-align: center; /* Center-align the list items */
+}
+
+.how-it-works-page p, ol, ul {
+  font-size: 14px;
+  line-height: 1.5;
+  color: aliceblue;
+  font-weight: 500;
+}

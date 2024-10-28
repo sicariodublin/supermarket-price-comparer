@@ -1,35 +1,53 @@
+/* Global styling to prevent overflow */
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* Hide any horizontal overflow */
+}
+
+/* Home page styling */
 .home-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  overflow-x: hidden; /* Prevents any overflow on the x-axis */
 }
 
 .home-container {
-  width: 100vw; /* Full width of the viewport */
+  width: 100%; /* Full width of the viewport */
   height: 100vh; /* Full height of the viewport */
+  padding: 10px;
   padding: 20px;
-  width: 100%;
   text-align: center;
-  background-image: url('../assets/images/veg-7.png'); /* Ensure this path is correct */
+  background-image: url('../assets/images/vegetables1.png'); /* Ensure this path is correct */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: rgb(35 131 129);
+  margin-bottom: 0;
+  overflow: hidden; /* Prevents the creation of scroll bars */
+  position: relative; /* Enables positioning for child elements */
 }
 
 .header-content {
-  margin-top: 110px;
-  background-color: rgba(175,173,173,0.5);
-  padding: 20px;
+  margin-top: 20px;
+  background-color: rgba(123 107 107 / 50%);
+  padding: 15px;
   border-radius: 8px; /* Rounded corners */
-  color: #333;
+  color: aliceblue;
+  font-size: 20px;
+  font-weight: 500;
+  max-width: 90%; /* Keep the container width suitable for small screens */
   display: inline-block; /* Only takes the necessary width */
 }
 
-/*.header-content h1, .header-content p {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Shadow behind text 
-}*/
+.header-content p {
+  color: aliceblue;
+  font-weight: 600;
+  font-size: 14px;
+}
 
 .become-member-button {
   background-color: #0061c8;
@@ -38,7 +56,7 @@
   border: none;
   border-radius: 5px; 
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 10px;
   font-size: 18px;
   transition: background-color 0.3s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -49,15 +67,47 @@
   background-color: #0056b3;
 }
 
-@media (max-width: 768px) {
+/* 768px to 1024px screen sizes */
+@media (min-width: 768px) and (max-width: 1024px) {
   .home-container {
-    background-image: url('../assets/images/veg-7.png'); /* Use a different image for smaller screens */
+    padding: 10px; /* Reduce padding for smaller screens */
+    background-size: cover; /* Make sure background fits the screen properly */
+  }
+
+  .header-content {
+    font-size: 22px; /* Decrease font size */
+    margin-top: 60px; /* Reduce margin-top */
+    padding: 20px; /* Reduce padding for better fit */
+    max-width: 90%; /* Keep text within boundaries on smaller screens */
+  }
+
+  .header-content p {
+    font-size: 12px; /* Decrease font size for smaller text */
+  }
+
+  .become-member-button {
+    padding: 8px 16px; /* Reduce padding */
+    font-size: 14px; /* Reduce font size */
   }
 }
 
-@media (min-width: 1024px) {
+/* For larger screens (more than 1024px) */
+@media (min-width: 1025px) {
   .home-container {
-    background-image: url('../assets/images/veg-7.png'); /* Higher-resolution image for larger screens */
-    
+    height: 100vh; 
+    padding: 40px; 
+  }
+
+  .header-content {
+    margin-top: 80px; 
+  }
+
+  .header-content p {
+    font-size: 18px; 
+  }
+
+  .become-member-button {
+    padding: 15px 30px; 
+    font-size: 18px; 
   }
 }
