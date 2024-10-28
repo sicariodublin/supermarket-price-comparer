@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/images/Frame-1.png';
-import magnifyingGlassIcon from '../assets/images/magnifying-glass-48.png';
+import magnifyingGlassIcon from '../assets/images/magnifying-glass-50.png';
 import './Header.css'; // Create a separate CSS file to style the header
 
 
