@@ -108,6 +108,7 @@
   }
   
   .quick-search-form {
+    position: relative;
     display: flex;
     align-items: center;
     background-color: white;
@@ -133,6 +134,7 @@
     padding: 0 10px;
     position: absolute;
     padding-left: 0;
+    z-index: 100;
   }
 
   .quick-search-form button:hover {
