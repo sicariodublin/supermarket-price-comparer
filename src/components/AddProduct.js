@@ -1,3 +1,4 @@
+// AddProduct.js (Component)
 import axios from 'axios';
 import React, { useState } from 'react';
 
@@ -44,8 +45,8 @@ function AddProduct() {
       <select value={supermarket} onChange={(e) => setSupermarket(e.target.value)}>
         <option value="">Select Supermarket</option>
         <option value="1">Lidl </option>
-        <option value="2">SuperValu </option>
-        <option value="3">Tesco </option>
+        <option value="2">SuperValue </option>
+        <option value="3">TESCO </option>
         <option value="4">Aldi </option>
         <option value="5">M&S </option>
         <option value="6">Dunnes Stores </option>

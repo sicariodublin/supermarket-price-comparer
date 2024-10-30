@@ -1,16 +1,14 @@
-// ProductList.js (Component)
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { supermarkets } from '../utilities/supermarketsData';
 
 function ProductList() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // Fetch products from your API
+    // Fetch products with supermarket names from your API
     axios
-      .get('http://localhost:5000/api/products')
+      .get('http://localhost:5000/api/products?include=supermarket_name')
       .then((response) => {
         setProducts(response.data);
       })
@@ -18,12 +16,6 @@ function ProductList() {
         console.error("Error fetching products: ", error);
       });
   }, []);
-
-  // Function to get supermarket name by ID
-  const getSupermarketName = (id) => {
-    const supermarket = supermarkets.find((s) => s.id === id);
-    return supermarket ? supermarket.name : 'Unknown';
-  };
 
   // Filter products by search term
   const filteredProducts = products.filter((product) =>
@@ -45,8 +37,8 @@ function ProductList() {
           <h3>{product.name}</h3>
           <p>Quantity: {product.quantity}</p>
           <p>Unit: {product.unit}</p>
-          <p>Price: ${product.price}</p>
-          <p>Supermarket: {getSupermarketName(product.supermarket_id)}</p>
+          <p>Price: €{product.price}</p>
+          <p>Supermarket: {product.supermarket_name}</p> {/* Use supermarket_name here */}
           <p>Date: {new Date(product.product_date).toLocaleDateString()}</p>
         </div>
       ))}

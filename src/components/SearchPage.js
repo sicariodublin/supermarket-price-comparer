@@ -1,5 +1,5 @@
+// SearchPage.js (Component)
 import React, { useEffect, useState } from 'react';
-import ProductList from '../components/ProductList'; // Import ProductList component
 import '../styles/SearchPage.css';
 
 function SearchPage() {
@@ -18,23 +18,39 @@ function SearchPage() {
   }, []);
 
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    if (e.target.value.trim() === '') {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter((product) =>
-          product.name.toLowerCase().includes(e.target.value.toLowerCase())
-        )
-      );
-    }
+    const term = e.target.value;
+    setSearchTerm(term);
+    setFilteredProducts(
+      term
+        ? products.filter((product) =>
+            product.name.toLowerCase().includes(term.toLowerCase())
+          )
+        : products
+    );
   };
 
   return (
     <div className="search-page">
       <h1>Search to Compare Prices</h1>
-      {/* Remove the search input and filtered products list */}
-      <ProductList products={products} />
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+        className="search-input"
+      />
+      <div className="product-list">
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="product-item">
+            <h2>{product.name}</h2>
+            <p><strong>Quantity:</strong> {product.quantity}</p>
+            <p><strong>Unit:</strong> {product.unit}</p>
+            <p><strong>Price:</strong> €{product.price}</p>
+            <p><strong>Supermarket:</strong> {product.supermarket_name}</p>
+            <p><strong>Date:</strong> {new Date(product.product_date).toLocaleDateString()}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
