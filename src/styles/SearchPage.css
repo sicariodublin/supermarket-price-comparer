@@ -1,0 +1,55 @@
+.search-page {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .search-input {
+    padding: 10px;
+    width: 80%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .search-page form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .search-page input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 60%;
+  }
+  
+  .search-page button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0061c8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-page button:hover {
+    background-color: #0056b3;
+  }
+  
+  .product-list {
+    margin-top: 20px;
+  }
+  
+  .product-item {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  
