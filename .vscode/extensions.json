@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "feiskyer.chatgpt-copilot",
-        "github.copilot"
+        "github.copilot",
+        "github.copilot-chat"
     ]
 }
