@@ -10,7 +10,6 @@ import '../styles/SearchPage.css';
 function SearchPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  /* const searchTerm = searchParams.get('term'); */
 
   const { isAuthenticated } = useAuth(); 
   const [editProduct, setEditProduct] = useState(null);
