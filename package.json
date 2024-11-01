@@ -1,5 +1,5 @@
 {
-  "homepage": "https://sicariodublin.github.io/supermarket-price-comparer", 
+  "homepage": "https://sicariodublin.github.io/supermarket-price-comparer",
   "name": "supermarket-price-comparer",
   "version": "0.1.0",
   "private": true,
@@ -28,7 +28,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-    
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +49,6 @@
   },
   "devDependencies": {
     "gh-pages": "^6.2.0",
-    "webpack": "^5.95.0"
+    "webpack": "^4.42.0"
   }
 }
