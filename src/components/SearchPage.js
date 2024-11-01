@@ -24,9 +24,19 @@ function SearchPage() {
       .then((response) => response.json())
       .then((data) => {
         setProducts(data);
-        setFilteredProducts(data);
+        // Apply initial search term from query parameters if it exists
+        const initialTerm = searchParams.get('term') || '';
+        setSearchTerm(initialTerm);
+        filterAndSortProducts(initialTerm, sortOption, data);
       });
   }, []);
+
+   // Listen for changes in the URL search parameter
+   useEffect(() => {
+    const term = searchParams.get('term') || '';
+    setSearchTerm(term);
+    filterAndSortProducts(term, sortOption);
+  }, [location.search, sortOption]);
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -40,8 +50,8 @@ function SearchPage() {
     filterAndSortProducts(searchTerm, option);
   };
 
-  const filterAndSortProducts = (term, sort) => {
-    let filtered = products.filter((product) =>
+  const filterAndSortProducts = (term, sort, productList = products) => {
+    let filtered = productList.filter((product) =>
       product.name.toLowerCase().includes(term.toLowerCase())
     );
 
@@ -76,8 +86,9 @@ function SearchPage() {
   };
 
   const handleProductSaved = (newProduct) => {
-    setProducts([...products, newProduct]);
-    filterAndSortProducts(searchTerm, sortOption);
+    const updatedProducts = [...products, newProduct];
+    setProducts(updatedProducts);
+    filterAndSortProducts(searchTerm, sortOption, updatedProducts);
   };
 
   const handleProductUpdated = (updatedProduct) => {
@@ -86,7 +97,7 @@ function SearchPage() {
     );
     setProducts(updatedProducts);
     setEditProduct(null);
-    filterAndSortProducts(searchTerm, sortOption);
+    filterAndSortProducts(searchTerm, sortOption, updatedProducts); 
   };
 
   return (
@@ -116,11 +127,32 @@ function SearchPage() {
         </select>
       </div>
 
-      <h1>Search Results for: {searchTerm || 'No search term provided'}</h1>
-      {/* Render search results based on the searchTerm */}
-      {/* ... */}
+       <h1>Search Results for: {searchTerm || 'No search term provided'}</h1>
 
-      {/* Render AddProductForm if user is authenticated */}
+      {/* Display a message if there are no results */}
+      {filteredProducts.length === 0 ? (
+        <p>No products found for "{searchTerm}"</p>
+      ) : (
+        <div className="product-list">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="product-item">
+              <h2>{product.name}</h2>
+              <p><strong>Quantity:</strong> {product.quantity}</p>
+              <p><strong>Unit:</strong> {product.unit}</p>
+              <p><strong>Price:</strong> €{product.price}</p>
+              <p><strong>Supermarket:</strong> {product.supermarket_name}</p>
+              <p><strong>Date:</strong> {new Date(product.product_date).toLocaleDateString()}</p>
+              {isAuthenticated && (
+                <button onClick={() => handleEditClick(product)} className="edit-button">
+                  Edit
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Render AddProductForm if user is authenticated and not editing */}
       {isAuthenticated && !editProduct && (
         <AddProductForm onProductSaved={handleProductSaved} />
       )}
@@ -133,24 +165,6 @@ function SearchPage() {
           onCancel={() => setEditProduct(null)}
         />
       )}
-
-      <div className="product-list">
-        {filteredProducts.map((product) => (
-          <div key={product.id} className="product-item">
-            <h2>{product.name}</h2>
-            <p><strong>Quantity:</strong> {product.quantity}</p>
-            <p><strong>Unit:</strong> {product.unit}</p>
-            <p><strong>Price:</strong> €{product.price}</p>
-            <p><strong>Supermarket:</strong> {product.supermarket_name}</p>
-            <p><strong>Date:</strong> {new Date(product.product_date).toLocaleDateString()}</p>
-            {isAuthenticated && (
-              <button onClick={() => handleEditClick(product)} className="edit-button">
-                Edit
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
