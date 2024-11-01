@@ -10,17 +10,17 @@ function Footer() {
           <img src={require('../assets/images/logo4.png')} alt="addandcompare" className="logo" />
           <div className="social-icons">
           <a href="#" className="facebook-icon" aria-label="Facebook">
-          <img src="/Facebook-48.png" alt="Facebook" />
-          </a>
-          <a href="#" className="instagram-icon" aria-label="Instagram">
-            <img src="/Instagram-48.png" alt="Instagram" />
-          </a>
-          <a href="#" className="twitter-icon" aria-label="Twitter">
-            <img src="/X-48.png" alt="Twitter" />
-          </a>
+          <img src={`${process.env.PUBLIC_URL}/Facebook-48.png`} alt="Facebook" />
+        </a>
+        <a href="#" className="instagram-icon" aria-label="Instagram">
+          <img src={`${process.env.PUBLIC_URL}/Instagram-48.png`} alt="Instagram" />
+        </a>
+        <a href="#" className="twitter-icon" aria-label="Twitter">
+          <img src={`${process.env.PUBLIC_URL}/X-48.png`} alt="Twitter" />
+            </a>
           <a href="#" className="linkedin-icon" aria-label="LinkedIn">
-            <img src="/Linkedin-48.png" alt="LinkedIn" />
-          </a>
+          <img src={`${process.env.PUBLIC_URL}/Linkedin-48.png`} alt="Twitter" />
+        </a>
           </div>
         </div>
         <div className="footer__links">

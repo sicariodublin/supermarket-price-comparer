@@ -8,6 +8,7 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,6 +18,10 @@ function RegisterForm() {
    const togglePasswordVisibility = () => {
     setShowPassword((prevState) =>!prevState);
    };
+  
+   const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword((prevState) => !prevState);
+  };
 
   return (
     <form className="register-form" onSubmit={handleSubmit}>
@@ -54,10 +59,10 @@ function RegisterForm() {
         </div>
       </div>
 
-      <div className="input-group">
+      <div className="input-group" style={{ position: 'relative' }}>
         <label htmlFor="password">Password</label>
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           id="password"
           placeholder="Enter Password"
           value={password}
@@ -69,26 +74,27 @@ function RegisterForm() {
         </div>
       </div>
 
-      <div className="input-group">
+      <div className="input-group" style={{ position: 'relative' }}>
         <label htmlFor="confirmPassword">Confirm Password</label>
         <input
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           id="confirmPassword"
           placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <div className="icon-container" onClick={togglePasswordVisibility}>
-          <i className={showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'}></i>
+        <div className="icon-container" onClick={toggleConfirmPasswordVisibility}>
+          <i className={showConfirmPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'}></i>
         </div>
       </div>
+
       <button type="submit" className="register-button">Register</button>
       <div className="additional-options">
         <Link to="/login">Already have an account? Log in here.</Link>
       </div>
     </form>
   );
-}   
+}
 
 export default RegisterForm;

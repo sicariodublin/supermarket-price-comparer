@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
-function QuickSearch({ onSearch }) {
-  const [query, setQuery] = useState('');
+function QuickSearch() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const history = useHistory();
 
   const handleSearch = (e) => {
     e.preventDefault();
-    onSearch(query);
+    if (searchTerm.trim()) {
+      // Navigate to SearchPage with the search term as a query parameter
+      history.push(`/search?term=${encodeURIComponent(searchTerm)}`);
+    } else {
+      history.push('/search');
+    }
   };
 
   return (
     <form onSubmit={handleSearch}>
       <input
         type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
         placeholder="Quick Search"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
       <button type="submit">Search</button>
     </form>
