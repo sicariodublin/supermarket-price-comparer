@@ -1,15 +1,41 @@
-// src/components/FeedbackForm.js
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Substitua useHistory por useNavigate
+import { AuthContext } from '../context/AuthContext';
 import './FeedbackForm.css';
 
 function FeedbackForm() {
   const [message, setMessage] = useState('');
+  const { isAuthenticated, token } = useContext(AuthContext);
+  const navigate = useNavigate(); // Use useNavigate em vez de useHistory
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission, e.g., send the message to a server or API.
-    alert('Thank you for your feedback!');
-    setMessage('');
+
+    if (!isAuthenticated) {
+      alert('You need to be logged in to send feedback');
+      navigate('/login'); // Use navigate para redirecionar
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      if (response.ok) {
+        alert('Thank you for your feedback!');
+        setMessage('');
+      } else {
+        alert('Failed to send feedback');
+      }
+    } catch (error) {
+      console.error('Error sending feedback:', error);
+    }
   };
 
   return (

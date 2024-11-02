@@ -1,19 +1,42 @@
 // LoginForm.js (Component)
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext'; // Importa AuthContext
 import '../styles/Login.css';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const { login } = useContext(AuthContext); // Usa o contexto de autenticação
+  const navigate = useNavigate(); // Usa navigate em vez de history
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: username, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        login(data.token); // Armazena o token e autentica
+        navigate('/'); // Redireciona para a página inicial ou dashboard
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error); // Exibe a mensagem de erro específica
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
+  };
+  
   
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add form submission logic here
-  };
-    
   const togglePasswordVisibility = () => {
     setShowPassword((prevState) => !prevState);
   };

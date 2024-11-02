@@ -10,33 +10,33 @@ import '../styles/SearchPage.css';
 function SearchPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
+  const { isAuthenticated } = useAuth();
 
-  const { isAuthenticated } = useAuth(); 
   const [editProduct, setEditProduct] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('term') || '');
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [sortOption, setSortOption] = useState('');
-
+  
+  
+   // Fetch products and apply initial filter
   useEffect(() => {
-    // Fetch the products from your API
     fetch('http://localhost:5000/api/products')
       .then((response) => response.json())
       .then((data) => {
         setProducts(data);
-        // Apply initial search term from query parameters if it exists
-        const initialTerm = searchParams.get('term') || '';
-        setSearchTerm(initialTerm);
-        filterAndSortProducts(initialTerm, sortOption, data);
+        applyInitialFilter(searchParams.get('term') || '', data); // Apply initial filter based on URL term
       });
-  }, []);
+  }, [location.search]);
 
-   // Listen for changes in the URL search parameter
-   useEffect(() => {
-    const term = searchParams.get('term') || '';
+    // Function to apply initial filter based on URL search term
+  const applyInitialFilter = (term, data) => {
     setSearchTerm(term);
-    filterAndSortProducts(term, sortOption);
-  }, [location.search, sortOption]);
+    const filtered = data.filter((product) =>
+      product.name.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  };
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -50,10 +50,15 @@ function SearchPage() {
     filterAndSortProducts(searchTerm, option);
   };
 
+  // Filter and sort products based on search term and sort option
   const filterAndSortProducts = (term, sort, productList = products) => {
-    let filtered = productList.filter((product) =>
-      product.name.toLowerCase().includes(term.toLowerCase())
-    );
+    let filtered = productList;
+
+    if (term) {
+      filtered = filtered.filter((product) =>
+        product.name.toLowerCase().includes(term.toLowerCase())
+      );
+    }
 
     if (sort === 'name') {
       filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -66,8 +71,8 @@ function SearchPage() {
     }
     else if (sort === 'Lidl') {
       filtered = filtered.filter((product) => product.supermarket_name === 'Lidl');
-    } else if (sort === 'SuperValue') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'SuperValue');
+    } else if (sort === 'SuperValu') {
+      filtered = filtered.filter((product) => product.supermarket_name === 'SuperValu');
     } else if (sort === 'TESCO') {
       filtered = filtered.filter((product) => product.supermarket_name === 'TESCO');
     } else if (sort === 'Aldi') {
@@ -100,6 +105,11 @@ function SearchPage() {
     filterAndSortProducts(searchTerm, sortOption, updatedProducts); 
   };
 
+  // Define a mensagem de resultados com o totalizador
+  const resultMessage = `Search Results for: ${
+    searchTerm || sortOption || 'No search term provided'
+  } (${filteredProducts.length} items found)`;
+
   return (
     <div className="search-page">
       <h1>Search to Compare Prices</h1>
@@ -119,7 +129,7 @@ function SearchPage() {
           <option value="date">Date</option>
           <option value="supermarket">Supermarket</option>
           <option value="Lidl">Lidl</option>
-          <option value="SuperValue">SuperValue</option>
+          <option value="SuperValu">SuperValu</option>
           <option value="TESCO">TESCO</option>
           <option value="Aldi">Aldi</option>
           <option value="M&S">M&S</option>
@@ -127,7 +137,7 @@ function SearchPage() {
         </select>
       </div>
 
-       <h1>Search Results for: {searchTerm || 'No search term provided'}</h1>
+      <h1>{resultMessage}</h1>
 
       {/* Display a message if there are no results */}
       {filteredProducts.length === 0 ? (

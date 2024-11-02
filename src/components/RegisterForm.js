@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // Substitui useHistory por useNavigate
+import { AuthContext } from '../context/AuthContext';
 import '../styles/Register.css';
 
 function RegisterForm() {
@@ -10,18 +11,41 @@ function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate(); // Usa useNavigate em vez de useHistory
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add form submission logic here
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        login(data.token); // Autentica o usuário após o registro bem-sucedido
+        navigate('/'); // Redireciona para a página inicial ou dashboard
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error); // Exibe a mensagem de erro específica
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
+  };
+  
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevState) => !prevState);
   };
 
-   const togglePasswordVisibility = () => {
-    setShowPassword((prevState) =>!prevState);
-   };
-  
-   const toggleConfirmPasswordVisibility = () => {
+  const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword((prevState) => !prevState);
   };
+
 
   return (
     <form className="register-form" onSubmit={handleSubmit}>
