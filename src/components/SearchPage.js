@@ -2,8 +2,7 @@
 // SearchPage.js (Component)
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import AddProductForm from '../components/AddProductForm';
-import EditProductForm from '../components/EditProductForm';
+import SearchPageForm from '../components/SearchPageForm';
 import { useAuth } from '../context/AuthContext';
 import '../styles/SearchPage.css';
 
@@ -162,15 +161,12 @@ function SearchPage() {
         </div>
       )}
 
-      {/* Render AddProductForm if user is authenticated and not editing */}
-      {isAuthenticated && !editProduct && (
-        <AddProductForm onProductSaved={handleProductSaved} />
-      )}
-
-      {/* Render EditProductForm if a product is being edited */}
-      {isAuthenticated && editProduct && (
-        <EditProductForm
-          product={editProduct}
+      {/* Render Add/Edit Form based on state */}
+      {isAuthenticated && (
+        <SearchPageForm
+          isEditing={!!editProduct}
+          productToEdit={editProduct}
+          onProductSaved={handleProductSaved}
           onProductUpdated={handleProductUpdated}
           onCancel={() => setEditProduct(null)}
         />

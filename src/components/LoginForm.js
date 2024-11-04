@@ -25,7 +25,7 @@ function LoginForm() {
       if (response.ok) {
         const data = await response.json();
         login(data.token); // Armazena o token e autentica
-        navigate('/'); // Redireciona para a página inicial ou dashboard
+        navigate('/search'); // Redireciona para a página inicial ou dashboard
       } else {
         const errorData = await response.json();
         alert(errorData.error); // Exibe a mensagem de erro específica

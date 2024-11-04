@@ -25,9 +25,9 @@ function RegisterForm() {
       });
   
       if (response.ok) {
-        const data = await response.json();
-        login(data.token); // Autentica o usuário após o registro bem-sucedido
-        navigate('/'); // Redireciona para a página inicial ou dashboard
+        // Exibe mensagem de sucesso e redireciona para a página de login
+        alert('Register successfully');
+        navigate('/login'); // Redireciona para a página de login
       } else {
         const errorData = await response.json();
         alert(errorData.error); // Exibe a mensagem de erro específica
@@ -35,8 +35,7 @@ function RegisterForm() {
     } catch (error) {
       console.error('Error during registration:', error);
     }
-  };
-  
+  };  
 
   const togglePasswordVisibility = () => {
     setShowPassword((prevState) => !prevState);

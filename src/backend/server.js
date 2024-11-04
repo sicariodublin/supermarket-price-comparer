@@ -1,21 +1,101 @@
 // server.js (Backend)
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+console.log("Mailjet Public API Key:", process.env.MJ_APIKEY_PUBLIC);
+console.log("Mailjet Private API Key:", process.env.MJ_APIKEY_PRIVATE);
+
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const jwt = require('jsonwebtoken'); // JWT para autenticação
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); 
+/* const feedbackRoutes = require('../../routes/feedbackRoutes'); */
+const mailjet = require('node-mailjet').apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE); // Configuração do Mailjet
 
 const app = express();
+
+
+// Rotas
 app.use(cors());
 app.use(express.json());
 
+  // Rota para enviar contact form
+app.post('/api/contact', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  const emailOptions = {
+    Messages: [
+      {
+        From: {
+          Email: "fabioast47@hotmail.com", // Remetente do e-mail
+          Name: "Contact Form",
+        },
+        To: [
+          {
+            Email: "addandcomparemessageus@hotmail.com", // Destinatário do e-mail
+            Name: "Support Team",
+          },
+        ],
+        Subject: subject || "New Contact Request",
+        HTMLPart: `
+          <h3>Contact Request from ${name}</h3>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Message:</strong><br />${message}</p>
+        `,
+      },
+    ],
+  };
+
+  try {
+    const result = await mailjet.post("send", { version: "v3.1" }).request(emailOptions);
+    console.log("Contact form message sent successfully:", result.body);
+    res.status(200).json({ message: "Message sent successfully!" });
+  } catch (error) {
+    console.error("Error sending contact form message:", error);
+    res.status(500).json({ message: "Failed to send message", error: error.message });
+  }
+});
+
+  // Rota para enviar feedback
+app.post('/api/feedback/sendFeedback', async (req, res) => {
+  const { message } = req.body;
+
+  const emailOptions = {
+    Messages: [
+      {
+        From: {
+          Email: "fabioast47@hotmail.com", // Seu e-mail
+          Name: "Feedback System",
+        },
+        To: [
+          {
+            Email: "addandcomparemessageus@hotmail.com", // Para onde o feedback será enviado
+            Name: "Admin",
+          },
+        ],
+        Subject: "Website Feedback",
+        HTMLPart: `<p>${message}</p>`,
+      },
+    ],
+  };
+
+  try {
+    const result = await mailjet.post("send", { version: "v3.1" }).request(emailOptions);
+    console.log("E-mail de feedback enviado com sucesso:", result.body);
+    res.status(200).json({ message: "Feedback enviado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao enviar e-mail de feedback:", error);
+    res.status(500).json({ message: "Falha ao enviar feedback", error: error.message });
+  }
+});
+
 // Database connection configuration
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root", // Use a more secure user in production
-  password: "Sicario/2016", // Ensure your password is securely handled
-  database: "supermarket",
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "supermarket",
 });
 
 connection.connect((err) => {
@@ -26,11 +106,11 @@ connection.connect((err) => {
   console.log("Connected to the database.");
 });
 
-// Rota para registro de usuário
+// Route for user registration
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
 
-  // Verifica se o usuário já existe
+  // Check if user already exists
   const checkUserQuery = 'SELECT * FROM users WHERE email = ?';
   connection.query(checkUserQuery, [email], async (err, results) => {
     if (err) {
@@ -42,7 +122,6 @@ app.post('/api/register', async (req, res) => {
     if (results.length > 0) {
       res.status(400).json({ error: 'User already exists' });
     } else {
-      // Gera um hash para a senha
       const hashedPassword = await bcrypt.hash(password, 10);
       const insertUserQuery = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
       connection.query(insertUserQuery, [username, email, hashedPassword], (err, result) => {
@@ -50,9 +129,7 @@ app.post('/api/register', async (req, res) => {
           console.error("Error inserting user:", err);
           res.status(500).json({ error: 'Failed to register user' });
         } else {
-          const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET || 'your_jwt_secret', {
-            expiresIn: '1h',
-          });
+          const token = jwt.sign({ id: result.insertId, username }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
           res.json({ token });
         }
       });
@@ -60,13 +137,10 @@ app.post('/api/register', async (req, res) => {
   });
 });
 
-// Rota para login de usuário
+// Route for user login
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body; // Altere para email se você estiver usando o e-mail para login
-  console.log("Received email:", email); // Debug
-  console.log("Received password:", password); // Debug
+  const { email, password } = req.body;
 
-  // Ajuste a consulta para procurar pelo email
   const query = 'SELECT * FROM users WHERE email = ?';
   connection.query(query, [email], async (err, results) => {
     if (err) {
@@ -77,13 +151,9 @@ app.post('/api/login', (req, res) => {
 
     if (results.length > 0) {
       const user = results[0];
-      
-      // Verifica a senha usando bcrypt
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (passwordMatch) {
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || 'your_jwt_secret', {
-          expiresIn: '1h',
-        });
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
         res.json({ token });
       } else {
         res.status(401).json({ error: 'Invalid credentials' });
@@ -94,8 +164,23 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+// Route to add a product
+app.post('/api/products', (req, res) => {
+  const { name, quantity, unit, price, supermarket_id, product_date } = req.body;
+  console.log("Received product data:", { name, quantity, unit, price, supermarket_id, product_date }); // Debugging log
 
-// Assuming you have an Express route for /api/products
+  const query = "INSERT INTO products (name, quantity, unit, price, supermarket_id, product_date) VALUES (?, ?, ?, ?, ?, ?)";
+  connection.query(query, [name, quantity, unit, price, supermarket_id, product_date], (err, result) => {
+    if (err) {
+      console.error("Error adding product:", err);
+      res.status(500).json({ error: 'Failed to add product' });
+    } else {
+      res.json({ id: result.insertId, message: 'Product added successfully!' });
+    }
+  });
+});
+
+// Route to get all products
 app.get('/api/products', (req, res) => {
   const query = `
     SELECT 
@@ -116,33 +201,6 @@ app.get('/api/products', (req, res) => {
       res.status(500).json({ error: 'Failed to retrieve products' });
     } else {
       res.json(results);
-    }
-  });
-});
-
-// API route to add a product
-app.post('/api/products', (req, res) => {
-  const { name, quantity, unit, price, supermarket_id } = req.body;
-  const query = "INSERT INTO products (name, quantity, unit, price, supermarket_id, product_date) VALUES (?, ?, ?, ?, ?, ?)";
-  connection.query(query, [name, quantity, unit, price, supermarket_id, product_date], (err, result) => {
-    if (err) {
-      res.status(500).send(err.message);
-    } else {
-      res.json({ id: result.insertId });
-    }
-  });
-});
-
-// API route to update a product
-app.put('/api/products/:id', (req, res) => {
-  const { id } = req.params;
-  const { name, quantity, unit, price, supermarket_id, product_date } = req.body;
-  const query = "UPDATE products SET name = ?, quantity = ?, unit = ?, price = ?, supermarket_id, product_date = ? WHERE id = ?";
-  connection.query(query, [name, quantity, unit, price, supermarket_id, product_date, id], (err, result) => {
-    if (err) {
-      res.status(500).send(err.message);
-    } else {
-      res.json({ message: 'Product updated successfully' });
     }
   });
 });

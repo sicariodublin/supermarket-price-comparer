@@ -1,35 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-function EditProductForm({ product }) {
-    const [updatedProduct, setUpdatedProduct] = useState(product);
+function EditProductForm({ product, onProductUpdated, onCancel }) {
+  const [name, setName] = useState(product.name);
+  const [quantity, setQuantity] = useState(product.quantity);
+  const [unit, setUnit] = useState('');
+  const [price, setPrice] = useState(product.price);
+  const [supermarket_id, setSupermarket] = useState(product.supermarket_name);
+  const [product_date, setDate] = useState(product.product_date);
 
-    useEffect(() => {
-        setUpdatedProduct(product);
-    }, [product]);
+  const handleUpdate = async () => {
+    const response = await fetch(`http://localhost:5000/api/products/${product.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, quantity, unit, price, supermarket_id, product_date }),
+    });
+    const updatedProduct = await response.json();
+    onProductUpdated(updatedProduct);
+  };
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        await fetch(`/api/products/${updatedProduct.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedProduct)
-        });
-    };
-
-    return (
-        <form onSubmit={handleUpdate}>
-            <h3>Edit Product</h3>
-            <input
-                type="text"
-                value={updatedProduct.name}
-                onChange={(e) => setUpdatedProduct({ ...updatedProduct, name: e.target.value })}
-            />
-            {/* Add other input fields similarly */}
-            <button type="submit">Update Product</button>
-        </form>
-    );
+  return (
+    <form onSubmit={handleUpdate}>
+      <input
+        type="text"
+        placeholder="Product Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Quantity"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Unit"
+        value={unit}
+        onChange={(e) => setUnit(e.target.value)}   
+      />
+      <input
+        type="text"
+        placeholder="Price"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Supermarket"
+        value={supermarket_id}
+        onChange={(e) => setSupermarket(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Date"
+        value={product_date}
+        onChange={(e) => setDate(e.target.value)}
+      />  
+      <button type="submit">Update Product</button>
+      <button onClick={onCancel}>Cancel</button>
+    </form>
+  );
 }
 
 export default EditProductForm;
