@@ -6,6 +6,7 @@ import SearchPageForm from '../components/SearchPageForm';
 import { useAuth } from '../context/AuthContext';
 import '../styles/SearchPage.css';
 
+
 function SearchPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -19,14 +20,23 @@ function SearchPage() {
   
   
    // Fetch products and apply initial filter
-  useEffect(() => {
-    fetch('http://localhost:5000/api/products')
-      .then((response) => response.json())
-      .then((data) => {
+   useEffect(() => {
+    // Define an async function to fetch products
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
         setProducts(data);
         applyInitialFilter(searchParams.get('term') || '', data); // Apply initial filter based on URL term
-      });
-  }, [location.search]);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+  
+    fetchProducts();
+  
+    // Only run this effect once when the component mounts
+  }, []); // Empty dependency array to ensure this only runs once
 
     // Function to apply initial filter based on URL search term
   const applyInitialFilter = (term, data) => {
@@ -89,20 +99,42 @@ function SearchPage() {
     setEditProduct(product);
   };
 
-  const handleProductSaved = (newProduct) => {
-    const updatedProducts = [...products, newProduct];
-    setProducts(updatedProducts);
-    filterAndSortProducts(searchTerm, sortOption, updatedProducts);
+  const handleProductSaved = async (newProduct) => {
+    try {
+      // Optionally, add new product to the backend
+      const response = await fetch('http://localhost:5000/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct),
+      });
+      
+      if (response.ok) {
+        console.log("Product successfully saved on the backend.");
+        // Fetch updated products from backend
+        fetchProducts();
+      } else {
+        throw new Error('Failed to save product on backend');
+      }
+    } catch (error) {
+      console.error('Error saving product:', error);
+    }
   };
-
-  const handleProductUpdated = (updatedProduct) => {
-    const updatedProducts = products.map((product) =>
-      product.id === updatedProduct.id ? updatedProduct : product
-    );
-    setProducts(updatedProducts);
-    setEditProduct(null);
-    filterAndSortProducts(searchTerm, sortOption, updatedProducts); 
+  
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products');
+      const data = await response.json();
+      setProducts(data);
+      filterAndSortProducts(searchTerm, sortOption, data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
   };
+  
+  useEffect(() => {
+    fetchProducts();
+  }, [location.search]);
+  
 
   // Define a mensagem de resultados com o totalizador
   const resultMessage = `Search Results for: ${
@@ -167,7 +199,7 @@ function SearchPage() {
           isEditing={!!editProduct}
           productToEdit={editProduct}
           onProductSaved={handleProductSaved}
-          onProductUpdated={handleProductUpdated}
+         
           onCancel={() => setEditProduct(null)}
         />
       )}

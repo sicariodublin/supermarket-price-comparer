@@ -1,13 +1,22 @@
 // SearchPageForm.js
 import React, { useEffect, useState } from 'react';
 
+const supermarkets = [
+  { id: 1, name: 'Lidl' },
+  { id: 2, name: 'SuperValue' },
+  { id: 3, name: 'TESCO' },
+  { id: 4, name: 'Aldi' },
+  { id: 5, name: 'M&S' },
+  { id: 6, name: 'Dunnes Stores' },
+];
+
 function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpdated, onCancel }) {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [price, setPrice] = useState('');
-  const [supermarket, setSupermarket] = useState('');
-  const [date, setDate] = useState('');
+  const [supermarket_id, setSupermarket] = useState('');
+  const [product_date, setDate] = useState('');
 
   // If editing, populate form with product details
   useEffect(() => {
@@ -16,7 +25,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
       setQuantity(productToEdit.quantity);
       setUnit(productToEdit.unit);
       setPrice(productToEdit.price);
-      setSupermarket(productToEdit.supermarket_name);
+      setSupermarket(productToEdit.supermarket_id);
       setDate(productToEdit.product_date);
     } else {
       resetForm();
@@ -34,7 +43,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newProduct = { name, quantity, unit, price, supermarket, date };
+    const newProduct = { name, quantity, unit, price, supermarket_id, product_date };
 
     if (isEditing) {
       onProductUpdated({ ...productToEdit, ...newProduct });
@@ -66,11 +75,22 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
         </div>
         <div className="form-group">
           <label>Supermarket:</label>
-          <input type="text" value={supermarket} onChange={(e) => setSupermarket(e.target.value)} required />
+          <select
+            value={supermarket_id}
+            onChange={(e) => setSupermarket(e.target.value)}
+            required
+          >
+            <option value="">Select Supermarket</option>
+            {supermarkets.map((supermarket) => (
+              <option key={supermarket.id} value={supermarket.id}>
+                {supermarket.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="form-group">
           <label>Date:</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          <input type="date" value={product_date} onChange={(e) => setDate(e.target.value)} required />
         </div>
         <button type="submit">{isEditing ? 'Update Product' : 'Save Product'}</button>
         {isEditing && <button type="button" onClick={onCancel}>Cancel</button>}

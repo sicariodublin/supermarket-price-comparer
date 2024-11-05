@@ -19,6 +19,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
   // Rota para enviar contact form
 app.post('/api/contact', async (req, res) => {
   const { name, email, subject, message } = req.body;
@@ -167,15 +168,21 @@ app.post('/api/login', (req, res) => {
 // Route to add a product
 app.post('/api/products', (req, res) => {
   const { name, quantity, unit, price, supermarket_id, product_date } = req.body;
-  console.log("Received product data:", { name, quantity, unit, price, supermarket_id, product_date }); // Debugging log
+  console.log("Received product data:", req.body); // Log received data
+
+  if (!name || !quantity || !unit || !price || !supermarket_id || !product_date) {
+    console.log("Missing required fields.");
+    return res.status(400).json({ error: "All fields are required." });
+  }
 
   const query = "INSERT INTO products (name, quantity, unit, price, supermarket_id, product_date) VALUES (?, ?, ?, ?, ?, ?)";
   connection.query(query, [name, quantity, unit, price, supermarket_id, product_date], (err, result) => {
     if (err) {
-      console.error("Error adding product:", err);
-      res.status(500).json({ error: 'Failed to add product' });
+      console.error('Error saving to database:', err);
+      res.status(500).json({ error: 'Failed to save product' });
     } else {
-      res.json({ id: result.insertId, message: 'Product added successfully!' });
+      console.log('Product saved successfully:', result);
+      res.json({ id: result.insertId });
     }
   });
 });
