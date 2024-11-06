@@ -43,15 +43,24 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newProduct = { name, quantity, unit, price, supermarket_id, product_date };
-
+    const updatedProduct = {
+      id: productToEdit  ? productToEdit.id: null, // Ensure the ID is included for the update
+      name,
+      quantity,
+      unit,
+      price,
+      supermarket_id,
+      product_date,
+    };
+  
     if (isEditing) {
-      onProductUpdated({ ...productToEdit, ...newProduct });
+      onProductUpdated(updatedProduct); // Use the function passed from the parent
     } else {
-      onProductSaved(newProduct);
+      onProductSaved(updatedProduct); // Use onProductSaved if it’s a new product
     }
     resetForm();
   };
+  
 
   return (
     <div className="form-container">

@@ -59,6 +59,16 @@ function SearchPage() {
     filterAndSortProducts(searchTerm, option);
   };
 
+
+  const handleProductUpdated = (updatedProduct) => { 
+    const updatedProducts = products.map((product) =>
+      product.id === updatedProduct.id ? updatedProduct : product
+    );
+    setProducts(updatedProducts);
+    setEditProduct(null); // Close the edit form
+  };
+
+  
   // Filter and sort products based on search term and sort option
   const filterAndSortProducts = (term, sort, productList = products) => {
     let filtered = productList;
@@ -199,7 +209,7 @@ function SearchPage() {
           isEditing={!!editProduct}
           productToEdit={editProduct}
           onProductSaved={handleProductSaved}
-         
+          onProductUpdated={handleProductUpdated}
           onCancel={() => setEditProduct(null)}
         />
       )}
