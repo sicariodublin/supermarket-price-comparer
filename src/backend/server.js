@@ -212,6 +212,23 @@ app.get('/api/products', (req, res) => {
   });
 });
 
+// API route to update a product
+app.put('/api/products/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, quantity, unit, price, supermarket_id, product_date } = req.body;
+
+  const query = "UPDATE products SET name = ?, quantity = ?, unit = ?, price = ?, supermarket_id = ?, product_date = ? WHERE id = ?";
+  connection.query(query, [name, quantity, unit, price, supermarket_id, product_date, id], (err, result) => {
+    if (err) {
+      console.error("Error updating product:", err);
+      res.status(500).send(err.message);
+    } else {
+      res.json({ message: "Product updated successfully" });
+    }
+  });
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

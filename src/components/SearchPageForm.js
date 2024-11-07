@@ -18,7 +18,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
   const [supermarket_id, setSupermarket] = useState('');
   const [product_date, setDate] = useState('');
 
-  // If editing, populate form with product details
+  // Populate form if editing an existing product
   useEffect(() => {
     if (isEditing && productToEdit) {
       setName(productToEdit.name);
@@ -26,7 +26,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
       setUnit(productToEdit.unit);
       setPrice(productToEdit.price);
       setSupermarket(productToEdit.supermarket_id);
-      setDate(productToEdit.product_date);
+      setDate(productToEdit.product_date ? new Date(productToEdit.product_date).toISOString().split('T')[0] : '');
     } else {
       resetForm();
     }
@@ -44,7 +44,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
   const handleSubmit = (e) => {
     e.preventDefault();
     const updatedProduct = {
-      id: productToEdit  ? productToEdit.id: null, // Ensure the ID is included for the update
+      id: isEditing && productToEdit ? productToEdit.id : null,
       name,
       quantity,
       unit,
@@ -52,35 +52,56 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
       supermarket_id,
       product_date,
     };
-  
+
+    console.log("Form Submission:", updatedProduct); // Debug log
+
     if (isEditing) {
-      onProductUpdated(updatedProduct); // Use the function passed from the parent
+      onProductUpdated(updatedProduct);
     } else {
-      onProductSaved(updatedProduct); // Use onProductSaved if it’s a new product
+      onProductSaved(updatedProduct);
     }
     resetForm();
   };
-  
 
   return (
-    <div className="form-container">
+    <div className="add-form-container">
       <h2>{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Product Name:</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Quantity:</label>
-          <input type="text" value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
+          <input
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Unit:</label>
-          <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} required />
+          <input
+            type="text"
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Price:</label>
-          <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          <input
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Supermarket:</label>
