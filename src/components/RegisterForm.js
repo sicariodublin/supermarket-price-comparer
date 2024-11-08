@@ -1,6 +1,7 @@
+// RegisterForm.js
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Substitui useHistory por useNavigate
-import { AuthContext } from '../context/AuthContext';
+import AuthContext from '../context/AuthContext';
 import '../styles/Register.css';
 
 function RegisterForm() {

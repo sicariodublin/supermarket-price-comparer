@@ -68,14 +68,14 @@ body, html {
 }
 
 /* 768px to 1024px screen sizes */
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (min-width: 768px) {
   .home-container {
     padding: 10px; /* Reduce padding for smaller screens */
     background-size: cover; /* Make sure background fits the screen properly */
   }
 
   .header-content {
-    font-size: 22px; /* Decrease font size */
+    font-size: 18px; /* Decrease font size */
     margin-top: 60px; /* Reduce margin-top */
     padding: 20px; /* Reduce padding for better fit */
     max-width: 90%; /* Keep text within boundaries on smaller screens */
@@ -92,7 +92,7 @@ body, html {
 }
 
 /* For larger screens (more than 1024px) */
-@media (min-width: 1025px) {
+@media (max-width: 1024px) {
   .home-container {
     height: 100vh; 
     padding: 40px; 
@@ -100,10 +100,12 @@ body, html {
 
   .header-content {
     margin-top: 80px; 
+    font-size: 16px;
+    max-width: 100%; /* Keep text within boundaries on smaller screens */
   }
 
   .header-content p {
-    font-size: 18px; 
+    font-size: 14px; 
   }
 
   .become-member-button {

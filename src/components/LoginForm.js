@@ -1,16 +1,17 @@
 // LoginForm.js (Component)
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext'; // Importa AuthContext
+import AuthContext from '../context/AuthContext';
 import '../styles/Login.css';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(''); // To display error messages
 
-  const { login } = useContext(AuthContext); // Usa o contexto de autenticação
-  const navigate = useNavigate(); // Usa navigate em vez de history
+  const { login } = useContext(AuthContext); // Use AuthContext
+  const navigate = useNavigate(); // Use navigate instead of history
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,14 +25,15 @@ function LoginForm() {
   
       if (response.ok) {
         const data = await response.json();
-        login(data.token); // Armazena o token e autentica
-        navigate('/search'); // Redireciona para a página inicial ou dashboard
+        login(data.token); // Store the token and authenticate
+        navigate('/search'); // Redirect to the search page after login
       } else {
         const errorData = await response.json();
-        alert(errorData.error); // Exibe a mensagem de erro específica
+        setErrorMessage(errorData.error || 'Invalid login credentials'); // Display a specific error message
       }
     } catch (error) {
       console.error('Error during login:', error);
+      setErrorMessage('An error occurred. Please try again.');
     }
   };
   
@@ -74,6 +76,9 @@ function LoginForm() {
           <i className={showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'}></i>
         </div>
       </div>
+
+      {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error messages */}
+
       <button type="submit" className="login-button">Log In</button>
       <div className="additional-options">
         <Link to="/register">Don't have an account? Register here.</Link>

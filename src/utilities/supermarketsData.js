@@ -1,7 +1,7 @@
 // supermarketsData.js
 export const supermarkets = [
     { id: 1, name: 'Lidl' },
-    { id: 2, name: 'SuperValue' },
+    { id: 2, name: 'SuperValu' },
     { id: 3, name: 'TESCO' },
     { id: 4, name: 'Aldi' },
     { id: 5, name: 'M&S' },

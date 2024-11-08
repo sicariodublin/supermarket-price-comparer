@@ -1,12 +1,13 @@
+// App.js
 import React from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import AddProduct from './components/AddProduct';
 import EditProduct from './components/EditProduct';
 import FeedbackForm from './components/FeedbackForm';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import SearchPage from './components/SearchPage';
-import { AuthProvider } from './context/AuthContext';
+/* import { AuthProvider } from './context/AuthContext'; */
 import AboutUs from './pages/About-us';
 import ContactUs from './pages/Contact-us';
 import Home from './pages/Home';
@@ -18,8 +19,7 @@ import TermsOfService from './pages/Terms-of-service';
 
 function App() {
   return (
-    <AuthProvider>
-    <Router>
+    <>
       <Header />
       <div className="main-content">
         <Routes>
@@ -34,13 +34,12 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product" element={<EditProduct />} />
-          <Route path="/auth-provider" element={<AuthProvider />} />
+          
         </Routes>
       </div>
       <FeedbackForm />
       <Footer />
-      </Router>
-      </AuthProvider>
+      </>
   );
 }
 

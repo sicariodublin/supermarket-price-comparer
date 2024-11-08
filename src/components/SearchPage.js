@@ -1,9 +1,10 @@
-// SearchPage.js
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import '../styles/SearchPage.css';
 import SearchPageForm from './SearchPageForm';
 
 function SearchPage() {
+  const { isAuthenticated, logout } = useContext(AuthContext); // Access auth status and logout function
   const [isEditing, setIsEditing] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [products, setProducts] = useState([]);
@@ -30,6 +31,8 @@ function SearchPage() {
   }, [searchTerm, sortOption]);
 
   const handleProductSaved = async (newProduct) => {
+    if (!isAuthenticated) return; // Prevent saving if not authenticated
+
     try {
       const response = await fetch('http://localhost:5000/api/products', {
         method: 'POST',
@@ -48,6 +51,8 @@ function SearchPage() {
   };
 
   const handleProductUpdated = async (updatedProduct) => {
+    if (!isAuthenticated) return; // Prevent updating if not authenticated
+
     try {
       const response = await fetch(`http://localhost:5000/api/products/${updatedProduct.id}`, {
         method: 'PUT',
@@ -125,14 +130,19 @@ function SearchPage() {
   };
 
   const handleEditClick = (product) => {
-    setIsEditing(true);
-    setProductToEdit(product);
+    if (isAuthenticated) { // Allow editing only if authenticated
+      setIsEditing(true);
+      setProductToEdit(product);
+    } else {
+      alert("Please log in to edit products.");
+    }
   };
 
   return (
     <div className="page-container">
       <div className="left-column">
         <h1>Search to Compare Prices</h1>
+        
         <input
           type="text"
           placeholder="Search products..."
@@ -140,6 +150,11 @@ function SearchPage() {
           onChange={handleSearchChange}
           className="search-input"
         />
+
+        <button onClick={logout} style={{ margin: '10px 0' }}>
+          Logout
+        </button>
+
         <div className="sort-container">
           <label htmlFor="sort">Sort By: </label>
           <select id="sort" value={sortOption} onChange={handleSortChange}>
@@ -156,33 +171,39 @@ function SearchPage() {
             <option value="Dunnes Stores">Dunnes Stores</option>
           </select>
         </div>
+
         {filteredProducts.length > 0 && (
           <>
-        <h2>Search Results for: {searchTerm} ({filteredProducts.length} items found)</h2>
-        <div className="product-list">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="product-item">
-              <h2>{product.name}</h2>
-              <p>Quantity: {product.quantity}</p>
-              <p>Unit: {product.unit}</p>
-              <p>Price: €{product.price}</p>
-              <p>Supermarket: {product.supermarket_name}</p>
-              <p>Date: {new Date(product.product_date).toLocaleDateString()}</p>
-              <button onClick={() => handleEditClick(product)}>Edit</button>
-              </div>
+            <h2>Search Results for: {searchTerm} ({filteredProducts.length} items found)</h2>
+            <div className="product-list">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="product-item">
+                  <h2>{product.name}</h2>
+                  <p>Quantity: {product.quantity}</p>
+                  <p>Unit: {product.unit}</p>
+                  <p>Price: €{product.price}</p>
+                  <p>Supermarket: {product.supermarket_name}</p>
+                  <p>Date: {new Date(product.product_date).toLocaleDateString()}</p>
+                  {isAuthenticated && (
+                    <button onClick={() => handleEditClick(product)}>Edit</button>
+                  )}
+                </div>
               ))}
             </div>
           </>
         )}
       </div>
+
       <div className="right-column">
-        <SearchPageForm
-          isEditing={isEditing}
-          productToEdit={productToEdit}
-          onProductSaved={handleProductSaved}
-          onProductUpdated={handleProductUpdated}
-          onCancel={handleCancelEdit}
-        />
+        {isAuthenticated && (
+          <SearchPageForm
+            isEditing={isEditing}
+            productToEdit={productToEdit}
+            onProductSaved={handleProductSaved}
+            onProductUpdated={handleProductUpdated}
+            onCancel={handleCancelEdit}
+          />
+        )}
       </div>
     </div>
   );
