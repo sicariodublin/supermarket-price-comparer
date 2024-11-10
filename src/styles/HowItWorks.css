@@ -25,7 +25,13 @@
   padding: 20px;
   border-radius: 8px; /* Rounded corners */
   display: inline-block; /* Only takes the necessary width */
-  width: 90%;
+  width: 100%;
+}
+
+.how-it-works-page ul,ol, li::marker {
+  display: inline-block;
+  text-align: center;
+  margin-right: 10px;
 }
 
 .how-it-works-page h1{

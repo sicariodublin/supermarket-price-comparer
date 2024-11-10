@@ -1,21 +1,23 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import '../styles/SearchPage.css';
-import SearchPageForm from './SearchPageForm';
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
+import "../styles/SearchPage.css";
+import SearchPageForm from "./SearchPageForm";
 
 function SearchPage() {
   const { isAuthenticated, logout } = useContext(AuthContext); // Access auth status and logout function
   const [isEditing, setIsEditing] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  const fetchProducts = async (searchTerm = '', sortOption = '') => {
+  const fetchProducts = async (searchTerm = "", sortOption = "") => {
     try {
-      const query = searchTerm ? `?name=${encodeURIComponent(searchTerm)}` : '';
-      const response = await fetch(`http://localhost:5000/api/products${query}`);
+      const query = searchTerm ? `?name=${encodeURIComponent(searchTerm)}` : "";
+      const response = await fetch(
+        `http://localhost:5000/api/products${query}`
+      );
       const data = await response.json();
       setProducts(data);
       filterAndSortProducts(searchTerm, sortOption, data); // Apply initial filter/sort if necessary
@@ -34,16 +36,19 @@ function SearchPage() {
     if (!isAuthenticated) return; // Prevent saving if not authenticated
 
     try {
-      const response = await fetch('http://localhost:5000/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5000/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newProduct),
       });
 
       if (response.ok) {
         const savedProduct = await response.json();
         setProducts((prev) => [...prev, savedProduct]);
-        filterAndSortProducts(searchTerm, sortOption, [...products, savedProduct]);
+        filterAndSortProducts(searchTerm, sortOption, [
+          ...products,
+          savedProduct,
+        ]);
       }
     } catch (error) {
       console.error("Error saving product:", error);
@@ -54,11 +59,14 @@ function SearchPage() {
     if (!isAuthenticated) return; // Prevent updating if not authenticated
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${updatedProduct.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/products/${updatedProduct.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedProduct),
+        }
+      );
 
       if (response.ok) {
         const updatedProducts = products.map((product) =>
@@ -86,8 +94,8 @@ function SearchPage() {
     const selectedSort = e.target.value;
     setSortOption(selectedSort);
 
-    if (selectedSort === '') {
-      setSearchTerm(''); // Clear search term when "Select" is chosen
+    if (selectedSort === "") {
+      setSearchTerm(""); // Clear search term when "Select" is chosen
       setFilteredProducts([]); // Reset filtered products
     } else {
       filterAndSortProducts(searchTerm, selectedSort);
@@ -101,36 +109,54 @@ function SearchPage() {
       filtered = filtered.filter((product) =>
         product.name?.toLowerCase().includes(term.toLowerCase())
       );
-    } 
-
-    if (sort === 'name') {
-      filtered = filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    } else if (sort === 'price') {
-      filtered = filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sort === 'date') {
-      filtered = filtered.sort((a, b) => new Date(a.product_date) - new Date(b.product_date));
-    } else if (sort === 'supermarket') {
-      filtered = filtered.sort((a, b) => (a.supermarket_name || '').localeCompare(b.supermarket_name || ''));
     }
-    else if (sort === 'Lidl') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'Lidl');
-    } else if (sort === 'SuperValu') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'SuperValu');
-    } else if (sort === 'TESCO') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'TESCO');
-    } else if (sort === 'Aldi') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'Aldi');
-    } else if (sort === 'M&S') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'M&S');
-    } else if (sort === 'Dunnes Stores') {
-      filtered = filtered.filter((product) => product.supermarket_name === 'Dunnes Stores');
+
+    if (sort === "name") {
+      filtered = filtered.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
+    } else if (sort === "price") {
+      filtered = filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sort === "date") {
+      filtered = filtered.sort(
+        (a, b) => new Date(a.product_date) - new Date(b.product_date)
+      );
+    } else if (sort === "supermarket") {
+      filtered = filtered.sort((a, b) =>
+        (a.supermarket_name || "").localeCompare(b.supermarket_name || "")
+      );
+    } else if (sort === "Lidl") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "Lidl"
+      );
+    } else if (sort === "SuperValu") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "SuperValu"
+      );
+    } else if (sort === "TESCO") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "TESCO"
+      );
+    } else if (sort === "Aldi") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "Aldi"
+      );
+    } else if (sort === "M&S") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "M&S"
+      );
+    } else if (sort === "Dunnes Stores") {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === "Dunnes Stores"
+      );
     }
 
     setFilteredProducts(filtered);
   };
 
   const handleEditClick = (product) => {
-    if (isAuthenticated) { // Allow editing only if authenticated
+    if (isAuthenticated) {
+      // Allow editing only if authenticated
       setIsEditing(true);
       setProductToEdit(product);
     } else {
@@ -142,7 +168,7 @@ function SearchPage() {
     <div className="page-container">
       <div className="left-column">
         <h1>Search to Compare Prices</h1>
-        
+
         <input
           type="text"
           placeholder="Search products..."
@@ -151,7 +177,7 @@ function SearchPage() {
           className="search-input"
         />
 
-        <button onClick={logout} style={{ margin: '10px 0' }}>
+        <button onClick={logout} style={{ margin: "10px 0" }}>
           Logout
         </button>
 
@@ -174,7 +200,10 @@ function SearchPage() {
 
         {filteredProducts.length > 0 && (
           <>
-            <h2>Search Results for: {searchTerm} ({filteredProducts.length} items found)</h2>
+            <h2>
+              Search Results for: {searchTerm} ({filteredProducts.length} items
+              found)
+            </h2>
             <div className="product-list">
               {filteredProducts.map((product) => (
                 <div key={product.id} className="product-item">
@@ -183,9 +212,13 @@ function SearchPage() {
                   <p>Unit: {product.unit}</p>
                   <p>Price: €{product.price}</p>
                   <p>Supermarket: {product.supermarket_name}</p>
-                  <p>Date: {new Date(product.product_date).toLocaleDateString()}</p>
+                  <p>
+                    Date: {new Date(product.product_date).toLocaleDateString()}
+                  </p>
                   {isAuthenticated && (
-                    <button onClick={() => handleEditClick(product)}>Edit</button>
+                    <button onClick={() => handleEditClick(product)}>
+                      Edit
+                    </button>
                   )}
                 </div>
               ))}

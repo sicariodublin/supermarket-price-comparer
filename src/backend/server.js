@@ -3,7 +3,6 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 console.log("Mailjet Public API Key:", process.env.MJ_APIKEY_PUBLIC);
 console.log("Mailjet Private API Key:", process.env.MJ_APIKEY_PRIVATE);
 
-
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -14,11 +13,9 @@ const mailjet = require('node-mailjet').apiConnect(process.env.MJ_APIKEY_PUBLIC,
 
 const app = express();
 
-
 // Rotas
 app.use(cors());
 app.use(express.json());
-
 
   // Rota para enviar contact form
 app.post('/api/contact', async (req, res) => {
@@ -227,7 +224,6 @@ app.put('/api/products/:id', (req, res) => {
     }
   });
 });
-
 
 // Start server
 const PORT = process.env.PORT || 5000;

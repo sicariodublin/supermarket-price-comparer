@@ -13,7 +13,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}*/
+}
 
 /* The main content should fill the remaining height, keeping the footer at the bottom */
 main {
@@ -164,7 +164,7 @@ main {
   }
 
   .footer__links {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 20px; /* Less gap for smaller screens */
   }
