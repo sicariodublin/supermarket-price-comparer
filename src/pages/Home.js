@@ -4,7 +4,7 @@ import '../styles/Home.css'; // Import CSS for Home page
 
 function Home() {
   return (
-    <div className="home-page">
+    <di className="home-page">
       <div className="home-container">
         <div className="header-content">
           <h1>Welcome to addandcompare.com!</h1>
@@ -17,7 +17,7 @@ function Home() {
           </Link>
         </div>
       </div>
-    </div>
+    </di>
   );
 }
 

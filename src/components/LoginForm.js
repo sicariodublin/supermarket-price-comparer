@@ -83,7 +83,7 @@ function LoginForm() {
       <div className="additional-options">
         <Link to="/register">Don't have an account? Register here.</Link>
       </div>
-    </form>
+    </form> 
   );
 }
 

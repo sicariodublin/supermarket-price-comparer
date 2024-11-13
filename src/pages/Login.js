@@ -12,7 +12,7 @@ function Login() {
       </div>
       <div className="login-right-section">
         <h2>Log In</h2>
-        <p>Register here to start your journey with us.</p>
+        <p>Login here to start your journey with us.</p>
         <LoginForm />
       </div>
     </div>

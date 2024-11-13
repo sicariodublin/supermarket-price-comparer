@@ -46,7 +46,7 @@ body, html {
 .header-content p {
   color: aliceblue;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 20px;
 }
 
 .become-member-button {
@@ -82,7 +82,7 @@ body, html {
   }
 
   .header-content p {
-    font-size: 12px; /* Decrease font size for smaller text */
+    font-size: 16px; /* Decrease font size for smaller text */
   }
 
   .become-member-button {
@@ -105,7 +105,7 @@ body, html {
   }
 
   .header-content p {
-    font-size: 14px; 
+    font-size: 16px; 
   }
 
   .become-member-button {
