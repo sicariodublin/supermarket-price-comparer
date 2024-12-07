@@ -66,7 +66,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
   return (
     <div className="add-form-container">
       <h2>{isEditing ? 'Edit Product' : 'Add New Product'}</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="form">
         <div className="form-group">
           <label>Product Name:</label>
           <input

@@ -11,17 +11,19 @@
 }
 
 .privacy-image {
-    width: 50%; /* Image container takes half of the available space */
+    width: 70%; /* Image container takes half of the available space */
     background-image: url('../assets/images/market.jpg'); /* Ensure this path is correct */
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
     height: auto; /* Maintain height proportional to width */
     border-radius: 8px; /* Rounded corners for better appearance */
+    margin-top: 0;
+    margin-left: 0;
 }
 
 .privacy-text {
-    width: 50%; /* Text container takes half of the available space */
+    width: 70%; /* Text container takes half of the available space */
     /* background-color: rgba(255, 255, 255, 0.9); /* Light background for better readability * */
     padding: 20px; /* Add padding around the text */
     border-radius: 8px; /* Rounded corners for better appearance */

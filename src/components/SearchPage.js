@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+// SearchPage.js
+import React, { useEffect, useState } from "react";
+import { useAuth } from '../context/AuthContext';
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
 
 function SearchPage() {
-  const { isAuthenticated, logout } = useContext(AuthContext); // Access auth status and logout function
+  const { isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [products, setProducts] = useState([]);
@@ -177,10 +178,6 @@ function SearchPage() {
           className="search-input"
         />
 
-        <button onClick={logout} style={{ margin: "10px 0" }}>
-          Logout
-        </button>
-
         <div className="sort-container">
           <label htmlFor="sort">Sort By: </label>
           <select id="sort" value={sortOption} onChange={handleSortChange}>
@@ -196,14 +193,19 @@ function SearchPage() {
             <option value="M&S">M&S</option>
             <option value="Dunnes Stores">Dunnes Stores</option>
           </select>
+          <p className="disclaimer">
+          Disclaimer: Displayed results may not always be perfectly accurate.
+          Product availability may vary depending on your location.
+        </p>
         </div>
 
         {filteredProducts.length > 0 && (
           <>
-            <h2>
-              Search Results for: {searchTerm} ({filteredProducts.length} items
-              found)
-            </h2>
+            <div className="search-results">
+              <h2>
+                Search Results for: {searchTerm} ({filteredProducts.length} items found)
+              </h2>
+            </div>
             <div className="product-list">
               {filteredProducts.map((product) => (
                 <div key={product.id} className="product-item">

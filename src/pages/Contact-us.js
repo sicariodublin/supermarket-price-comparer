@@ -56,7 +56,7 @@ function ContactUs() {
 
        <div className="contact-form-container">
         <h2>Contact Form</h2>
-        <form onSubmit={handleSubmit}>
+        <form id="contact-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Your Name:</label>
             <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />

@@ -6,7 +6,7 @@ function HowItWorks() {
     <div className="how-it-works-page">
       <div className="how-it-works-container">
         <div className="header-works">
-          <h1>Wow it works!</h1>
+          <h1>How it works!</h1>
           <p>Ireland's new supermarket prices comparison website!</p>
           <p>At addandcompare.com, we simplify your grocery shopping by providing a platform to compare product prices from various supermarkets. Here’s how you can make the most of our service:</p>
       

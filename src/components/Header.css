@@ -82,7 +82,7 @@
   transition: color 0.3s ease; /* Optional: Add a smooth transition for hover effect */
 }
 
-.navbar__links-right li a:hover {
+.navbar__links-right li {
   color: #0000f3; /* Optional: Set a color for hover state */
 } 
 
@@ -93,6 +93,23 @@
   font-weight: bold;
   padding: 0 10px;
   transition: background-color 0.3s ease;
+}
+
+.logout-button {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0 10px;
+  transition: background-color 0.3s ease;
+  color: #333; /* Set the desired text color */
+  text-decoration: none; /* Remove the underline */
+  transition: color 0.3s ease; /* Optional: Add a smooth transition for hover effect */
+  cursor: pointer;
+  margin-top: 18px;
+}
+
+.logout-button:hover {
+  color: #0000f3; /* Optional: Set a color for hover state */
 }
   
   .navbar__search {
@@ -125,29 +142,28 @@
     padding: 3px;
     flex-grow: 1;
     margin-left: 40px;
-  }
-  
-  .quick-search-form button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0 10px;
-    position: absolute;
-    padding-left: 0;
-    z-index: 100;
+    padding-right: 3rem; /* Add padding to avoid overlap with the button */
+    background-color: transparent;
   }
 
-  .quick-search-form button:hover {
-    filter: brightness(1.6); /* Increase brightness on hover */
-    transition: filter 0.3s ease; /* Smooth transition */
-  }
-  
-  .quick-search-form button img {
-    width: 35px; /* Adjust icon size */
-    border-radius: 50%;
-    padding-top: 4px;
-  }
-  
+  /* Dashboard Icon */
+.dashboard-icon {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-icon i {
+  font-size: 1.5rem; /* Adjust size as needed */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: var(--normal-blue, #007bff); /* Use a CSS variable or a static color */
+}
+
+.dashboard-icon i:hover {
+  transform: scale(1.1);
+}
+
  /* Media Queries for Small Screens */
   @media (max-width: 1080px) {
     .header {
@@ -178,8 +194,5 @@
         width: calc(100% - 50px);
     }
 
-    .quick-search-form button {
-        width: 40px;
-    }
   }
   

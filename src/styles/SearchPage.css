@@ -5,26 +5,27 @@
   text-align: center;
 }
 
-.left-column h1 {
-  font-size: 34px;
-  color: black;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
 .search-input {
   padding: 5px;
   width: 100%;
-  /* max-width: 600px; */
-  margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
+  height: 40px;
+  margin-top: 26px;
+  margin-bottom: 40px;
+}
+
+.search-input h2 {
+  font-size: 34px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .sort-container {
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .sort-container label {
@@ -38,6 +39,15 @@
   border-radius: 5px;
 }
 
+.search-results h2 {
+  color: #ff4b4b; /* Dark text for readability */
+  font-size: 1.2rem; /* Slightly larger font size */
+  margin: 0; /* Reset margin */
+  font-weight: 600; /* Slightly bold font */
+  text-align: center;
+  margin-bottom: 20px;
+} 
+
 .product-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -47,7 +57,7 @@
 .product-item {
   background-color: #f8f8f8;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 5px;
   padding: 15px;
   text-align: left;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -70,8 +80,8 @@
 .page-container {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  gap: 20px;
+  padding: 60px;
+  gap: 100px;
 }
 
 .left-column,
@@ -80,24 +90,33 @@
   margin-top: 0;
 }
 
-.left-column {
-  padding-right: 10px;
-}
-
-.right-column {
-  padding-left: 10px;
-}
-
-.right-column h2 {
+.left-column h1 {
   font-size: 34px;
+  color: black;
+  margin-top: 20px;
   margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.disclaimer {
+  color: #646363;
+  font-size: 14px;
+  margin-top: 30px;
+  margin-bottom: 80px;
+}
+
+.form {
+  width: 100%; /* Ensure the form takes full width */
 }
 
 .add-form-container {
-  /* background-color: #f9f9f9; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 20px;
-  border-radius: 8px;
-  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+  border-radius: 5px;
+  max-width: 600px;
   margin-bottom: 20px;
 }
 
@@ -106,42 +125,101 @@
   margin-top: 0;
   margin-bottom: 20px;
   font-weight: 600;
+  text-align: center;
 }
 
-.add-form-container form {
+/* .add-form-container form {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
+} */
 
-.add-form-container label {
+/* .add-form-container label {
   font-weight: 600;
 }
 
 .add-form-container input,
 .add-form-container select {
-  padding: 4px; 
+  padding: 6px; 
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
   margin-left: 20px;
+} */
+
+.form-group {
+  /* display: flex; */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  flex: 1; /* Allow the label to take some space */
+  text-align: left; /* Align text to the right */
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  flex: 2; /* Make input/select elements wider */
+  height: 40px; /* Uniform height */
+  width: 100%; /* Stretch input/select fields */
+  padding: 0 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  margin-top: 5px;
 }
 
 .add-form-container button {
   margin-top: 10px;
-  width: 70%;
+  width: 100%;
   align-items: center;
+  border-radius: 5px;
+  text-decoration: none;
+  border: none;
+  padding: 8px;
+  font-size: 16px;
+  background-color: #0061c8;
+  color: #fff;
+  cursor: pointer;
+}
+
+.add-form-container button:hover {
+  background-color: #004a8d;
 }
 
 @media (max-width: 768px) {
   /* Stack columns on smaller screens */
   .page-container {
     flex-direction: column;
+    padding: 20px;
+    gap: 0;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
   }
+
+  .left-column h1 {
+    font-size: 34px;
+    margin-bottom: 0;
+    text-align: center;
+  }
+
   .add-form-container button {
     margin-top: 10px;
     width: 100%;
     align-items: center;
   }
 
+  .add-form-container h2 {
+    font-size: 34px;
+    text-align: center;
+  }
+
+  .sort-container {
+    margin-bottom: 10px;
+    text-align: center;
+  }
 }

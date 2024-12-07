@@ -5,6 +5,7 @@ import EditProduct from './components/EditProduct';
 import FeedbackForm from './components/FeedbackForm';
 import Footer from './components/Footer';
 import Header from './components/Header';
+import Logout from './components/Logout';
 import SearchPage from './components/SearchPage';
 import AboutUs from './pages/About-us';
 import ContactUs from './pages/Contact-us';
@@ -32,6 +33,7 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product" element={<EditProduct />} />
+          <Route path="/logout" element={<Logout />} />
         </Routes>
       </div>
       <FeedbackForm />

@@ -36,6 +36,7 @@
   background-color: #dbd7d7;
   padding: 50px;
   margin-bottom: 260px;
+  width: 100%;
 }
 
 .login-right-section h1 {
@@ -122,6 +123,27 @@
 
 .color-icon {
   color: #0061c8;
+}
+
+/* Login.css */
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #f5c6cb;
 }
 
 @media (min-width: 768px) {

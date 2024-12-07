@@ -47,7 +47,6 @@ main {
   color: #6c63ff;
   margin-bottom: 10px;
   font-size: 21px;
-  transition: color 0.3s ease;
 }
 
 .footer__logo-section {
@@ -114,6 +113,7 @@ main {
   gap: 80px;
   justify-content: flex-end;
   flex: 1;
+  text-align: left;
 }
 
 .footer__links div {
@@ -167,6 +167,7 @@ main {
     flex-direction: row;
     align-items: center;
     gap: 20px; /* Less gap for smaller screens */
+    text-align: center;
   }
 
   .footer__links div {
@@ -180,5 +181,21 @@ main {
 
   .footer__copyright {
     margin-top: 20px;
+  }
+
+  .terms-text h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+}
+
+@media (min-width: 1024px) { 
+  .footer .container {
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    max-width: 90%;
+    margin: 0 auto;
   }
 }
