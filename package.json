@@ -1,5 +1,5 @@
 {
-  "homepage": "https://sicariodublin.github.io/",
+  "homepage": "https://sicariodublin.github.io/supermarket-price-comparer",
   "name": "supermarket-price-comparer",
   "proxy": "http://localhost:5000",
   "version": "0.1.0",
