@@ -459,6 +459,95 @@ app.get("/api/verify-email", (req, res) => {
   }
 });
 
+app.post('/api/password-reset', async (req, res) => {
+  const { username, email } = req.body;
+
+  if (!username || !email) {
+    return res.status(400).json({ message: 'Username and email are required' });
+  }
+
+  try {
+    const user = await findUserInDatabase(username, email); // Replace with your DB logic
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'defaultSecret', {
+      expiresIn: '1h',
+    });
+    const resetUrl = `http://localhost:4000/password-reset?token=${token}`;
+
+    // Email Logic
+    const emailOptions = {
+      Messages: [
+        {
+          From: {
+            Email: 'addandcomparemessageus@hotmail.com',
+            Name: 'Add and Compare',
+          },
+          To: [{ Email: email }],
+          Subject: 'Password Reset Request',
+          HTMLPart: `
+            <p>Hi ${username},</p>
+            <p>You requested to reset your password. Please click the link below to reset it:</p>
+            <a href="${resetUrl}">Reset Password</a>
+            <p>If you did not request this, please ignore this email.</p>
+          `,
+        },
+      ],
+    };
+    await mailjet.post('send', { version: 'v3.1' }).request(emailOptions);
+
+    res.status(200).json({ message: 'Password reset email sent successfully.' });
+  } catch (error) {
+    console.error('Error handling password reset:', error);
+    res.status(500).json({ message: 'Failed to handle password reset request.' });
+  }
+});
+
+app.post('/api/password-reset/confirm', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'defaultSecret');
+    const userId = decoded.userId;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const query = 'UPDATE users SET password = ? WHERE id = ?';
+    connection.query(query, [hashedPassword, userId], (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to reset password.' });
+      }
+
+      res.status(200).json({ message: 'Password reset successfully.' });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: 'Invalid or expired token.' });
+  }
+});
+
+// Helper function to find a user in the database
+function findUserInDatabase(username, email) {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT * FROM users WHERE username = ? AND email = ?';
+    connection.query(query, [username, email], (err, results) => {
+      if (err) {
+        return reject(err);
+      }
+      if (results.length === 0) {
+        return resolve(null); // No user found
+      }
+      resolve(results[0]); // Return the first matched user
+    });
+  });
+}
+
 // Serve React build files
 app.use(express.static(path.join(__dirname, "../../build")));
 

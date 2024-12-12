@@ -2,11 +2,14 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import AddProduct from "./components/AddProduct";
+import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
 import EditProduct from "./components/EditProduct";
 import FeedbackForm from "./components/FeedbackForm";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Logout from "./components/Logout";
+import PasswordResetConfirmPage from './components/PasswordResetConfirmPage';
+import PasswordResetPage from "./components/PasswordResetPage";
 import SearchPage from "./components/SearchPage";
 import VerifyEmail from "./components/VerifyEmail";
 import AboutUs from "./pages/About-us";
@@ -18,7 +21,6 @@ import PrivacyPolicy from "./pages/Privacy-policy";
 import Register from "./pages/Register";
 import TermsOfService from "./pages/Terms-of-service";
 import DashboardReact from "./routes/dashboardReact"; // DashboardRoutes file
-
 function App() {
   return (
     <>
@@ -40,6 +42,9 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/dashboard/*" element={<DashboardReact />} />
+          <Route path="/password-reset" element={<PasswordResetPage />} />
+          <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
+          <Route path="/delete-account" element={<DeleteConfirmationModal />} />
 
           {/* Dashboard Routes */}
         </Routes>

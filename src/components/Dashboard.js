@@ -1,12 +1,16 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext"; // Import AuthContext
-import "../styles/Dashboard.css"; // Create a CSS file for styling
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/Dashboard.css";
+import "../styles/Modal.css";
+import AccountSettingsModal from "./AccountSettingsModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 const Dashboard = () => {
-  const { isAuthenticated, logout, token } = useContext(AuthContext); // Access auth details
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const navigate = useNavigate();
 
-  // Mock data (replace with API call later)
+  // Mock data (replace with API calls later)
   const userData = {
     name: "Fsteyer",
     watchlist: [],
@@ -18,14 +22,35 @@ const Dashboard = () => {
     ],
   };
 
+  const handleOpenSettings = () => setIsSettingsModalOpen(true);
+  const handleCloseSettings = () => setIsSettingsModalOpen(false);
+
+  const handlePasswordReset = () => {
+    setIsSettingsModalOpen(false);
+    navigate("/password-reset");
+  };
+
+  const handleDeleteAccount = () => {
+    setIsSettingsModalOpen(false);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Account deleted");
+    setIsDeleteModalOpen(false);
+    // Call API to delete account here
+  };
+
   return (
     <div className="dashboard">
       {/* Greeting Section */}
       <header className="dashboard-header">
         <div className="greeting">
-        <i className="bi bi-person pt-3 color-normal-blue" id="pers"></i>
+          <i className="bi bi-person pt-3 color-normal-blue" id="pers"></i>
+          <div>
           <p>Hello,</p>
-          <p>{userData.name}!</p>
+            <p>{userData.name}!!</p>
+          </div>
         </div>
       </header>
 
@@ -33,22 +58,22 @@ const Dashboard = () => {
       <section className="options-section">
         <h3>My Options</h3>
         <div className="options-grid">
-          <Link to="/account-settings" className="option">
+          <div className="option" onClick={handleOpenSettings}>
             <span>Account Settings</span>
-            <i className="icon-settings"></i>
-          </Link>
-          <Link to="/newsletter-options" className="option">
+            <i className="bi bi-gear"></i>
+          </div>
+          <div className="option">
             <span>Newsletter Options</span>
-            <i className="icon-mail"></i>
-          </Link>
-          <Link to="/cheapest-weekly-shop" className="option">
+            <i className="bi bi-envelope"></i>
+          </div>
+          <div className="option">
             <span>Cheapest Weekly Shop</span>
-            <i className="icon-chart"></i>
-          </Link>
-          <Link to="/product-seasonality" className="option">
+            <i className="bi bi-bar-chart"></i>
+          </div>
+          <div className="option">
             <span>Product Seasonality</span>
-            <i className="icon-weather"></i>
-          </Link>
+            <i className="bi bi-cloud-sun"></i>
+          </div>
         </div>
       </section>
 
@@ -78,9 +103,23 @@ const Dashboard = () => {
           ))}
         </div>
       </section>
+
+      {/* Account Settings Modal */}
+      <AccountSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={handleCloseSettings}
+        onPasswordReset={handlePasswordReset}
+        onDeleteAccount={handleDeleteAccount}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };
 
 export default Dashboard;
-

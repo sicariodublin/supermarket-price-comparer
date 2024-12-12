@@ -1,17 +1,17 @@
 //
-import "bootstrap-icons/font/bootstrap-icons.css"; // Import Bootstrap Icon
+import "bootstrap-icons/font/bootstrap-icons.css";
 import React from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/Frame-1.png";
-import { useAuth } from "../context/AuthContext"; // Import useAuth for authentication state
-import "./Header.css"; // Create a separate CSS file to style the header
+import { useAuth } from "../context/AuthContext";
+import "./Header.css";
 
 function Header() {
   const { isAuthenticated, logout } = useAuth();
 
   return (
     <header className="header">
-      <nav className="navbar">
+      <nav className="navbar">  
         {/* Logo Section */}
         <div className="navbar__logo">
           <Link to="/">
@@ -62,7 +62,7 @@ function Header() {
             type="text"
             placeholder="Quick Search"
             name="query"
-            style={{ paddingRight: "3rem" }} // Add padding to avoid overlap with the button
+            style={{ paddingRight: "3rem" }} 
           />
           <button
             className="magnifying-icon"
@@ -78,7 +78,7 @@ function Header() {
               padding: "0.2rem",
               position: "absolute",
               top: "50%",
-              left: "0rem", // Adjust as needed to align correctly
+              left: "0rem", 
               transform: "translateY(-50%)",
               border: "none",
             }}

@@ -154,7 +154,7 @@
 }
 
 .dashboard-icon i {
-  font-size: 1.5rem; /* Adjust size as needed */
+  font-size: 2rem; /* Adjust size as needed */
   cursor: pointer;
   transition: transform 0.2s ease;
   color: var(--normal-blue, #007bff); /* Use a CSS variable or a static color */
@@ -192,6 +192,13 @@
 
     .quick-search-form input {
         width: calc(100% - 50px);
+    }
+
+    .logout-button {
+        display: flex;
+        position: relative;
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
   }

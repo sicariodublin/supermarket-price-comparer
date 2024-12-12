@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AddProduct from './components/AddProduct';
+import Dashboard from './components/Dashboard';
 import EditProduct from './components/EditProduct';
 import FeedbackForm from './components/FeedbackForm';
 import Footer from './components/Footer';
@@ -12,6 +13,7 @@ import ContactUs from './pages/Contact-us';
 import Home from './pages/Home';
 import HowItWorks from './pages/HowItWorks';
 import Login from './pages/Login';
+import PasswordResetPage from './pages/PasswordResetPage';
 import PrivacyPolicy from './pages/Privacy-policy';
 import Register from './pages/Register';
 import TermsOfService from './pages/Terms-of-service';
@@ -34,6 +36,8 @@ function App() {
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/edit-product" element={<EditProduct />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/password-reset" element={<PasswordResetPage />} />  
         </Routes>
       </div>
       <FeedbackForm />

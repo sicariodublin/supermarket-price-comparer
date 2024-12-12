@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     clearTimeout(timeoutId); // Clear any existing timer
     const newTimeoutId = setTimeout(() => {
       logout(true); // Auto-logout after 5 minutes due to inactivity
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }, 50 * 60 * 1000); // 5 minutes in milliseconds
     setTimeoutId(newTimeoutId);
   };
 
