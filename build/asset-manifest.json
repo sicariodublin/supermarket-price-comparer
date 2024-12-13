@@ -1,0 +1,34 @@
+{
+  "files": {
+    "main.css": "/supermarket-price-comparer/static/css/main.6c890e49.chunk.css",
+    "main.js": "/supermarket-price-comparer/static/js/main.645a78de.chunk.js",
+    "main.js.map": "/supermarket-price-comparer/static/js/main.645a78de.chunk.js.map",
+    "runtime-main.js": "/supermarket-price-comparer/static/js/runtime-main.74a35e1e.js",
+    "runtime-main.js.map": "/supermarket-price-comparer/static/js/runtime-main.74a35e1e.js.map",
+    "static/css/2.8ebab506.chunk.css": "/supermarket-price-comparer/static/css/2.8ebab506.chunk.css",
+    "static/js/2.0a44c428.chunk.js": "/supermarket-price-comparer/static/js/2.0a44c428.chunk.js",
+    "static/js/2.0a44c428.chunk.js.map": "/supermarket-price-comparer/static/js/2.0a44c428.chunk.js.map",
+    "index.html": "/supermarket-price-comparer/index.html",
+    "precache-manifest.5e5766cbe129b04568a42d381ed87b2c.js": "/supermarket-price-comparer/precache-manifest.5e5766cbe129b04568a42d381ed87b2c.js",
+    "service-worker.js": "/supermarket-price-comparer/service-worker.js",
+    "static/css/2.8ebab506.chunk.css.map": "/supermarket-price-comparer/static/css/2.8ebab506.chunk.css.map",
+    "static/css/main.6c890e49.chunk.css.map": "/supermarket-price-comparer/static/css/main.6c890e49.chunk.css.map",
+    "static/js/2.0a44c428.chunk.js.LICENSE.txt": "/supermarket-price-comparer/static/js/2.0a44c428.chunk.js.LICENSE.txt",
+    "static/media/Frame-1.png": "/supermarket-price-comparer/static/media/Frame-1.5cf368b6.png",
+    "static/media/bootstrap-icons.css": "/supermarket-price-comparer/static/media/bootstrap-icons.cc1e5eda.woff2",
+    "static/media/Header.css": "/supermarket-price-comparer/static/media/fa-v4compatibility.d6a1b588.woff2",
+    "static/media/logo4.png": "/supermarket-price-comparer/static/media/logo4.8feee896.png",
+    "static/media/Privacypolicy.css": "/supermarket-price-comparer/static/media/market.3309f285.jpg",
+    "static/media/Termsofservice.css": "/supermarket-price-comparer/static/media/supermarket.c428a1cf.jpg",
+    "static/media/About-us.css": "/supermarket-price-comparer/static/media/supermarket2.6c1eeef8.jpg",
+    "static/media/HowItWorks.css": "/supermarket-price-comparer/static/media/veg-7.54781c9b.png",
+    "static/media/Home.css": "/supermarket-price-comparer/static/media/vegetables1.0bdb27f7.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.74a35e1e.js",
+    "static/css/2.8ebab506.chunk.css",
+    "static/js/2.0a44c428.chunk.js",
+    "static/css/main.6c890e49.chunk.css",
+    "static/js/main.645a78de.chunk.js"
+  ]
+}
