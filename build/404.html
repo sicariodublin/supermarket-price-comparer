@@ -1,5 +1,18 @@
-<script>
-    const redirectTo = window.location.pathname.slice(window.location.pathname.indexOf('/', 1));
-    window.location.href = window.location.origin + redirectTo;
-  </script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; URL='/'" />
+  </head>
+  <body>
+    <script>
+      // Redirect any unknown paths to the index.html
+      const path = window.location.pathname;
+      if (path !== '/') {
+        window.location.replace('/');
+      }
+    </script>
+    <p>If you are not redirected automatically, follow this <a href="/">link</a>.</p>
+  </body>
+</html>
+
   
