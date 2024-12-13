@@ -29,7 +29,7 @@
   "scripts": {
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider PORT=4000 react-scripts start",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages --silent -d build",
     "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
