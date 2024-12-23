@@ -146,6 +146,11 @@
     background-color: transparent;
   }
 
+  .bi-search::before {
+    font-size: 1.1rem;
+    padding: 5px;
+}
+
   /* Dashboard Icon */
 .dashboard-icon {
   margin-left: 10px;
@@ -183,7 +188,7 @@
         gap: 15px;
     }
 
-    .quick-search-form {
+    .quick-search-form {  
         width: 50%;
         margin-top: 10px;
         margin-left: 20px;

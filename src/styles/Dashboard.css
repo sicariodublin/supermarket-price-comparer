@@ -43,6 +43,7 @@
   margin: 0;
   line-height: 25px;
   font-weight: 800;
+  text-align: left;
 }
 
 .greeting i {
@@ -178,4 +179,5 @@ h3 {
     width: 100%;
     margin-bottom: 20px;
   }
+
 }

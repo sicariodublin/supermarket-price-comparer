@@ -1,3 +1,4 @@
+// Dashboard.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
@@ -9,6 +10,8 @@ const Dashboard = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  /* const { user, logout, } = useAuth(); */
+
 
   // Mock data (replace with API calls later)
   const userData = {
@@ -22,6 +25,7 @@ const Dashboard = () => {
     ],
   };
 
+  // Modal control handlers
   const handleOpenSettings = () => setIsSettingsModalOpen(true);
   const handleCloseSettings = () => setIsSettingsModalOpen(false);
 
@@ -48,8 +52,8 @@ const Dashboard = () => {
         <div className="greeting">
           <i className="bi bi-person pt-3 color-normal-blue" id="pers"></i>
           <div>
-          <p>Hello,</p>
-            <p>{userData.name}!!</p>
+            <p>Hello,</p>
+            <p>{userData.name}!</p>
           </div>
         </div>
       </header>
@@ -117,6 +121,7 @@ const Dashboard = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
+        /* user={user} // Pass the user data */
       />
     </div>
   );

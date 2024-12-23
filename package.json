@@ -1,5 +1,5 @@
 {
-  "homepage": "https://sicariodublin.github.io/supermarket-price-comparer",
+  "homepage": "https://sicariodublin.github.io/",
   "name": "supermarket-price-comparer",
   "proxy": "http://localhost:5000",
   "version": "0.1.0",
@@ -18,6 +18,7 @@
     "jsonwebtoken": "^9.0.2",
     "node-mailjet": "^6.0.6",
     "nodemailer": "^6.9.16",
+    "process": "^0.11.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.1",

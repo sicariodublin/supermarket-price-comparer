@@ -11,6 +11,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const path = require("path");
+const bodyParser = require("body-parser");
 const mailjet = require("node-mailjet").apiConnect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
@@ -21,6 +22,7 @@ const app = express();
 // Rotas
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 app.use('/api/', dashboardExpress);
 
 // Database connection configuration
@@ -547,6 +549,26 @@ function findUserInDatabase(username, email) {
     });
   });
 }
+
+let users = [
+  { id: "user-id-placeholder", username: "Fsteyer", email: "fsteyer@example.com" },
+];  
+
+// Delete Account Endpoint
+app.delete("/api/delete-account", (req, res) => {
+  const { userId } = req.body; // User ID from client
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
+
+  db.query("DELETE FROM users WHERE id = ?", [userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: "Error deleting account.", error: err });
+    }
+    return res.status(200).json({ message: "Account deleted successfully." });
+  });
+});
 
 // Serve React build files
 app.use(express.static(path.join(__dirname, "../../build")));

@@ -49,6 +49,7 @@ function Footer() {
             </ul>
           </div>
         </div>
+        {/* <hr class="solid" /> */}
         <div className="footer__copyright">
           <p>&copy; Copyright All Rights Reserved 2024</p>
         </div>

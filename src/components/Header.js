@@ -69,13 +69,13 @@ function Header() {
             type="submit"
             style={{
               borderRadius: "100%",
-              width: "2rem",
+              width: "2.3rem",
               height: "2.2rem",
               backgroundColor: "black",
               padding: "0.5rem",
               color: "white",
               cursor: "pointer",
-              padding: "0.2rem",
+              padding: "0.3rem",
               position: "absolute",
               top: "50%",
               left: "0rem", 

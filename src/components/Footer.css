@@ -110,7 +110,7 @@ main {
 
 .footer__links {
   display: flex;
-  gap: 80px;
+  gap: 100px;
   justify-content: flex-end;
   flex: 1;
   text-align: left;
@@ -149,6 +149,11 @@ main {
   width: 100%;
   margin-top: 20px; 
 }
+
+/* .solid {
+  border-top: 3px solid #ffffff;
+  color:#fff
+} */
 
 /* Media Queries for Small Screens */
 @media (max-width: 768px) {
@@ -198,4 +203,5 @@ main {
     max-width: 90%;
     margin: 0 auto;
   }
+
 }

@@ -43,6 +43,11 @@ body, html {
   display: inline-block; /* Only takes the necessary width */
 }
 
+.header-content h1 {
+  font-size: 70px;
+  font-weight: 700;
+}
+
 .header-content p {
   color: #0b2289;
   font-weight: 600;
@@ -82,8 +87,12 @@ body, html {
     max-width: 90%; /* Keep text within boundaries on smaller screens */
   }
 
+  .header-content h1 {
+    font-size: 50px; /* Increase font size */
+  }
+
   .header-content p {
-    font-size: 16px; /* Decrease font size for smaller text */
+    font-size: 20px; /* Decrease font size for smaller text */
   }
 
   .become-member-button {
@@ -103,6 +112,10 @@ body, html {
     margin-top: 80px; 
     font-size: 16px;
     max-width: 100%; /* Keep text within boundaries on smaller screens */
+  }
+
+  .header-content h1 {
+    font-size: 32px; 
   }
 
   .header-content p {
