@@ -9,6 +9,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const { verifyToken } = require("./middleware/authMiddleware");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -218,59 +219,75 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
 
-  const query = "SELECT * FROM users WHERE email = ?";
-  connection.query(query, [email], async (err, results) => {
-    if (err) {
-      console.error("Error during login:", err);
-      res.status(500).json({ error: "Server error" });
-      return;
-    }
+  // Validate request body
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
-    if (results.length > 0) {
+  // Query database for user
+  connection.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    async (err, results) => {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
       const user = results[0];
-
-      // Check if email is verified
-      if (!user.isVerified) {
-        return res
-          .status(401)
-          .json({ error: "Please verify your email before logging in." });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Check if the user is already logged in
-      if (user.isLoggedIn) {
-        console.log(`User ${email} is already logged in.`);
-        return res.status(401).json({ error: "User is already logged in." });
-      } else {
-        console.log(`User ${email} is not logged in. Proceeding to log in.`);
-      }
+      // Verify password
+      try {
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
 
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (passwordMatch) {
+        // Update isLoggedIn status
+        connection.query(
+          "UPDATE users SET isLoggedIn = ? WHERE email = ?",
+          [1, email],
+          (updateErr) => {
+            if (updateErr) {
+              console.error("Error updating login status:", updateErr);
+            }
+          }
+        );
+
+        // Generate token with user ID and email
         const token = jwt.sign(
-          { id: user.id, email: user.email },
+          {
+            id: user.id,
+            email: user.email
+          },
           process.env.JWT_SECRET || "00398223828992005933",
           { expiresIn: "1h" }
         );
-        console.log("Generated token:", token); // Debug log
-        res.json({ token });
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
-      }
 
-      // Update isLoggedIn to TRUE
-      const updateQuery = "UPDATE users SET isLoggedIn = 1 WHERE email = ?";
-      connection.query(updateQuery, [email], (err, result) => {
-        if (err) {
-          console.error("Error updating isLoggedIn:", err);
-        } else {
-          console.log(`Updated isLoggedIn for ${email}.`);
-        }
-      });
-    } else {
-      res.status(401).json({ error: "Invalid credentials" });
+        // Log for debugging
+        console.log("User authenticated:", { id: user.id, email: user.email });
+        console.log("Generated token payload:", jwt.decode(token));
+
+        // Send response
+        res.json({
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name
+          }
+        });
+      } catch (error) {
+        console.error("Authentication error:", error);
+        res.status(500).json({ message: "Authentication failed" });
+      }
     }
-  });
+  );
 });
+
 
 // Route for user logout
 app.post("/api/logout", (req, res) => {
@@ -555,18 +572,31 @@ let users = [
 ];  
 
 // Delete Account Endpoint
-app.delete("/api/delete-account", (req, res) => {
-  const { userId } = req.body; // User ID from client
+app.delete('/api/delete-account', verifyToken, (req, res) => {
 
+  console.log("Full request headers:", req.headers);
+  console.log("Full decoded token:", req.user);
+  console.log("UserID from request:", req.userId);
+
+  const userId = req.userId; // Extracted from the token
   if (!userId) {
-    return res.status(400).json({ message: "User ID is required." });
+    console.error("UserID is undefined");
+    return res.status(400).json({ message: "Invalid user ID" });
   }
 
-  db.query("DELETE FROM users WHERE id = ?", [userId], (err, result) => {
+  connection.query('DELETE FROM users WHERE id = ?', [userId], (err, result) => {
     if (err) {
-      return res.status(500).json({ message: "Error deleting account.", error: err });
+      console.error('Error deleting user from database:', err);
+      return res.status(500).json({ message: 'Internal server error' });
     }
-    return res.status(200).json({ message: "Account deleted successfully." });
+
+    if (result.affectedRows === 0) {
+      console.log("No user found with ID:", userId); // Log if no user is found
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    console.log("Deleted user with ID:", userId); // Log success
+    return res.status(200).json({ message: 'Account deleted successfully' });
   });
 });
 
