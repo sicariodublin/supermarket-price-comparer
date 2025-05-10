@@ -1,5 +1,6 @@
 // src/components/Footer.js
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
@@ -27,25 +28,25 @@ function Footer() {
           <div>
             <h5>My Account</h5>
             <ul>
-              <li><a href="/login">Login</a></li>
-              <li><a href="/register">Sign Up</a></li>
-              <li><a href="/search">Search</a></li>
+              <li><Link to="/login">Login</Link></li>
+              <li><Link to="/register">Sign Up</Link></li>
+              <li><Link to="/search">Search</Link></li>
             </ul>
           </div>
           <div>
             <h5>Links</h5>
             <ul>
-              <li><a href="/">Home</a></li>
-              <li><a href="/how-it-works">How it Works</a></li>
-              <li><a href="/about-us">About Us</a></li>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/how-it-works">How it Works</Link></li>
+              <li><Link to="/about-us">About Us</Link></li>
             </ul>
           </div>
           <div>
             <h5>Customer Care</h5>
             <ul>
-              <li><a href="/contact-us">Contact Us</a></li>
-              <li><a href="/terms-of-service">Terms of Service</a></li>
-              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><Link to="/contact-us">Contact Us</Link></li>
+              <li><Link to="/terms-of-service">Terms of Service</Link></li>
+              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

@@ -1,44 +1,46 @@
-// Logout.js
-import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
-
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
 
 const Logout = () => {
-  const { token, setToken, setIsAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, token, setToken, setIsAuthenticated, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       if (token) {
-        console.log('Token sent during logout:', token);
+        console.log("Token sent during logout:", token);
 
         // Send logout request to the server
-        const response = await fetch('http://localhost:5000/api/logout', {
-          method: 'POST',
+        const response = await fetch("http://localhost:5000/api/logout", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (response.ok) {
-          console.log('Logout successful');
+          console.log("Logout successful");
         } else {
           const errorData = await response.json();
-          console.error('Error during logout:', errorData.message);
+          console.error("Error during logout:", errorData.message);
         }
       }
-
-      // Clear local storage and context state
-      localStorage.removeItem('token');
-      setToken(null);
-      setIsAuthenticated(false);
-      navigate('/'); // Redirect to login page
     } catch (error) {
-      console.error('Error during logout:', error.message);
+      console.error("Error during logout:", error.message);
+    } finally {
+      // Clear local storage and context state
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
+      navigate("/"); // Redirect to Home
     }
   };
+
+  if (!isAuthenticated) return null; // Don't show the button if not authenticated
 
   return (
     <button className="logout-button" onClick={handleLogout}>

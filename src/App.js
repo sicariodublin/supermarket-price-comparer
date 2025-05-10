@@ -1,5 +1,5 @@
 // App.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import AddProduct from "./components/AddProduct";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
@@ -21,10 +21,30 @@ import PrivacyPolicy from "./pages/Privacy-policy";
 import Register from "./pages/Register";
 import TermsOfService from "./pages/Terms-of-service";
 import DashboardReact from "./routes/dashboardReact"; // DashboardRoutes file
+
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const storedLoginState = localStorage.getItem('isLoggedIn');
+    if (storedLoginState === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('isLoggedIn');
+  };
+
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       <div className="main-content">
         <Routes>
           {/* Public Routes */}
@@ -48,6 +68,16 @@ function App() {
 
           {/* Dashboard Routes */}
         </Routes>
+        {/* <div>
+          {isLoggedIn ? (
+            <>
+              <button onClick={handleLogout}>Logout</button>
+              <Link to="/dashboard">Dashboard</Link>
+            </>
+          ) : (
+            <Link to="/login" onClick={handleLogin}>Login</Link>
+          )}
+        </div> */}
       </div>
       <FeedbackForm />
       <Footer />
