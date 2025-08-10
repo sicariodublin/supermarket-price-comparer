@@ -1,5 +1,5 @@
 // App.js
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Route, Routes } from "react-router-dom";
 import AddProduct from "./components/AddProduct";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
@@ -12,6 +12,7 @@ import PasswordResetConfirmPage from './components/PasswordResetConfirmPage';
 import PasswordResetPage from "./components/PasswordResetPage";
 import SearchPage from "./components/SearchPage";
 import VerifyEmail from "./components/VerifyEmail";
+import { useAuth } from "./context/AuthContext";
 import AboutUs from "./pages/About-us";
 import ContactUs from "./pages/Contact-us";
 import Home from "./pages/Home";
@@ -23,28 +24,11 @@ import TermsOfService from "./pages/Terms-of-service";
 import DashboardReact from "./routes/dashboardReact"; // DashboardRoutes file
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const storedLoginState = localStorage.getItem('isLoggedIn');
-    if (storedLoginState === 'true') {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('isLoggedIn');
-  };
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <Header isLoggedIn={isAuthenticated} onLogout={logout} />
       <div className="main-content">
         <Routes>
           {/* Public Routes */}

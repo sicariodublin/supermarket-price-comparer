@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-
-const supermarkets = [
-  { id: 1, name: 'Lidl' },
-  { id: 2, name: 'SuperValu' },
-  { id: 3, name: 'TESCO' },
-  // Add other supermarkets here
-];
+import { supermarkets } from '../utilities/supermarketsData';
+import { addProduct } from '../services/api';
 
 function AddProductForm({ onProductSaved }) {
   const [name, setName] = useState('');
@@ -30,21 +25,12 @@ function AddProductForm({ onProductSaved }) {
     console.log("Attempting to submit new product:", newProduct);
 
     try {
-      const response = await fetch('http://localhost:5000/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to add product: ${response.statusText}`);
-      }
-
-      const savedProduct = await response.json();
+      const savedProduct = await addProduct(newProduct);
       console.log("Product successfully saved to backend:", savedProduct);
 
       onProductSaved(savedProduct);
 
+      // Reset form fields
       setName('');
       setQuantity('');
       setUnit('');

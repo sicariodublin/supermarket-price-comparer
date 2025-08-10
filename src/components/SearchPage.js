@@ -1,6 +1,7 @@
 // SearchPage.js
 import React, { useEffect, useState } from "react";
 import { useAuth } from '../context/AuthContext';
+import { getProducts, addProduct, updateProduct } from '../services/api';
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
 
@@ -15,11 +16,7 @@ function SearchPage() {
 
   const fetchProducts = async (searchTerm = "", sortOption = "") => {
     try {
-      const query = searchTerm ? `?name=${encodeURIComponent(searchTerm)}` : "";
-      const response = await fetch(
-        `http://localhost:5000/api/products${query}`
-      );
-      const data = await response.json();
+      const data = await getProducts(searchTerm);
       setProducts(data);
       filterAndSortProducts(searchTerm, sortOption, data); // Apply initial filter/sort if necessary
     } catch (error) {
@@ -37,20 +34,12 @@ function SearchPage() {
     if (!isAuthenticated) return; // Prevent saving if not authenticated
 
     try {
-      const response = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProduct),
-      });
-
-      if (response.ok) {
-        const savedProduct = await response.json();
-        setProducts((prev) => [...prev, savedProduct]);
-        filterAndSortProducts(searchTerm, sortOption, [
-          ...products,
-          savedProduct,
-        ]);
-      }
+      const savedProduct = await addProduct(newProduct);
+      setProducts((prev) => [...prev, savedProduct]);
+      filterAndSortProducts(searchTerm, sortOption, [
+        ...products,
+        savedProduct,
+      ]);
     } catch (error) {
       console.error("Error saving product:", error);
     }
@@ -60,23 +49,13 @@ function SearchPage() {
     if (!isAuthenticated) return; // Prevent updating if not authenticated
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/products/${updatedProduct.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedProduct),
-        }
+      const result = await updateProduct(updatedProduct.id, updatedProduct);
+      const updatedProducts = products.map((product) =>
+        product.id === updatedProduct.id ? updatedProduct : product
       );
-
-      if (response.ok) {
-        const updatedProducts = products.map((product) =>
-          product.id === updatedProduct.id ? updatedProduct : product
-        );
-        setProducts(updatedProducts);
-        filterAndSortProducts(searchTerm, sortOption, updatedProducts);
-        setIsEditing(false); // Close the edit form
-      }
+      setProducts(updatedProducts);
+      filterAndSortProducts(searchTerm, sortOption, updatedProducts);
+      setIsEditing(false); // Close the edit form
     } catch (error) {
       console.error("Error updating product:", error);
     }

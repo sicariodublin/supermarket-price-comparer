@@ -1,8 +1,8 @@
 // LoginForm.js
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
 
 function LoginForm() {
@@ -12,7 +12,7 @@ function LoginForm() {
   const [errorMessage, setErrorMessage] = useState(""); // For error messages
   const [verifiedMessage, setVerifiedMessage] = useState(""); // For success messages
 
-  const { login } = useContext(AuthContext); // Use AuthContext
+  const { login } = useAuth(); // Use AuthContext hook
   const navigate = useNavigate(); // For navigation
   const location = useLocation(); // For handling query parameters
 
@@ -37,7 +37,7 @@ function LoginForm() {
       if (response.ok) {
         const data = await response.json(); // Fetch response data here
         console.log("Token received:", data.token); // Debug log
-        login(data.token); // Authenticate
+        login(data.token, data.user); // Authenticate with token and user data
         navigate("/search"); // Redirect
       } else {
         const errorData = await response.json(); // Fetch error data here

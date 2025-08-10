@@ -6,7 +6,8 @@ const connection = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'supermarket_db'
+  database: process.env.DB_NAME || 'supermarket',
+  port: process.env.DB_PORT || 3306
 });
 
 const updateLoginStatus = (email, status) => {
@@ -40,7 +41,7 @@ const verifyToken = (req, res, next) => {
     
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "00398223828992005933"
+      process.env.JWT_SECRET
     );
 
     console.log("Token verification:", {

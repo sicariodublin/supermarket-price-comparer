@@ -1,5 +1,5 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { getProducts } from '../services/api';
 
 function ProductList() {
   const [products, setProducts] = useState([]);
@@ -7,15 +7,17 @@ function ProductList() {
 
   useEffect(() => {
     // Fetch products with supermarket names from your API
-    axios
-      .get('http://localhost:5000/api/products?include=supermarket_name')
-      .then((response) => {
-        setProducts(response.data);
-      })
-      .catch((error) => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts(searchTerm);
+        setProducts(data);
+      } catch (error) {
         console.error("Error fetching products: ", error);
-      });
-  }, []);
+      }
+    };
+    
+    fetchProducts();
+  }, [searchTerm]);
 
   // Filter products by search term
   const filteredProducts = products.filter((product) =>

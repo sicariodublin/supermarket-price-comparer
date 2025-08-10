@@ -2,8 +2,8 @@
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
-console.log("Mailjet Public API Key:", process.env.MJ_APIKEY_PUBLIC);
-console.log("Mailjet Private API Key:", process.env.MJ_APIKEY_PRIVATE);
+// Verify environment variables are loaded
+console.log("Environment variables loaded successfully");
 const dashboardExpress = require("./routes/dashboardExpress");
 const express = require("express");
 const mysql = require("mysql2");
@@ -32,12 +32,14 @@ const connection = mysql.createConnection({
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "supermarket",
+  port: process.env.DB_PORT || 3306
 });
 
 connection.connect((err) => {
   if (err) {
     console.error("Error connecting to the database: " + err.message);
-    return;
+    // Implement proper error handling
+    process.exit(1); // Exit with error code if database connection fails
   }
   console.log("Connected to the database.");
 });
@@ -161,8 +163,8 @@ app.post("/api/register", async (req, res) => {
 
             // Generate the verification token
             const verificationToken = jwt.sign(
-              { id: userId, email }, // Replace `userId` with the appropriate variable holding the user's ID
-              process.env.JWT_SECRET || "00398223828992005933",
+              { id: userId, email },
+              process.env.JWT_SECRET,
               { expiresIn: "1d" }
             );
 
@@ -263,7 +265,7 @@ app.post("/api/login", (req, res) => {
             id: user.id,
             email: user.email
           },
-          process.env.JWT_SECRET || "00398223828992005933",
+          process.env.JWT_SECRET,
           { expiresIn: "1h" }
         );
 
@@ -306,7 +308,7 @@ app.post("/api/logout", (req, res) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "00398223828992005933"
+      process.env.JWT_SECRET
     );
     const email = decoded.email;
 
@@ -336,7 +338,7 @@ const authenticateToken = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1]; // Extract the token from "Bearer <token>"
-  jwt.verify(token, process.env.JWT_SECRET || '00398223828992005933', (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
@@ -453,7 +455,7 @@ app.get("/api/verify-email", (req, res) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "00398223828992005933"
+      process.env.JWT_SECRET
     );
     const userId = decoded.id;
 
@@ -491,7 +493,7 @@ app.post('/api/password-reset', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'defaultSecret', {
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
     const resetUrl = `http://localhost:4000/password-reset?token=${token}`;
@@ -532,7 +534,7 @@ app.post('/api/password-reset/confirm', async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'defaultSecret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

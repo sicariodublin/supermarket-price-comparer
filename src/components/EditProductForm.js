@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { supermarkets } from '../utilities/supermarketsData';
+import { updateProduct } from '../services/api';
 
 function EditProductForm({ product, onProductUpdated, onCancel }) {
   const [name, setName] = useState(product.name || '');
@@ -24,17 +26,7 @@ function EditProductForm({ product, onProductUpdated, onCancel }) {
     console.log("Attempting to update product:", updatedProduct);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${product.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update product: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      const result = await updateProduct(product.id, updatedProduct);
       console.log("Product successfully updated:", result);
       onProductUpdated(result);
     } catch (error) {
@@ -49,7 +41,12 @@ function EditProductForm({ product, onProductUpdated, onCancel }) {
       <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} required />
       <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
       <select value={supermarket_id} onChange={(e) => setSupermarket(e.target.value)} required>
-        {/* Add options for supermarkets */}
+        <option value="">Select Supermarket</option>
+        {supermarkets.map((supermarket) => (
+          <option key={supermarket.id} value={supermarket.id}>
+            {supermarket.name}
+          </option>
+        ))}
       </select>
       <input type="date" value={product_date} onChange={(e) => setDate(e.target.value)} required />
       <button type="submit">Update Product</button>
