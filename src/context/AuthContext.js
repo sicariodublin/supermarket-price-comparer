@@ -1,4 +1,5 @@
 // AuthContext.js
+import React from 'react';
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (token) {
-        await fetch("http://localhost:5000/api/logout", {
+        await fetch("http://localhost:5001/api/logout", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });

@@ -423,6 +423,40 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
   });
 });
 
+// Route to search products by name
+app.get("/api/products/search", (req, res) => {
+  const searchName = req.query.name || "";
+  
+  let query = `
+SELECT 
+  products.id, 
+  products.name, 
+  products.quantity, 
+  products.unit, 
+  products.price, 
+  supermarkets.name AS supermarket_name, 
+  products.product_date
+FROM products
+LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
+`;
+
+  let queryParams = [];
+
+  if (searchName) {
+    query += " WHERE products.name LIKE ?";
+    queryParams.push(`%${searchName}%`);
+  }
+
+  connection.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error searching products:", err);
+      res.status(500).json({ error: "Failed to search products" });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 // API route to update a product
 app.put("/api/products/:id", (req, res) => {
   const { id } = req.params;
@@ -611,7 +645,7 @@ app.get("*", (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

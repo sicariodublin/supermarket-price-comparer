@@ -83,7 +83,8 @@ function SearchPage() {
   };
 
   const filterAndSortProducts = (term, sort, productList = products) => {
-    let filtered = productList;
+    // Ensure productList is an array
+    let filtered = Array.isArray(productList) ? productList : [];
 
     if (term) {
       filtered = filtered.filter((product) =>

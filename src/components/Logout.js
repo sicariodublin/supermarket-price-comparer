@@ -12,7 +12,7 @@ const Logout = () => {
         console.log("Token sent during logout:", token);
 
         // Send logout request to the server
-        const response = await fetch("http://localhost:5000/api/logout", {
+        const response = await fetch("http://localhost:5001/api/logout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

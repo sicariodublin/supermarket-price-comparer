@@ -11,7 +11,7 @@ function VerifyEmail() {
     const token = queryParams.get("token");
 
     if (token) {
-      fetch(`http://localhost:5000/api/verify-email?token=${token}`)
+      fetch(`http://localhost:5001/api/verify-email?token=${token}`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Failed to verify email");

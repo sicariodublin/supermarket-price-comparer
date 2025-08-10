@@ -10,7 +10,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose }) => {
 
   const handleConfirm = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/delete-account", {
+      const response = await fetch("http://localhost:5001/api/delete-account", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

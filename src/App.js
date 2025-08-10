@@ -2,7 +2,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import AddProduct from "./components/AddProduct";
-import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
+import DeleteAccountPage from "./components/DeleteAccountPage";
 import EditProduct from "./components/EditProduct";
 import FeedbackForm from "./components/FeedbackForm";
 import Footer from "./components/Footer";
@@ -48,7 +48,7 @@ function App() {
           <Route path="/dashboard/*" element={<DashboardReact />} />
           <Route path="/password-reset" element={<PasswordResetPage />} />
           <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
-          <Route path="/delete-account" element={<DeleteConfirmationModal />} />
+          <Route path="/delete-account" element={<DeleteAccountPage />} />
 
           {/* Dashboard Routes */}
         </Routes>

@@ -22,7 +22,7 @@ function AddProduct() {
             date,
         };
         
-    await axios.post('http://localhost:5000/api/products', newProduct);
+    await axios.post('http://localhost:5001/api/products', newProduct);
     alert('Product added successfully!');
     // Reset form fields after successful submission
     setProductName('');
