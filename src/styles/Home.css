@@ -1,129 +1,455 @@
-/* Global styling to prevent overflow */
-body, html {
+/* Modern Home Page Styles */
+* {
   margin: 0;
   padding: 0;
-  width: 100%;
-  overflow-x: hidden; /* Hide any horizontal overflow */
+  box-sizing: border-box;
 }
 
-/* Home page styling */
 .home-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
-  overflow-x: hidden; /* Prevents any overflow on the x-axis */
+  overflow-x: hidden;
 }
 
-.home-container {
-  width: 100%; /* Full width of the viewport */
-  height: 100vh; /* Full height of the viewport */
-  padding: 10px;
-  padding: 20px;
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 80px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../assets/images/vegetables1.png') center/cover;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-text h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 40px;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.stat-item {
   text-align: center;
-  background-image: url('../assets/images/vegetables1.png'); /* Ensure this path is correct */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  color: rgb(35 131 129);
-  margin-bottom: 0;
-  overflow: hidden; /* Prevents the creation of scroll bars */
-  position: relative; /* Enables positioning for child elements */
 }
 
-.header-content {
-  margin-top: 20px;
-  background-color: rgba(224 224 224 / 85%);
-  padding: 15px;
-  border-radius: 8px; /* Rounded corners */
-  color: #0b2289;
-  font-size: 20px;
-  font-weight: 500;
-  max-width: 90%; /* Keep the container width suitable for small screens */
-  display: inline-block; /* Only takes the necessary width */
+.stat-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffd700;
 }
 
-.header-content h1 {
-  font-size: 70px;
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 15px 30px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.btn-large {
+  padding: 20px 40px;
+  font-size: 1.2rem;
+}
+
+/* Hero Visual */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.price-preview-card {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 350px;
+}
+
+.price-preview-card h3 {
+  margin-bottom: 20px;
+  color: #667eea;
+  font-size: 1.3rem;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-low {
+  color: #4caf50;
   font-weight: 700;
 }
 
-.header-content p {
-  color: #0b2289;
-  font-weight: 600;
-  font-size: 20px;
+.price-high {
+  color: #f44336;
+  font-weight: 700;
 }
 
-.become-member-button {
-  background-color: #0061c8;
+.price-separator {
+  color: #999;
+}
+
+.savings-badge {
+  background: #4caf50;
   color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px; 
-  cursor: pointer;
-  margin-top: 10px;
-  font-size: 20px;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  text-decoration: none;
-  height: 45px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
-.become-member-button:hover {
-  background-color: #0056b3;
+/* Comparison Section */
+.comparison-section {
+  padding: 80px 0;
+  background: #f8f9fa;
 }
 
-/* 768px to 1024px screen sizes */
-@media (min-width: 768px) {
-  .home-container {
-    padding: 10px; /* Reduce padding for smaller screens */
-    background-size: cover; /* Make sure background fits the screen properly */
-  }
+.comparison-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #333;
+}
 
-  .header-content {
-    font-size: 18px; /* Decrease font size */
-    margin-top: 60px; /* Reduce margin-top */
-    padding: 20px; /* Reduce padding for better fit */
-    max-width: 90%; /* Keep text within boundaries on smaller screens */
-  }
+.section-subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 50px;
+}
 
-  .header-content h1 {
-    font-size: 50px; /* Increase font size */
-  }
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
 
-  .header-content p {
-    font-size: 20px; /* Decrease font size for smaller text */
-  }
+.comparison-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-  .become-member-button {
-    padding: 8px 16px; /* Reduce padding */
-    font-size: 14px; /* Reduce font size */
+.comparison-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.product-title {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.price-comparison-table {
+  margin-bottom: 20px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.price-row.best-price {
+  background: linear-gradient(90deg, #e8f5e8, transparent);
+  border-radius: 8px;
+  padding: 12px 15px;
+  border-bottom: 1px solid #4caf50;
+}
+
+.supermarket-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.supermarket-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.best-badge {
+  background: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.unit {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.savings-info {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.savings-text {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Features Section */
+.features-section {
+  padding: 80px 0;
+  background: white;
+}
+
+.features-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  color: #333;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+}
+
+.feature-card {
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.feature-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.feature-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.cta-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.cta-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .hero-text h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-stats {
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .features-section h2,
+  .comparison-section h2,
+  .cta-content h2 {
+    font-size: 2rem;
   }
 }
 
-/* For larger screens (more than 1024px) */
-@media (max-width: 1024px) {
-  .home-container {
-    height: 100vh; 
-    padding: 40px; 
+@media (max-width: 480px) {
+  .hero-text h1 {
+    font-size: 2rem;
   }
-
-  .header-content {
-    margin-top: 80px; 
-    font-size: 16px;
-    max-width: 100%; /* Keep text within boundaries on smaller screens */
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
   }
-
-  .header-content h1 {
-    font-size: 32px; 
+  
+  .hero-stats {
+    flex-direction: column;
+    gap: 15px;
   }
-
-  .header-content p {
-    font-size: 16px; 
+  
+  .btn {
+    padding: 12px 24px;
+    font-size: 1rem;
   }
-
-  .become-member-button {
-    padding: 15px 30px; 
-    font-size: 18px; 
+  
+  .btn-large {
+    padding: 15px 30px;
+    font-size: 1.1rem;
   }
 }
