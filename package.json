@@ -36,10 +36,11 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": ["react-app", "react-app/jest"],
+    "rules": {
+      "react/react-in-jsx-scope": "off",
+      "no-unused-vars": ["warn", { "varsIgnorePattern": "^React$" }]
+      }
   },
   "browserslist": {
     "production": [

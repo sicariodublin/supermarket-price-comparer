@@ -1,58 +1,116 @@
-// src/components/Footer.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 import './Footer.css';
 
 function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer__logo-section">
-          <img src={require('../assets/images/logo4.png')} alt="addandcompare" className="logo" />
-          <div className="social-icons">
-          <a href="#" className="facebook-icon" aria-label="Facebook">
-          <img src={`${process.env.PUBLIC_URL}/Facebook-48.png`} alt="Facebook" />
-        </a>
-        <a href="#" className="instagram-icon" aria-label="Instagram">
-          <img src={`${process.env.PUBLIC_URL}/Instagram-48.png`} alt="Instagram" />
-        </a>
-        <a href="#" className="twitter-icon" aria-label="Twitter">
-          <img src={`${process.env.PUBLIC_URL}/X-48.png`} alt="Twitter" />
-            </a>
-          <a href="#" className="linkedin-icon" aria-label="LinkedIn">
-          <img src={`${process.env.PUBLIC_URL}/Linkedin-48.png`} alt="Twitter" />
-        </a>
+    <footer className="modern-footer">
+      <div className="footer-container">
+        {/* Main Footer Content */}
+        <div className="footer-main">
+          {/* Brand Section */}
+          <div className="footer-brand">
+            <Logo variant="option1" width={180} height={50} className="footer-logo" />
+            <p className="footer-description">
+              Ireland's leading supermarket price comparison platform. 
+              Save money on your weekly shop by comparing prices across all major retailers.
+            </p>
+            <div className="social-links">
+              <a href="#" className="social-link facebook" aria-label="Facebook">
+                <i className="bi bi-facebook"></i>
+              </a>
+              <a href="#" className="social-link instagram" aria-label="Instagram">
+                <i className="bi bi-instagram"></i>
+              </a>
+              <a href="#" className="social-link twitter" aria-label="Twitter">
+                <i className="bi bi-twitter"></i>
+              </a>
+              <a href="#" className="social-link linkedin" aria-label="LinkedIn">
+                <i className="bi bi-linkedin"></i>
+              </a>
+            </div>
           </div>
-        </div>
-        <div className="footer__links">
-          <div>
-            <h5>My Account</h5>
-            <ul>
-              <li><Link to="/login">Login</Link></li>
-              <li><Link to="/register">Sign Up</Link></li>
-              <li><Link to="/search">Search</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Links</h5>
-            <ul>
+
+          {/* Quick Links */}
+          <div className="footer-section">
+            <h5 className="footer-title">Quick Links</h5>
+            <ul className="footer-links">
               <li><Link to="/">Home</Link></li>
+              <li><Link to="/search">Search Products</Link></li>
               <li><Link to="/how-it-works">How it Works</Link></li>
               <li><Link to="/about-us">About Us</Link></li>
             </ul>
           </div>
-          <div>
-            <h5>Customer Care</h5>
-            <ul>
+
+          {/* Account */}
+          <div className="footer-section">
+            <h5 className="footer-title">My Account</h5>
+            <ul className="footer-links">
+              <li><Link to="/login">Login</Link></li>
+              <li><Link to="/register">Sign Up</Link></li>
+              <li><Link to="/dashboard">Dashboard</Link></li>
+              <li><Link to="/add-product">Add Product</Link></li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div className="footer-section">
+            <h5 className="footer-title">Support</h5>
+            <ul className="footer-links">
               <li><Link to="/contact-us">Contact Us</Link></li>
               <li><Link to="/terms-of-service">Terms of Service</Link></li>
               <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><a href="mailto:support@addandcompare.com">Help Center</a></li>
             </ul>
           </div>
+
+          {/* Newsletter */}
+          <div className="footer-section newsletter-section">
+            <h5 className="footer-title">Stay Updated</h5>
+            <p className="newsletter-description">
+              Get the latest deals and price alerts delivered to your inbox.
+            </p>
+            <form className="newsletter-form">
+              <div className="newsletter-input-group">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  className="newsletter-input"
+                  required
+                />
+                <button type="submit" className="newsletter-button">
+                  <i className="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </form>
+            <div className="footer-stats">
+              <div className="stat">
+                <span className="stat-number">10K+</span>
+                <span className="stat-label">Active Users</span>
+              </div>
+              <div className="stat">
+                <span className="stat-number">€2M+</span>
+                <span className="stat-label">Total Savings</span>
+              </div>
+            </div>
+          </div>
         </div>
-        {/* <hr class="solid" /> */}
-        <div className="footer__copyright">
-          <p>&copy; Copyright All Rights Reserved 2024</p>
+
+        {/* Footer Bottom */}
+        <div className="footer-bottom">
+          <div className="footer-bottom-content">
+            <p className="copyright">
+              &copy; {currentYear} Add&Compare. All rights reserved.
+            </p>
+            <div className="footer-bottom-links">
+              <Link to="/privacy-policy">Privacy</Link>
+              <Link to="/terms-of-service">Terms</Link>
+              <Link to="/contact-us">Contact</Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

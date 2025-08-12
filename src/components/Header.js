@@ -1,6 +1,7 @@
-import "bootstrap-icons/font/bootstrap-icons.css";
 import React, { useState } from "react";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import "./Header.css";
 
@@ -28,8 +29,7 @@ function Header() {
         {/* Logo Section */}
         <div className="navbar-brand">
           <Link to="/" className="brand-link">
-            <img src={logo} alt="AddAndCompare Logo" className="brand-logo" />
-            <span className="brand-text">AddAndCompare</span>
+            <Logo variant="option1" width={180} height={45} className="brand-logo" />
           </Link>
         </div>
 
