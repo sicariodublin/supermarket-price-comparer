@@ -4,10 +4,10 @@ import React from 'react';
 // Logo Option 1: Shopping Cart with Price Tag
 const LogoOption1 = ({ width = 200, height = 60, className = "" }) => {
   return (
-    <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 200 60" 
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 200 60"
       className={className}
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -17,48 +17,71 @@ const LogoOption1 = ({ width = 200, height = 60, className = "" }) => {
           <stop offset="100%" stopColor="#764ba2" />
         </linearGradient>
       </defs>
-      
+
       {/* Shopping Cart Icon */}
-      <g transform="translate(10, 10)">
+      <g transform="translate(9, 4)">
         {/* Cart Body */}
-        <path 
-          d="M5 8 L35 8 L32 28 L8 28 Z" 
-          fill="url(#gradient1)" 
-          stroke="#fff" 
-          strokeWidth="1"
+        <path
+          d="M3 2 L38 2 L38 26 L9 29 Z"
+          fill="url(#gradient1)"
+          stroke="#fff"
+          strokeWidth="2"
           rx="2"
         />
-        
+
         {/* Cart Handle */}
-        <path 
-          d="M2 2 L8 2 L10 8" 
-          fill="none" 
-          stroke="url(#gradient1)" 
-          strokeWidth="2" 
+        <path
+          d="M1 1 L8 1 L10 20 L36 20"
+          fill="none"
+          stroke="url(#gradient1)"
+          strokeWidth="3"
           strokeLinecap="round"
         />
-        
+
         {/* Cart Wheels */}
         <circle cx="12" cy="35" r="3" fill="url(#gradient1)" />
         <circle cx="28" cy="35" r="3" fill="url(#gradient1)" />
-        
+
         {/* Price Tag */}
         <g transform="translate(20, 5)">
-          <path 
-            d="M0 0 L15 0 L20 8 L15 16 L0 16 Z" 
-            fill="#ff6b6b" 
-            stroke="#fff" 
+          <path
+            d="M0 1 L15 1 L20 8 L15 16 L0 16 Z"
+            fill="#ff6b6b"
+            stroke="#fff"
             strokeWidth="1"
           />
-          <text x="7" y="10" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">€</text>
+          <text
+            x="7"
+            y="10"
+            fill="white"
+            fontSize="8"
+            fontWeight="bold"
+            textAnchor="middle"
+          >
+            €
+          </text>
         </g>
       </g>
-      
+
       {/* Brand Text */}
-      <text x="55" y="25" fill="#333" fontSize="16" fontWeight="700" fontFamily="Inter, sans-serif">
+      <text
+        x="55"
+        y="25"
+        fill="#333"
+        fontSize="20.5"
+        fontWeight="700"
+        fontFamily="Inter, sans-serif"
+      >
         Add&Compare
       </text>
-      <text x="55" y="40" fill="#667eea" fontSize="10" fontWeight="500" fontFamily="Inter, sans-serif">
+      <text
+        x="60"
+        y="40"
+        fill="#667eea"
+        fontSize="12"
+        fontWeight="500"
+        fontFamily="Inter, sans-serif"
+      >
         Smart Shopping Ireland
       </text>
     </svg>

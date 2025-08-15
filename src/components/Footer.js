@@ -6,6 +6,14 @@ import './Footer.css';
 function Footer() {
   const currentYear = new Date().getFullYear();
 
+  // Function to scroll to top smoothly
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <footer className="modern-footer">
       <div className="footer-container">
@@ -38,10 +46,10 @@ function Footer() {
           <div className="footer-section">
             <h5 className="footer-title">Quick Links</h5>
             <ul className="footer-links">
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/search">Search Products</Link></li>
-              <li><Link to="/how-it-works">How it Works</Link></li>
-              <li><Link to="/about-us">About Us</Link></li>
+              <li><Link to="/" onClick={scrollToTop}>Home</Link></li>
+              <li><Link to="/search" onClick={scrollToTop}>Search Products</Link></li>
+              <li><Link to="/how-it-works" onClick={scrollToTop}>How it Works</Link></li>
+              <li><Link to="/about-us" onClick={scrollToTop}>About Us</Link></li>
             </ul>
           </div>
 
@@ -49,10 +57,10 @@ function Footer() {
           <div className="footer-section">
             <h5 className="footer-title">My Account</h5>
             <ul className="footer-links">
-              <li><Link to="/login">Login</Link></li>
-              <li><Link to="/register">Sign Up</Link></li>
-              <li><Link to="/dashboard">Dashboard</Link></li>
-              <li><Link to="/add-product">Add Product</Link></li>
+              <li><Link to="/login" onClick={scrollToTop}>Login</Link></li>
+              <li><Link to="/register" onClick={scrollToTop}>Sign Up</Link></li>
+              <li><Link to="/dashboard" onClick={scrollToTop}>Dashboard</Link></li>
+              <li><Link to="/search" onClick={scrollToTop}>Add Product</Link></li>
             </ul>
           </div>
 
@@ -60,9 +68,9 @@ function Footer() {
           <div className="footer-section">
             <h5 className="footer-title">Support</h5>
             <ul className="footer-links">
-              <li><Link to="/contact-us">Contact Us</Link></li>
-              <li><Link to="/terms-of-service">Terms of Service</Link></li>
-              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link to="/contact-us" onClick={scrollToTop}>Contact Us</Link></li>
+              <li><Link to="/terms-of-service" onClick={scrollToTop}>Terms of Service</Link></li>
+              <li><Link to="/privacy-policy" onClick={scrollToTop}>Privacy Policy</Link></li>
               <li><a href="mailto:support@addandcompare.com">Help Center</a></li>
             </ul>
           </div>
@@ -106,9 +114,9 @@ function Footer() {
               &copy; {currentYear} Add&Compare. All rights reserved.
             </p>
             <div className="footer-bottom-links">
-              <Link to="/privacy-policy">Privacy</Link>
-              <Link to="/terms-of-service">Terms</Link>
-              <Link to="/contact-us">Contact</Link>
+              <Link to="/privacy-policy" onClick={scrollToTop}>Privacy</Link>
+              <Link to="/terms-of-service" onClick={scrollToTop}>Terms</Link>
+              <Link to="/contact-us" onClick={scrollToTop}>Contact</Link>
             </div>
           </div>
         </div>

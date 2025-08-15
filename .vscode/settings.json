@@ -6,5 +6,11 @@
         "APIKEY",
         "Dunnes",
         "watchlist"
-    ]
+    ],
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "never",
+        "source.fixAll.eslint": "never"
+    },
+    "typescript.preferences.organizeImportsOnSave": false,
+    "javascript.preferences.organizeImportsOnSave": false
 }

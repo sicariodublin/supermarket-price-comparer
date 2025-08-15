@@ -1,61 +1,90 @@
-/*Register.css*/
+/* Modern Register Page Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .register-page {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .register-left-section {
   flex: 1;
-  background-image: url("../assets/images/supermarket.jpg");
-  background-size: cover;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%),
+              url("../assets/images/supermarket.jpg") center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px;
+  position: relative;
+}
+
+.welcome-content {
+  text-align: center;
   color: white;
-  padding: 50px;
 }
 
 .register-left-section h1 {
-  font-size: 95px;
-  color: #fff;
+  font-size: 4rem;
   font-weight: 800;
-  margin-bottom: 0;
-  margin-top: 0;
-  align-items: center;
-  margin-left: 20px;
-  display: flex;
-  flex-direction: column;
-  font-style: italic;
+  margin-bottom: 10px;
   font-family: "Caveat", cursive;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+}
+
+.welcome-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-top: 20px;
+  font-weight: 300;
 }
 
 .register-right-section {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background-color: #dbd7d7;
+  justify-content: center;
+  background: #f8f9fa;
   padding: 50px;
 }
 
-.register-right-section h1 {
-  font-size: 32px;
-  margin-bottom: 20px;
+.register-container {
+  width: 100%;
+  max-width: 450px;
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.register-right-section h2 {
-  font-size: 30px;
-  color: #0061c8;
-  margin-top: 100px;
-  margin-bottom: 0;
+.register-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
+.register-header h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.register-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Form Styles */
 .register-form {
   width: 100%;
-  max-width: 600px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 160px;
 }
 
 .input-group {
@@ -65,116 +94,117 @@
 }
 
 .input-group label {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .input-group input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 15px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #f8f9fa;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
 }
 
 .icon-container {
   position: absolute;
-  right: 12px;
-  top: 33px;
+  right: 15px;
+  top: 43px;
   cursor: pointer;
-  color: #0061c8;
-  font-size: 20px;
+  color: #667eea;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.icon-container:hover {
+  color: #5a6fd8;
 }
 
 .register-button {
-  padding: 8px;
-  background-color: #0061c8;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 18px;
-  transition: background-color 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 10px;
 }
 
 .register-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
 .additional-options {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .additional-options a {
-  color: #0061c8;
+  color: #667eea;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .additional-options a:hover {
+  color: #5a6fd8;
   text-decoration: underline;
 }
 
-.text-sz {
-  font-size: 16px;
-  margin-top: 3px;
-}
-
-.color-icon {
-  color: #0061c8;
-}
-
-/* Tablet Screens (min-width: 768px) */
-@media (min-width: 768px) {
-    .register-page {
-      flex-direction: row;
-      align-items: stretch;
-      column-gap: 40px;
-    }
-  
-    .register-right-section {
-      padding: 0;
-      padding-right: 5px;
-    }
-  
-    .register-left-section h1 {
-      font-size: 75px;
-    }
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-page {
+    flex-direction: column;
+    min-height: auto;
   }
   
-  /* Mobile Screens (max-width: 767px) */
-  @media (max-width: 767px) {
-    .register-page {
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      height: auto; /* Let content dictate height */
-    }
-  
-    .register-left-section,
-    .register-right-section {
-      width: 100%;
-      text-align: center;
-      padding: 20px;
-    }
-  
-    .register-left-section {
-      background-image: url("../assets/images/supermarket.jpg");
-      background-size: cover;
-      background-position: center;
-      margin-bottom: 20px;
-    }
-  
-    .register-left-section h1 {
-      font-size: 60px;
-      margin-left: 0;
-    }
-  
-    .register-right-section h1 {
-      font-size: 28px;
-    }
-  
-    .register-form {
-      max-width: 100%;
-    }
+  .register-left-section {
+    padding: 40px 20px;
+    min-height: 300px;
   }
+  
+  .register-left-section h1 {
+    font-size: 3rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+  
+  .register-right-section {
+    padding: 40px 20px;
+  }
+  
+  .register-container {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-left-section h1 {
+    font-size: 2.5rem;
+  }
+  
+  .register-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .register-container {
+    padding: 25px 15px;
+  }
+}
 
