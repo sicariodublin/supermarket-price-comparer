@@ -175,11 +175,23 @@
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 2;
+  outline: none;
 }
 
 .search-button:hover {
   background: rgba(102, 126, 234, 0.1);
   color: #5a6fd8;
+}
+
+.search-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.search-button:active {
+  outline: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .search-button i {
@@ -380,7 +392,7 @@
   .user-menu {
     width: 100%;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 12px;
   }
 
@@ -393,11 +405,16 @@
   }
 
   .user-profile {
-    flex: 1;
+    width: 100%;
     justify-content: center;
     min-width: 120px;
     padding: 12px 20px;
     font-size: 1rem;
+  }
+
+  .logout-btn {
+    width: 100%;
+    min-width: 120px;
   }
 }
 
@@ -422,6 +439,18 @@
   }
 
   .btn {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    min-width: 100px;
+  }
+
+  .user-profile {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    min-width: 100px;
+  }
+
+  .logout-btn {
     padding: 10px 15px;
     font-size: 0.9rem;
     min-width: 100px;
@@ -607,7 +636,7 @@
 .bi-search::before {
   font-size: 1.3rem;
   padding: 0;
-  margin-right: -5px;
+  margin-right: 5px;
   margin-top: 3px;
 }
 

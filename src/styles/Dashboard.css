@@ -181,3 +181,205 @@ h3 {
   }
 
 }
+
+/* Newsletter Options Modal Styles */
+.newsletter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.option-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.option-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+/* Weekly Shop Modal Styles */
+.weekly-shop-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.budget-section {
+  margin: 20px 0;
+}
+
+.budget-section label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.budget-section input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100px;
+}
+
+.supermarket-selection {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.supermarket-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.shopping-list-section {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.shopping-item input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.remove-item-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-item-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Seasonality Modal Styles */
+.seasonality-modal {
+  max-width: 700px;
+  width: 90%;
+}
+
+.month-selector {
+  margin: 20px 0;
+}
+
+.month-selector select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.seasonality-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.seasonal-section h4 {
+  margin-bottom: 10px;
+  color: #2438bc;
+}
+
+.product-list {
+  list-style: none;
+  padding: 0;
+}
+
+.product-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.in-season li {
+  color: #28a745;
+}
+
+.out-season li {
+  color: #dc3545;
+}
+
+.seasonal-tips {
+  grid-column: 1 / -1;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.seasonal-tips h4 {
+  margin-bottom: 10px;
+  color: #2438bc;
+}
+
+.seasonal-tips p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 768px) {
+  .seasonality-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .weekly-shop-modal,
+  .seasonality-modal {
+    width: 95%;
+    margin: 10px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .options-grid {
+    flex-direction: column;
+    gap: 20px;
+    margin-left: 0;
+    margin-top: 20px;
+  }
+  .option {
+    width: 100%;
+  }
+  .dates-grid {
+    flex-direction: column;
+    gap: 20px;
+    margin-left: 0;
+    margin-top: 20px;
+  }
+  .date-card {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+}

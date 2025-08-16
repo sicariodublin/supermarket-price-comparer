@@ -5,13 +5,18 @@ import "../styles/Dashboard.css";
 import "../styles/Modal.css";
 import AccountSettingsModal from "./AccountSettingsModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import NewsletterOptionsModal from "./NewsletterOptionsModal";
+import CheapestWeeklyShopModal from "./CheapestWeeklyShopModal";
+import ProductSeasonalityModal from "./ProductSeasonalityModal";
 
 const Dashboard = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
+  const [isWeeklyShopModalOpen, setIsWeeklyShopModalOpen] = useState(false);
+  const [isSeasonalityModalOpen, setIsSeasonalityModalOpen] = useState(false);
   const navigate = useNavigate();
   /* const { user, logout, } = useAuth(); */
-
 
   // Mock data (replace with API calls later)
   const userData = {
@@ -23,11 +28,28 @@ const Dashboard = () => {
       { supermarket: "SuperValu", date: "05-12-24" },
       { supermarket: "Tesco", date: "05-12-24" },
     ],
+    newsletterSettings: {
+      weeklyDeals: true,
+      priceAlerts: false,
+      newProducts: true,
+      seasonalTips: false
+    },
+    weeklyShopBudget: 150,
+    preferredSupermarkets: ["Aldi", "Tesco"]
   };
 
   // Modal control handlers
   const handleOpenSettings = () => setIsSettingsModalOpen(true);
   const handleCloseSettings = () => setIsSettingsModalOpen(false);
+
+  const handleOpenNewsletter = () => setIsNewsletterModalOpen(true);
+  const handleCloseNewsletter = () => setIsNewsletterModalOpen(false);
+
+  const handleOpenWeeklyShop = () => setIsWeeklyShopModalOpen(true);
+  const handleCloseWeeklyShop = () => setIsWeeklyShopModalOpen(false);
+
+  const handleOpenSeasonality = () => setIsSeasonalityModalOpen(true);
+  const handleCloseSeasonality = () => setIsSeasonalityModalOpen(false);
 
   const handlePasswordReset = () => {
     setIsSettingsModalOpen(false);
@@ -43,6 +65,18 @@ const Dashboard = () => {
     console.log("Account deleted");
     setIsDeleteModalOpen(false);
     // Call API to delete account here
+  };
+
+  const handleNewsletterSave = (settings) => {
+    console.log("Newsletter settings saved:", settings);
+    // Call API to save newsletter settings
+    setIsNewsletterModalOpen(false);
+  };
+
+  const handleWeeklyShopSave = (data) => {
+    console.log("Weekly shop preferences saved:", data);
+    // Call API to save weekly shop preferences
+    setIsWeeklyShopModalOpen(false);
   };
 
   return (
@@ -66,15 +100,15 @@ const Dashboard = () => {
             <span>Account Settings</span>
             <i className="bi bi-gear"></i>
           </div>
-          <div className="option">
+          <div className="option" onClick={handleOpenNewsletter}>
             <span>Newsletter Options</span>
             <i className="bi bi-envelope"></i>
           </div>
-          <div className="option">
+          <div className="option" onClick={handleOpenWeeklyShop}>
             <span>Cheapest Weekly Shop</span>
             <i className="bi bi-bar-chart"></i>
           </div>
-          <div className="option">
+          <div className="option" onClick={handleOpenSeasonality}>
             <span>Product Seasonality</span>
             <i className="bi bi-cloud-sun"></i>
           </div>
@@ -114,6 +148,29 @@ const Dashboard = () => {
         onClose={handleCloseSettings}
         onPasswordReset={handlePasswordReset}
         onDeleteAccount={handleDeleteAccount}
+      />
+
+      {/* Newsletter Options Modal */}
+      <NewsletterOptionsModal
+        isOpen={isNewsletterModalOpen}
+        onClose={handleCloseNewsletter}
+        onSave={handleNewsletterSave}
+        currentSettings={userData.newsletterSettings}
+      />
+
+      {/* Cheapest Weekly Shop Modal */}
+      <CheapestWeeklyShopModal
+        isOpen={isWeeklyShopModalOpen}
+        onClose={handleCloseWeeklyShop}
+        onSave={handleWeeklyShopSave}
+        currentBudget={userData.weeklyShopBudget}
+        preferredSupermarkets={userData.preferredSupermarkets}
+      />
+
+      {/* Product Seasonality Modal */}
+      <ProductSeasonalityModal
+        isOpen={isSeasonalityModalOpen}
+        onClose={handleCloseSeasonality}
       />
 
       {/* Delete Confirmation Modal */}

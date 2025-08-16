@@ -2,13 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from '../context/AuthContext';
 import { getProducts, addProduct, updateProduct } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
 
 function SearchPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [products, setProducts] = useState([]);
@@ -17,6 +18,16 @@ function SearchPage() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+
+  // Handle URL query parameters from quick search
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const queryFromUrl = queryParams.get('q');
+    
+    if (queryFromUrl && queryFromUrl !== searchTerm) {
+      setSearchTerm(queryFromUrl);
+    }
+  }, [location.search]);
 
   const fetchProducts = async (searchTerm = "", sortOption = "") => {
     try {

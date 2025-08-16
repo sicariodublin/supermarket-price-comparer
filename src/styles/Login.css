@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px;
+  padding: 80px;
   position: relative;
 }
 
@@ -129,6 +129,12 @@
 .icon-container:hover {
   color: #5a6fd8;
 }
+
+.text-sz i {
+  transition: color 0.3s ease;
+  color: #667eea;
+  cursor: pointer;
+} 
 
 .login-button {
   padding: 15px;

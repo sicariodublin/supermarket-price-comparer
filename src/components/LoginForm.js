@@ -55,50 +55,54 @@ function LoginForm() {
   };
 
   return (
-      <form className="login-form" onSubmit={handleSubmit}>
-        <div className="input-group">
-        {verifiedMessage && <div className="success-message">{verifiedMessage}</div>} {/* Success message */}
-        {errorMessage && <div className="error-message">{errorMessage}</div>} {/* Error message */}
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            placeholder="Enter Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <div style={{ position: "absolute", right: "12px", top: "32px" }}>
-            <p className="text-sz color-icon">
-              <i className="bi bi-check-circle-fill"></i>
-            </p>
-          </div>
+    <form className="login-form" onSubmit={handleSubmit}>
+      <div className="input-group">
+        {verifiedMessage && (
+          <div className="success-message">{verifiedMessage}</div>
+        )}{" "}
+        {/* Success message */}
+        {errorMessage && (
+          <div className="error-message">{errorMessage}</div>
+        )}{" "}
+        {/* Error message */}
+        <label htmlFor="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <div style={{ position: "absolute", right: "15px", top: "45px", bottom: "0", fontSize: "1.2rem", color: "#667eea" }}>
+          <p className="text-sz color-icon">
+            <i className="bi bi-check-circle-fill"></i>
+          </p>
         </div>
-        <div className="input-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            id="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <div className="icon-container" onClick={togglePasswordVisibility}>
-            <i
-              className={
-                showPassword ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"
-              }
-            ></i>
-          </div>
+      </div>
+      <div className="input-group">
+        <label htmlFor="password">Password</label>
+        <input
+          type={showPassword ? "text" : "password"}
+          id="password"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <div className="icon-container" onClick={togglePasswordVisibility}>
+          <i
+            className={showPassword ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"}
+          ></i>
         </div>
-        <button type="submit" className="login-button">
-          Log In
-        </button>
-        <div className="additional-options">
-          <Link to="/register">Don't have an account? Register here.</Link>
-        </div>
-      </form>
+      </div>
+      <button type="submit" className="login-button">
+        Log In
+      </button>
+      <div className="additional-options">
+        <Link to="/register">Don't have an account? Register here.</Link>
+      </div>
+    </form>
   );
 }
 
