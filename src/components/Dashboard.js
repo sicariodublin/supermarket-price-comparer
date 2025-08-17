@@ -1,6 +1,7 @@
 // Dashboard.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Dashboard.css";
 import "../styles/Modal.css";
 import AccountSettingsModal from "./AccountSettingsModal";
@@ -15,12 +16,33 @@ const Dashboard = () => {
   const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
   const [isWeeklyShopModalOpen, setIsWeeklyShopModalOpen] = useState(false);
   const [isSeasonalityModalOpen, setIsSeasonalityModalOpen] = useState(false);
+  const [generatedShoppingLists, setGeneratedShoppingLists] = useState([]);
   const navigate = useNavigate();
-  /* const { user, logout, } = useAuth(); */
+  const { user } = useAuth(); // Get user from AuthContext
+
+  // Function to extract first name from email or full name
+  const getDisplayName = () => {
+    if (!user) return "User";
+    
+    // If user has a name field, use it
+    if (user.name) {
+      return user.name.split(' ')[0]; // Get first name
+    }
+    
+    // If user has email, extract name from email
+    if (user.email) {
+      const emailName = user.email.split('@')[0];
+      // Convert email format like "mica.campi" to "Mica"
+      const firstName = emailName.split('.')[0];
+      return firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    }
+    
+    return "User";
+  };
 
   // Mock data (replace with API calls later)
   const userData = {
-    name: "Fsteyer",
+    name: getDisplayName(),
     watchlist: [],
     dataCollectionDates: [
       { supermarket: "Aldi", date: "05-12-24" },
@@ -77,6 +99,22 @@ const Dashboard = () => {
     console.log("Weekly shop preferences saved:", data);
     // Call API to save weekly shop preferences
     setIsWeeklyShopModalOpen(false);
+  };
+
+  const handleGeneratedShoppingList = (listData) => {
+    const newList = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString(),
+      budget: listData.budget,
+      totalCost: listData.totalCost,
+      items: listData.items,
+      supermarkets: listData.supermarkets
+    };
+    setGeneratedShoppingLists(prev => [newList, ...prev.slice(0, 4)]); // Keep only 5 most recent
+  };
+
+  const deleteShoppingList = (listId) => {
+    setGeneratedShoppingLists(prev => prev.filter(list => list.id !== listId));
   };
 
   return (
@@ -158,11 +196,53 @@ const Dashboard = () => {
         currentSettings={userData.newsletterSettings}
       />
 
+      {/* My Generated Shopping Lists Section */}
+      {generatedShoppingLists.length > 0 && (
+        <section className="shopping-lists-section">
+          <h3>My Generated Shopping Lists</h3>
+          <div className="shopping-lists-grid">
+            {generatedShoppingLists.map((list) => (
+              <div className="shopping-list-card" key={list.id}>
+                <div className="list-header">
+                  <h4>Weekly Shop - {list.date}</h4>
+                  <button 
+                    className="delete-list-btn"
+                    onClick={() => deleteShoppingList(list.id)}
+                    title="Delete list"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="list-summary">
+                  <p><strong>Budget:</strong> €{list.budget}</p>
+                  <p><strong>Total Cost:</strong> €{list.totalCost}</p>
+                  <p><strong>Savings:</strong> €{(list.budget - list.totalCost).toFixed(2)}</p>
+                </div>
+                <div className="list-items">
+                  <h5>Items ({list.items.length}):</h5>
+                  <ul>
+                    {list.items.slice(0, 3).map((item, index) => (
+                      <li key={index}>
+                        {item.name} - €{item.price} ({item.store})
+                      </li>
+                    ))}
+                    {list.items.length > 3 && (
+                      <li>...and {list.items.length - 3} more items</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Cheapest Weekly Shop Modal */}
       <CheapestWeeklyShopModal
         isOpen={isWeeklyShopModalOpen}
         onClose={handleCloseWeeklyShop}
         onSave={handleWeeklyShopSave}
+        onGenerateList={handleGeneratedShoppingList}
         currentBudget={userData.weeklyShopBudget}
         preferredSupermarkets={userData.preferredSupermarkets}
       />

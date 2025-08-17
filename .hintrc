@@ -9,7 +9,8 @@
         "ignore": [
           "backdrop-filter",
           "position: sticky",
-          "min-height: auto"
+          "min-height: auto",
+          "inset"
         ]
       }
     ]

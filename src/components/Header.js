@@ -158,7 +158,7 @@ function Header() {
                 </button>
                 <input
                   type="text"
-                  placeholder="Search products... (e.g., eggs, milk)"
+                  placeholder="Find products...(e.g., eggs, milk)"
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   onFocus={handleSearchInputFocus}
@@ -200,7 +200,7 @@ function Header() {
               <div className="user-menu">
                 <Link to="/dashboard" className="user-profile" onClick={() => setIsMenuOpen(false)}>
                   <i className="bi bi-person-circle"></i>
-                  <span>Dashboard</span>
+                  <span>User</span>
                 </Link>
                 <button onClick={logout} className="btn btn-outline logout-btn">
                   <i className="bi bi-box-arrow-right"></i>

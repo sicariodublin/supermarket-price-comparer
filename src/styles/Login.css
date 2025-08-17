@@ -116,25 +116,61 @@
   background: white;
 }
 
+/* Fixed positioning for icons */
 .icon-container {
   position: absolute;
   right: 15px;
-  top: 43px;
+  bottom: 15px;
   cursor: pointer;
   color: #667eea;
   font-size: 1.2rem;
   transition: color 0.3s ease;
+  z-index: 10;
 }
 
 .icon-container:hover {
   color: #5a6fd8;
 }
 
+/* Check icon positioning - fixed to be relative to input */
+.text-sz {
+  position: absolute;
+  right: 15px;
+  top: 43px;
+  z-index: 10;
+}
+
 .text-sz i {
   transition: color 0.3s ease;
   color: #667eea;
   cursor: pointer;
-} 
+  font-size: 1.1rem;
+}
+
+/* Message Styles */
+.success-message {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #c3e6cb;
+  font-weight: 500;
+  order: -1; /* Place messages at the top of input group */
+}
+
+.error-message {
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+  color: #721c24;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #f5c6cb;
+  font-weight: 500;
+  order: -1; /* Place messages at the top of input group */
+}
 
 .login-button {
   padding: 15px;
@@ -235,4 +271,39 @@
   .login-container {
     padding: 25px 15px;
   }
+}
+
+/* Add styles for the new message container */
+.form-message-slot {
+  margin-bottom: 1rem;
+  min-height: 0; /* Allows it to collapse when empty */
+}
+
+/* Update input-wrap for proper icon positioning */
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap input {
+  flex: 1;
+  padding-right: 2.5rem; /* Space for the icon */
+}
+
+/* Center icons properly within the input */
+.end-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Remove old icon positioning styles */
+.text-sz.color-icon,
+.icon-container {
+  /* These old styles are no longer needed */
 }

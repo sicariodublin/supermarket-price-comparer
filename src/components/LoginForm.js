@@ -56,46 +56,62 @@ function LoginForm() {
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
-      <div className="input-group">
+      {/* Keep banners OUTSIDE input groups so icons never shift */}
+      <div className="form-message-slot">
         {verifiedMessage && (
-          <div className="success-message">{verifiedMessage}</div>
-        )}{" "}
-        {/* Success message */}
+          <div className="success-message">
+            <i className="bi bi-check-circle-fill me-2"></i>
+            {verifiedMessage}
+          </div>
+        )}
         {errorMessage && (
-          <div className="error-message">{errorMessage}</div>
-        )}{" "}
-        {/* Error message */}
+          <div className="error-message">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            {errorMessage}
+          </div>
+        )}
+      </div>
+
+      <div className="input-group">
         <label htmlFor="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          placeholder="Enter Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <div style={{ position: "absolute", right: "15px", top: "45px", bottom: "0", fontSize: "1.2rem", color: "#667eea" }}>
-          <p className="text-sz color-icon">
-            <i className="bi bi-check-circle-fill"></i>
-          </p>
+        <div className="input-wrap">
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <i className="bi bi-person-circle end-icon" aria-hidden="true"></i>
         </div>
       </div>
+
       <div className="input-group">
         <label htmlFor="password">Password</label>
-        <input
-          type={showPassword ? "text" : "password"}
-          id="password"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <div className="icon-container" onClick={togglePasswordVisibility}>
+        <div className="input-wrap">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           <i
-            className={showPassword ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"}
+            className={`end-icon bi ${
+              showPassword ? "bi-eye-slash-fill" : "bi-eye-fill"
+            }`}
+            role="button"
+            tabIndex={0}
+            onClick={togglePasswordVisibility}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && togglePasswordVisibility()}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            title={showPassword ? "Hide password" : "Show password"}
           ></i>
         </div>
       </div>
+      
       <button type="submit" className="login-button">
         Log In
       </button>

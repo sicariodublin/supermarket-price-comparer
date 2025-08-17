@@ -1,29 +1,27 @@
 /* Modal.css */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(0,0,0,.5);
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 16px;         /* breathing room on tiny screens */
     z-index: 1000;
   }
   
   .modal-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 50%;
-    max-width: 500px;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+  width: clamp(320px, 92vw, 560px);  /* phone ~full width, desktop ~560px */
+  max-height: 90vh;                  /* never exceed viewport height */
+  overflow: auto;                    /* scroll inside modal if content is long */
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.2);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
 
   .modal {
     display: flex;
@@ -55,6 +53,7 @@
     justify-content: flex-end;
     gap: 10px;
     background: white;
+    flex-wrap: wrap;
   }
   
   .close-button {
@@ -67,35 +66,138 @@
   .button-container {
     display: flex;
     justify-content: center;
-    width: 800px;
-    gap: 30px;
+    gap: 12px;
     margin-bottom: 25px;
     cursor: pointer;
-  }
+    flex-wrap: wrap;
+}
   
   .btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-  }
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    text-align: center;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
   
   .btn-danger {
     background: red;
     color: white;
   }
-  
-  .btn-secondary {
-    background: gray;
-    color: white;
-  }
-  
-  @media screen and (max-width: 768px) {
-    .modal {
-      width: 80%;
-    }
 
-   .modal-content {
-      width: 80%;
-    }
+  .btn-danger:hover {
+  background: #c82333;
+}
+  
+  .btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+  
+  /* Tablet bump */
+@media (min-width: 768px) {
+  .modal-content {
+    width: clamp(480px, 80vw, 680px);
+    padding: 24px;
   }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+  .modal-content {
+    width: clamp(560px, 56vw, 720px);
+  }
+}
+
+/* Make the Weekly Shop modal a touch wider, targeting the exact element */
+.modal-content.weekly-shop-modal {
+  width: clamp(360px, 88vw, 700px);
+}
+@media (min-width: 768px) {
+  .modal-content.weekly-shop-modal {
+    width: clamp(520px, 72vw, 760px);
+  }
+}
+
+/* Optional: full-bleed on very small screens */
+@media (max-width: 420px) {
+  .modal-overlay { 
+    padding: 8px; 
+  }
+  
+  .modal-content {
+    width: 100%;
+    max-height: 95vh;
+    border-radius: 8px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    min-width: 80px;
+    font-size: 13px;
+  }
+  
+  .button-container {
+    gap: 8px;
+  }
+}
+
+/* Button container responsive */
+@media (max-width: 480px) {
+  .button-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .button-container .btn {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* Buttons row helper (if you use one) */
+.modal-footer, .button-container, .modal-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
