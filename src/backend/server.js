@@ -1,10 +1,24 @@
 // server.js (Backend)
+// --- Polyfill missing Web File in Node 18 (must be first) ---
+if (typeof globalThis.File === 'undefined') {
+  const { Blob } = globalThis;
+  globalThis.File = class File extends Blob {
+    constructor(parts, name, opts = {}) {
+      super(parts, opts);
+      this.name = String(name);
+      this.lastModified = opts.lastModified ?? Date.now();
+    }
+    get [Symbol.toStringTag]() { return 'File'; }
+  };
+}
+
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
 // Verify environment variables are loaded
 console.log("Environment variables loaded successfully");
 const dashboardExpress = require("./routes/dashboardExpress");
+const DataCollectionService = require('./services/dataCollectionService');
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
@@ -35,6 +49,12 @@ const connection = mysql.createConnection({
   port: process.env.DB_PORT || 3306
 });
 
+// After database connection, add:
+const dataCollectionService = new DataCollectionService(connection);
+
+// Start scheduled data collection
+dataCollectionService.scheduleDataCollection();
+
 connection.connect((err) => {
   if (err) {
     console.error("Error connecting to the database: " + err.message);
@@ -42,6 +62,35 @@ connection.connect((err) => {
     process.exit(1); // Exit with error code if database connection fails
   }
   console.log("Connected to the database.");
+});
+
+// Add manual trigger endpoint
+app.post('/api/admin/collect-data/:supermarketId', async (req, res) => {
+  const { supermarketId } = req.params;
+  
+  try {
+    await dataCollectionService.updateProductPrices(parseInt(supermarketId));
+    res.json({ message: `Data collection completed for supermarket ${supermarketId}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get collection dates endpoint
+app.get('/api/collection-dates', (req, res) => {
+  const query = `
+    SELECT id, name, last_updated 
+    FROM supermarkets 
+    ORDER BY name
+  `;
+  
+  connection.query(query, (err, results) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to fetch collection dates' });
+    } else {
+      res.json(results);
+    }
+  });
 });
 
 // Rota para enviar contact form
@@ -649,3 +698,193 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// ... existing code ...
+
+// Route to get new or back in stock products
+app.get('/api/products/new-or-back', async (req, res) => {
+  try {
+    const query = `
+      SELECT p.*, s.name as supermarket_name, 
+             CASE 
+               WHEN p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'new'
+               WHEN p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'back'
+               ELSE NULL
+             END as status,
+             p.discount_percentage
+      FROM products p
+      JOIN supermarkets s ON p.supermarket_id = s.id
+      WHERE (p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) 
+             OR p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+      ORDER BY p.created_at DESC, p.back_in_stock_date DESC
+      LIMIT 10
+    `;
+    
+    const [results] = await db.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching new/back in stock products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// Route to get cost comparison data
+app.get('/api/products/cost-comparison', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 4;
+    
+    const query = `
+      SELECT 
+        p1.name as product_name,
+        p1.category,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', p2.id,
+            'price', p2.price,
+            'unit', p2.unit,
+            'supermarket_name', s.name,
+            'supermarket_id', s.id
+          ) ORDER BY p2.price ASC
+        ) as price_variations
+      FROM products p1
+      JOIN products p2 ON LOWER(TRIM(p1.name)) = LOWER(TRIM(p2.name))
+      JOIN supermarkets s ON p2.supermarket_id = s.id
+      WHERE p1.id IN (
+        SELECT MIN(id) 
+        FROM products 
+        GROUP BY LOWER(TRIM(name))
+        HAVING COUNT(*) > 1
+      )
+      GROUP BY p1.name, p1.category
+      ORDER BY RAND()
+      LIMIT ?
+    `;
+    
+    const [results] = await db.execute(query, [limit]);
+    
+    // Parse JSON and calculate savings
+    const processedResults = results.map(item => {
+      const variations = JSON.parse(item.price_variations);
+      const minPrice = Math.min(...variations.map(v => v.price));
+      const maxPrice = Math.max(...variations.map(v => v.price));
+      const savingsPercentage = maxPrice > 0 ? ((maxPrice - minPrice) / maxPrice * 100).toFixed(1) : 0;
+      
+      return {
+        ...item,
+        price_variations: variations,
+        min_price: minPrice,
+        max_price: maxPrice,
+        savings_percentage: savingsPercentage
+      };
+    });
+    
+    res.json(processedResults);
+  } catch (error) {
+    console.error('Error fetching cost comparisons:', error);
+    res.status(500).json({ error: 'Failed to fetch cost comparisons' });
+  }
+});
+
+// Route to get weekly sales/promotions
+app.get('/api/products/weekly-sales', async (req, res) => {
+  try {
+    const query = `
+      SELECT p.*, s.name as supermarket_name,
+             p.original_price,
+             p.discount_percentage,
+             p.promotion_end_date
+      FROM products p
+      JOIN supermarkets s ON p.supermarket_id = s.id
+      WHERE p.discount_percentage > 0 
+        AND (p.promotion_end_date IS NULL OR p.promotion_end_date >= CURDATE())
+      ORDER BY p.discount_percentage DESC, p.created_at DESC
+      LIMIT 8
+    `;
+    
+    const [results] = await db.execute(query);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching weekly sales:', error);
+    res.status(500).json({ error: 'Failed to fetch weekly sales' });
+  }
+});
+
+// Route to get product pricing history
+app.get('/api/products/:id/pricing-history', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    const query = `
+      SELECT ph.*, p.name as product_name, s.name as supermarket_name
+      FROM price_history ph
+      JOIN products p ON ph.product_id = p.id
+      JOIN supermarkets s ON p.supermarket_id = s.id
+      WHERE ph.product_id = ?
+      ORDER BY ph.recorded_date DESC
+      LIMIT 30
+    `;
+    
+    const [results] = await db.execute(query, [productId]);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching pricing history:', error);
+    res.status(500).json({ error: 'Failed to fetch pricing history' });
+  }
+});
+
+// Route to get detailed product information
+app.get('/api/products/:id/details', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    const query = `
+      SELECT p.*, s.name as supermarket_name, s.logo_url as supermarket_logo,
+             AVG(ph.price) as avg_price_30_days,
+             MIN(ph.price) as lowest_price_30_days,
+             MAX(ph.price) as highest_price_30_days
+      FROM products p
+      JOIN supermarkets s ON p.supermarket_id = s.id
+      LEFT JOIN price_history ph ON p.id = ph.product_id 
+        AND ph.recorded_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+      WHERE p.id = ?
+      GROUP BY p.id
+    `;
+    
+    const [results] = await db.execute(query, [productId]);
+    
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json(results[0]);
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).json({ error: 'Failed to fetch product details' });
+  }
+});
+
+// Route to get featured products
+app.get('/api/products/featured', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 6;
+    
+    const query = `
+      SELECT p.*, s.name as supermarket_name
+      FROM products p
+      JOIN supermarkets s ON p.supermarket_id = s.id
+      WHERE p.featured = 1 OR p.discount_percentage > 0
+      ORDER BY p.featured DESC, p.discount_percentage DESC, p.created_at DESC
+      LIMIT ?
+    `;
+    
+    const [results] = await db.execute(query, [limit]);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    res.status(500).json({ error: 'Failed to fetch featured products' });
+  }
+});
+
+
+
+

@@ -1,6 +1,7 @@
 // App.js
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext';
 import AddProduct from "./components/AddProduct";
 import DeleteAccountPage from "./components/DeleteAccountPage";
 import EditProduct from "./components/EditProduct";
@@ -30,6 +31,7 @@ function App() {
     <>
       <Header isLoggedIn={isAuthenticated} onLogout={logout} />
       <div className="main-content">
+        <AuthProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -51,7 +53,8 @@ function App() {
           <Route path="/delete-account" element={<DeleteAccountPage />} />
 
           {/* Dashboard Routes */}
-        </Routes>
+          </Routes>
+          </AuthProvider>
         {/* <div>
           {isLoggedIn ? (
             <>

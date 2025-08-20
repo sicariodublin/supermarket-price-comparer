@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts } from '../services/api';
+import { getProducts, getFeaturedProducts } from '../services/api';
+import NewOrBackInStore from '../components/NewOrBackInStore';
+// Comment out these imports temporarily until we create the components
+// import CostComparison from '../components/CostComparison';
+// import WeeklySales from '../components/WeeklySales';
+// import ProductDetailModal from '../components/ProductDetailModal';
 import '../styles/Home.css';
 
 function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [priceComparisons, setPriceComparisons] = useState([]);
+  const [priceComparisons, setPriceComparisons] = useState([]); // ADD THIS LINE
+  const [collectionDates, setCollectionDates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false);
 
   useEffect(() => {
     fetchFeaturedData();
@@ -14,15 +22,13 @@ function Home() {
 
   const fetchFeaturedData = async () => {
     try {
-      const products = await getProducts('');
-      
-      // Get featured products (latest 6 products)
-      const featured = products.slice(0, 6);
-      setFeaturedProducts(featured);
+      const products = await getFeaturedProducts(6);
+      setFeaturedProducts(products);
       
       // Create price comparison data by grouping products by name
+      const allProducts = await getProducts('');
       const productGroups = {};
-      products.forEach(product => {
+      allProducts.forEach(product => {
         const productName = product.name.toLowerCase();
         if (!productGroups[productName]) {
           productGroups[productName] = [];
@@ -45,6 +51,16 @@ function Home() {
       console.error('Error fetching data:', error);
       setLoading(false);
     }
+  };
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
   };
 
   const calculateSavings = (products) => {
@@ -104,7 +120,14 @@ function Home() {
         </div>
       </section>
 
-      {/* Price Comparison Tables */}
+      {/* NEW QUIDU-STYLE COMPONENTS */}
+      <NewOrBackInStore onProductClick={handleProductClick} />
+      
+      {/* Temporarily comment out until components are created */}
+      {/* <CostComparison onProductClick={handleProductClick} /> */}
+      {/* <WeeklySales onProductClick={handleProductClick} /> */}
+
+      {/* Existing Price Comparison Tables */}
       <section className="comparison-section">
         <div className="container">
           <h2>Today's Best Price Comparisons</h2>
@@ -186,6 +209,14 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Product Detail Modal - temporarily commented out */}
+      {/* {showProductModal && selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={closeProductModal}
+        />
+      )} */}
     </div>
   );
 }

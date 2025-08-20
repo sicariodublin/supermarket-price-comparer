@@ -1,5 +1,5 @@
 // Dashboard.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Dashboard.css";
@@ -9,6 +9,7 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import NewsletterOptionsModal from "./NewsletterOptionsModal";
 import CheapestWeeklyShopModal from "./CheapestWeeklyShopModal";
 import ProductSeasonalityModal from "./ProductSeasonalityModal";
+import { getCollectionDates } from '../services/api';
 
 const Dashboard = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -17,6 +18,7 @@ const Dashboard = () => {
   const [isWeeklyShopModalOpen, setIsWeeklyShopModalOpen] = useState(false);
   const [isSeasonalityModalOpen, setIsSeasonalityModalOpen] = useState(false);
   const [generatedShoppingLists, setGeneratedShoppingLists] = useState([]);
+  const [collectionDates, setCollectionDates] = useState([]);
   const navigate = useNavigate();
   const { user } = useAuth(); // Get user from AuthContext
 
@@ -40,16 +42,35 @@ const Dashboard = () => {
     return "User";
   };
 
+  useEffect(() => {
+  console.log('Dashboard mounted, fetching collection dates...');
+  const fetchCollectionDates = async () => {
+    try {
+      console.log('Calling getCollectionDates...');
+      const dates = await getCollectionDates();
+      console.log('Collection dates received:', dates);
+      setCollectionDates(dates);
+    } catch (error) {
+      console.error('Error fetching collection dates:', error);
+      // Fallback to mock data if API fails
+      const mockData = [
+        { id: 1, name: "Aldi", last_updated: "2024-12-05" },
+        { id: 2, name: "Dunnes Stores", last_updated: "2024-12-05" },
+        { id: 3, name: "SuperValu", last_updated: "2024-12-05" },
+        { id: 4, name: "Tesco", last_updated: "2024-12-05" },
+      ];
+      console.log('Using fallback data:', mockData);
+      setCollectionDates(mockData);
+    }
+  };
+    
+    fetchCollectionDates();
+  }, []);
+  
   // Mock data (replace with API calls later)
   const userData = {
     name: getDisplayName(),
     watchlist: [],
-    dataCollectionDates: [
-      { supermarket: "Aldi", date: "05-12-24" },
-      { supermarket: "Dunnes Stores", date: "05-12-24" },
-      { supermarket: "SuperValu", date: "05-12-24" },
-      { supermarket: "Tesco", date: "05-12-24" },
-    ],
     newsletterSettings: {
       weeklyDeals: true,
       priceAlerts: false,
@@ -171,10 +192,10 @@ const Dashboard = () => {
       <section className="data-collection-dates">
         <h3>Data Collection Dates</h3>
         <div className="dates-grid">
-          {userData.dataCollectionDates.map((data, index) => (
-            <div className="date-card" key={index}>
-              <span>{data.supermarket}</span>
-              <span>{data.date}</span>
+          {collectionDates.map((item) => (
+            <div key={item.id} className="date-card">
+              <span>{item.name}</span>
+              <span>{new Date(item.last_updated).toLocaleDateString()}</span>
             </div>
           ))}
         </div>

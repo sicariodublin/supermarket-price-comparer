@@ -1,7 +1,7 @@
 {
   "homepage": "https://sicariodublin.github.io/",
   "name": "supermarket-price-comparer",
-  "proxy": "http://localhost:5000",
+  "proxy": "http://localhost:5001",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,11 +14,14 @@
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "cheerio": "^1.1.2",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "node-mailjet": "^6.0.6",
     "nodemailer": "^6.9.16",
     "process": "^0.11.10",
+    "puppeteer": "^24.16.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.1",
@@ -36,11 +39,19 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": ["react-app", "react-app/jest"],
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
     "rules": {
       "react/react-in-jsx-scope": "off",
-      "no-unused-vars": ["warn", { "varsIgnorePattern": "^React$" }]
-      }
+      "no-unused-vars": [
+        "warn",
+        {
+          "varsIgnorePattern": "^React$"
+        }
+      ]
+    }
   },
   "browserslist": {
     "production": [

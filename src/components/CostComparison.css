@@ -1,0 +1,219 @@
+.cost-comparison-section {
+  padding: 60px 0;
+  background: white;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.section-header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.comparison-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.comparison-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.product-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.savings-indicator {
+  background: #f8f9fa;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.savings-text {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.price-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.price-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-radius: 8px;
+}
+
+.price-bar:hover {
+  background: #f8f9fa;
+}
+
+.supermarket-info {
+  flex: 0 0 120px;
+}
+
+.supermarket-badge {
+  background: #2c3e50;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.supermarket-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.price-bar-container {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.price-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.price-display {
+  flex: 0 0 80px;
+  text-align: right;
+}
+
+.price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.unit {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-left: 2px;
+}
+
+.expand-indicator {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.expand-btn:hover {
+  background: #f8f9fa;
+  color: #007bff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .comparison-card {
+    padding: 20px;
+  }
+  
+  .comparison-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .product-name {
+    font-size: 1.3rem;
+  }
+  
+  .supermarket-info {
+    flex: 0 0 100px;
+  }
+  
+  .supermarket-name {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cost-comparison-section {
+    padding: 40px 0;
+  }
+  
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .price-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .supermarket-info {
+    flex: none;
+  }
+  
+  .price-display {
+    flex: none;
+    text-align: left;
+  }
+}
