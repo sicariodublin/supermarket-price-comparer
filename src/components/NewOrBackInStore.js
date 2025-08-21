@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './NewOrBackInStore.css';
 
+// ✅ Import your local image
+import BionaGarlicImg from '../assets/images/Biona-Organic-Garlic-Paste.jpg';
+import TescoFinestBasmatiRiceImg from '../assets/images/Tesco-Finest-Basmati-Rice.jpg';
+import HeinzFruitYogurtPorridgeImg from '../assets/images/Heinz-Fruit&Yogurt-Porridge.jpg';
+import AvonmoreFreshMilkImg from '../assets/images/Avonmore-Fresh-Milk-1L.jpg';
+import KelloggsCornflakesImg from '../assets/images/Kelloggs-Cornflakes-500g.jpg';
+
 const NewOrBackInStore = ({ onProductClick }) => {
   const [newProducts, setNewProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +27,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           price: 1.50,
           originalPrice: 2.00,
           supermarket: "Tesco",
-          image: "/api/placeholder/150/150",
+          image: TescoFinestBasmatiRiceImg,
           isNew: true,
           discount: 25
         },
@@ -29,7 +36,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           name: "Biona Organic Garlic Paste 130g",
           price: 4.20,
           supermarket: "SuperValu",
-          image: "/api/placeholder/150/Biona-Organic-Garlic-Paste.jpg",
+          image: BionaGarlicImg,
           isNew: true
         },
         {
@@ -38,7 +45,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           price: 3.00,
           originalPrice: 3.50,
           supermarket: "Dunnes Stores",
-          image: "/api/placeholder/150/150",
+          image: HeinzFruitYogurtPorridgeImg,
           isBackInStock: true,
           discount: 14
         },
@@ -46,8 +53,8 @@ const NewOrBackInStore = ({ onProductClick }) => {
           id: 4,
           name: "Avonmore Fresh Milk 1L",
           price: 1.25,
-          supermarket: "Aldi",
-          image: "/api/placeholder/150/150",
+          supermarket: "Tesco",
+          image: AvonmoreFreshMilkImg,
           isNew: true
         },
         {
@@ -56,7 +63,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           price: 3.99,
           originalPrice: 4.99,
           supermarket: "Tesco",
-          image: "/api/placeholder/150/150",
+          image: KelloggsCornflakesImg,
           isBackInStock: true,
           discount: 20
         }

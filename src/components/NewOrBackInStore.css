@@ -31,6 +31,7 @@
 .products-container {
   overflow: hidden;
   margin: 0 50px;
+  
 }
 
 .products-track {
@@ -40,13 +41,15 @@
 }
 
 .product-card {
-  flex: 0 0 calc(25% - 15px);
+  flex: 0 0 calc(23% - 15px);
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
+  max-height: 360px;
+;
 }
 
 .product-card:hover {
@@ -69,7 +72,7 @@
 .product-badge {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 0;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -89,10 +92,10 @@
 .discount-badge {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 0;
   background: #dc3545;
   color: white;
-  padding: 4px 8px;
+  padding: 4px 7px;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -112,6 +115,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 

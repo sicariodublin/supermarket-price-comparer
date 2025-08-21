@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts, getFeaturedProducts } from '../services/api';
 import NewOrBackInStore from '../components/NewOrBackInStore';
-// Comment out these imports temporarily until we create the components
-// import CostComparison from '../components/CostComparison';
-// import WeeklySales from '../components/WeeklySales';
-// import ProductDetailModal from '../components/ProductDetailModal';
+import CostComparison from '../components/CostComparison';
 import '../styles/Home.css';
 
 function Home() {
@@ -122,11 +119,8 @@ function Home() {
 
       {/* NEW QUIDU-STYLE COMPONENTS */}
       <NewOrBackInStore onProductClick={handleProductClick} />
+      <CostComparison />
       
-      {/* Temporarily comment out until components are created */}
-      {/* <CostComparison onProductClick={handleProductClick} /> */}
-      {/* <WeeklySales onProductClick={handleProductClick} /> */}
-
       {/* Existing Price Comparison Tables */}
       <section className="comparison-section">
         <div className="container">

@@ -12,8 +12,46 @@ const CostComparison = ({ onProductClick }) => {
 
   const fetchCostComparisons = async () => {
     try {
-      // Mock data for now - will be replaced with real API
-      const mockComparisons = [
+      let data;
+      if (typeof getCostComparisons === 'function') {
+        data = await getCostComparisons();
+      }
+      // fallback to mock data if API returns nothing or fails
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        data = [
+          {
+            product_name: "Milk",
+            category: "Dairy",
+            price_variations: [
+              { id: 1, price: 1.36, unit: "L", supermarket_name: "Aldi", supermarket_id: 1 },
+              { id: 2, price: 1.57, unit: "L", supermarket_name: "Dunnes Stores", supermarket_id: 2 },
+              { id: 3, price: 1.75, unit: "L", supermarket_name: "SuperValu", supermarket_id: 3 },
+              { id: 4, price: 1.78, unit: "L", supermarket_name: "Tesco", supermarket_id: 4 }
+            ],
+            min_price: 1.36,
+            max_price: 1.78,
+            savings_percentage: "23.6"
+          },
+          {
+            product_name: "Eggs",
+            category: "Dairy",
+            price_variations: [
+              { id: 5, price: 0.33, unit: "per", supermarket_name: "Aldi", supermarket_id: 1 },
+              { id: 6, price: 0.35, unit: "per", supermarket_name: "Dunnes Stores", supermarket_id: 2 },
+              { id: 7, price: 0.36, unit: "per", supermarket_name: "SuperValu", supermarket_id: 3 },
+              { id: 8, price: 0.31, unit: "per", supermarket_name: "Tesco", supermarket_id: 4 }
+            ],
+            min_price: 0.31,
+            max_price: 0.36,
+            savings_percentage: "13.9"
+          }
+        ];
+      }
+      setComparisons(data);
+      setLoading(false);
+    } catch (error) {
+      // fallback to mock data on error
+      setComparisons([
         {
           product_name: "Milk",
           category: "Dairy",
@@ -40,13 +78,9 @@ const CostComparison = ({ onProductClick }) => {
           max_price: 0.36,
           savings_percentage: "13.9"
         }
-      ];
-      
-      setComparisons(mockComparisons);
+      ]);
       setLoading(false);
-    } catch (error) {
       console.error('Error fetching cost comparisons:', error);
-      setLoading(false);
     }
   };
 
