@@ -23,16 +23,17 @@
 }
 
 .product-image {
-  max-width: 260px;
-  max-height: 340px;
+  max-width: 560px;
+  max-height: 440px;
   border-radius: 12px;
   background: #fff;
 }
 
 .cart-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 2px;
+  left: 463px;
+  right: 18px;
   background: #222;
   color: #fff;
   border-radius: 50%;
@@ -107,6 +108,7 @@
 
 .similar-products-section {
   margin-top: 32px;
+  margin-left: 50px;
 }
 
 .similar-products-table {

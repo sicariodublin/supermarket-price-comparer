@@ -699,8 +699,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// ... existing code ...
-
 // Route to get new or back in stock products
 app.get('/api/products/new-or-back', async (req, res) => {
   try {
@@ -864,25 +862,26 @@ app.get('/api/products/:id/details', async (req, res) => {
 });
 
 // Route to get featured products
-app.get('/api/products/featured', async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 6;
-    
-    const query = `
-      SELECT p.*, s.name as supermarket_name
-      FROM products p
-      JOIN supermarkets s ON p.supermarket_id = s.id
-      WHERE p.featured = 1 OR p.discount_percentage > 0
-      ORDER BY p.featured DESC, p.discount_percentage DESC, p.created_at DESC
-      LIMIT ?
-    `;
-    
-    const [results] = await db.execute(query, [limit]);
-    res.json(results);
-  } catch (error) {
-    console.error('Error fetching featured products:', error);
-    res.status(500).json({ error: 'Failed to fetch featured products' });
-  }
+app.get('/api/products/featured', (req, res) => {
+  const limit = parseInt(req.query.limit) || 6;
+  
+  const query = `
+    SELECT p.*, s.name as supermarket_name
+    FROM products p
+    JOIN supermarkets s ON p.supermarket_id = s.id
+    WHERE p.featured = 1 OR p.discount_percentage > 0
+    ORDER BY p.featured DESC, p.discount_percentage DESC, p.created_at DESC
+    LIMIT ?
+  `;
+  
+  connection.query(query, [limit], (err, results) => {
+    if (err) {
+      console.error('Error fetching featured products:', err);
+      res.status(500).json({ error: 'Failed to fetch featured products' });
+    } else {
+      res.json(results);
+    }
+  });
 });
 
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Contact-us.css';
 
 function ContactUs() {
@@ -163,6 +164,7 @@ function ContactUs() {
                     </button>
                   </form>
                   
+                  
                   {feedback && (
                     <div className={`feedback-message ${feedback.includes('successfully') ? 'success' : 'error'}`}>
                       {feedback}
@@ -172,6 +174,13 @@ function ContactUs() {
               </div>
             </div>
           </div>
+          <Link
+                    to="/"
+                      className="btn btn-secondary btn-large"
+                      // style={{ padding: "8px 24px", fontSize: "1rem", }}
+                    >
+                      Back to Home
+                    </Link>
         </div>
       </section>
     </div>

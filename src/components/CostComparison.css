@@ -101,12 +101,16 @@
   padding: 4px 12px;
   border-radius: 20px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .supermarket-name {
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .price-bar-container {

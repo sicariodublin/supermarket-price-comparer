@@ -2,6 +2,7 @@
 .dashboard {
   padding-left: 2rem !important;
   padding-right: 2rem !important;
+  background: linear-gradient(135deg, #ECDCBB 0%, #4B6868 100%);
 }
 
 .dashboard-header {

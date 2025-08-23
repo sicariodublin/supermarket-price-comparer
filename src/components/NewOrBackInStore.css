@@ -1,6 +1,6 @@
 .new-or-back-section {
   padding: 60px 0;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .section-header {
@@ -166,6 +166,15 @@
   background: #e9ecef;
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+.new-or-back-section .supermarket-name {
+  background: #ffe066; /* Example: yellow background */
+  color: #222;         /* Example: dark text */
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .carousel-btn {

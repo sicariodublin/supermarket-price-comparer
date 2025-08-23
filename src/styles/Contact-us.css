@@ -202,6 +202,19 @@
   resize: vertical;
 }
 
+.contact-page .btn-large {
+  padding: 8px 24px;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 70px;
+  margin-bottom: -30px;
+  margin-left: 500px;
+}
+
 .submit-btn {
   padding: 15px 30px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

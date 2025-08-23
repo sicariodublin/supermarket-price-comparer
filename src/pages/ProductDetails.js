@@ -3,10 +3,19 @@ import { useParams } from "react-router-dom";
 import "../styles/ProductDetails.css";
 import cordialImg from "../assets/images/cordial.jpg";
 
+// Function to scroll to top smoothly
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
 function ProductDetails() {
   const { productId } = useParams();
 
-  useEffect(() => {
+  useEffect(() => { 
+    scrollToTop();
     console.log("ProductDetails page loaded for productId:", productId);
     // Replace with real API call
     setProduct({
@@ -106,6 +115,15 @@ function ProductDetails() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ textAlign: "center", margin: "32px 0" }}>
+        <button
+          className="btn btn-secondary"
+          onClick={scrollToTop}
+          style={{ padding: "8px 24px", fontSize: "1rem" }}
+        >
+          Back to Top
+        </button>
       </div>
     </div>
   );

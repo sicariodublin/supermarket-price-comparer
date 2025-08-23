@@ -7,7 +7,7 @@ import '../styles/Home.css';
 
 function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [priceComparisons, setPriceComparisons] = useState([]); // ADD THIS LINE
+  const [priceComparisons, setPriceComparisons] = useState([]); 
   const [collectionDates, setCollectionDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -20,8 +20,10 @@ function Home() {
   const fetchFeaturedData = async () => {
     try {
       let products = await getFeaturedProducts(6);
+      console.log("API returned:", products); // Debug log
       if (!Array.isArray(products)) products = [];
       setFeaturedProducts(products);
+      console.log("Featured products:", products); // Debug log
       
       // Create price comparison data by grouping products by name
       const allProducts = await getProducts('');
@@ -119,7 +121,7 @@ function Home() {
         </div>
       </section>
 
-      {/* NEW QUIDU-STYLE COMPONENTS */}
+      {/* NEW-STYLE COMPONENTS */}
       <NewOrBackInStore onProductClick={handleProductClick} />
       <CostComparison />
       
@@ -198,22 +200,28 @@ function Home() {
         <div className="container">
           <h2>Featured Products</h2>
           <div className="featured-products-grid">
-            {featuredProducts.map((product) => (
-              <Link
-                key={product.productId}
-                to={`/product/${product.productId}`}
-                className="featured-product-card"
-              >
-                <img src={product.image} alt={product.name} className="product-image" />
-                <div className="product-info">
-                  <h3>{product.name}</h3>
-                  <span className="product-price">€{product.price}</span>
-                </div>
-              </Link>
-            ))}
+            {featuredProducts.length === 0 ? (
+              <div className="no-products-message">
+                No featured products available at the moment.
+              </div>
+            ) : (
+              featuredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="featured-product-card"
+                >
+                  <img src={product.image} alt={product.name} className="product-image" />
+                  <div className="product-info">
+                    <h3>{product.name}</h3>
+                    <span className="product-price">€{product.price}</span>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
-      </section>
+      </section> 
 
       {/* CTA Section */}
       <section className="cta-section">
