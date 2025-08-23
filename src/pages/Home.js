@@ -19,7 +19,8 @@ function Home() {
 
   const fetchFeaturedData = async () => {
     try {
-      const products = await getFeaturedProducts(6);
+      let products = await getFeaturedProducts(6);
+      if (!Array.isArray(products)) products = [];
       setFeaturedProducts(products);
       
       // Create price comparison data by grouping products by name
@@ -45,6 +46,7 @@ function Home() {
       setPriceComparisons(comparisons);
       setLoading(false);
     } catch (error) {
+      setFeaturedProducts([]); // fallback to empty array
       console.error('Error fetching data:', error);
       setLoading(false);
     }
@@ -187,6 +189,28 @@ function Home() {
               <h3>Price Alerts</h3>
               <p>Get notified when your favorite products go on sale</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="featured-products-section">
+        <div className="container">
+          <h2>Featured Products</h2>
+          <div className="featured-products-grid">
+            {featuredProducts.map((product) => (
+              <Link
+                key={product.productId}
+                to={`/product/${product.productId}`}
+                className="featured-product-card"
+              >
+                <img src={product.image} alt={product.name} className="product-image" />
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <span className="product-price">€{product.price}</span>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

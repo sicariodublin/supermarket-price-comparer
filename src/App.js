@@ -13,7 +13,6 @@ import PasswordResetConfirmPage from './components/PasswordResetConfirmPage';
 import PasswordResetPage from "./components/PasswordResetPage";
 import SearchPage from "./components/SearchPage";
 import VerifyEmail from "./components/VerifyEmail";
-import { useAuth } from "./context/AuthContext";
 import AboutUs from "./pages/About-us";
 import ContactUs from "./pages/Contact-us";
 import Home from "./pages/Home";
@@ -22,16 +21,14 @@ import Login from "./pages/Login";
 import PrivacyPolicy from "./pages/Privacy-policy";
 import Register from "./pages/Register";
 import TermsOfService from "./pages/Terms-of-service";
-import DashboardReact from "./routes/dashboardReact"; // DashboardRoutes file
+import DashboardReact from "./routes/dashboardReact";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
-  const { isAuthenticated, logout } = useAuth();
-
   return (
-    <>
-      <Header isLoggedIn={isAuthenticated} onLogout={logout} />
+    <AuthProvider>
+      <Header />
       <div className="main-content">
-        <AuthProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -51,24 +48,12 @@ function App() {
           <Route path="/password-reset" element={<PasswordResetPage />} />
           <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
           <Route path="/delete-account" element={<DeleteAccountPage />} />
-
-          {/* Dashboard Routes */}
-          </Routes>
-          </AuthProvider>
-        {/* <div>
-          {isLoggedIn ? (
-            <>
-              <button onClick={handleLogout}>Logout</button>
-              <Link to="/dashboard">Dashboard</Link>
-            </>
-          ) : (
-            <Link to="/login" onClick={handleLogin}>Login</Link>
-          )}
-        </div> */}
+          <Route path="/product/:productId" element={<ProductDetails />} />
+        </Routes>
       </div>
       <FeedbackForm />
       <Footer />
-    </>
+    </AuthProvider>
   );
 }
 

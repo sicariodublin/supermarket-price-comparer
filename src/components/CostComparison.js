@@ -26,7 +26,8 @@ const CostComparison = ({ onProductClick }) => {
               { id: 1, price: 1.36, unit: "L", supermarket_name: "Aldi", supermarket_id: 1 },
               { id: 2, price: 1.57, unit: "L", supermarket_name: "Dunnes Stores", supermarket_id: 2 },
               { id: 3, price: 1.75, unit: "L", supermarket_name: "SuperValu", supermarket_id: 3 },
-              { id: 4, price: 1.78, unit: "L", supermarket_name: "Tesco", supermarket_id: 4 }
+              { id: 4, price: 1.78, unit: "L", supermarket_name: "Tesco", supermarket_id: 4 },
+              // { id: 5, price: 1.25, unit: "per", supermarket_name: "Lidl", supermarket_id: 5 },
             ],
             min_price: 1.36,
             max_price: 1.78,
@@ -59,7 +60,10 @@ const CostComparison = ({ onProductClick }) => {
             { id: 1, price: 1.36, unit: "L", supermarket_name: "Aldi", supermarket_id: 1 },
             { id: 2, price: 1.57, unit: "L", supermarket_name: "Dunnes Stores", supermarket_id: 2 },
             { id: 3, price: 1.75, unit: "L", supermarket_name: "SuperValu", supermarket_id: 3 },
-            { id: 4, price: 1.78, unit: "L", supermarket_name: "Tesco", supermarket_id: 4 }
+            { id: 4, price: 1.78, unit: "L", supermarket_name: "Tesco",
+              supermarket_id: 4
+            },
+            
           ],
           min_price: 1.36,
           max_price: 1.78,

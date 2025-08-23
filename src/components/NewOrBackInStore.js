@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './NewOrBackInStore.css';
 
 // ✅ Import your local image
@@ -7,6 +8,7 @@ import TescoFinestBasmatiRiceImg from '../assets/images/Tesco-Finest-Basmati-Ric
 import HeinzFruitYogurtPorridgeImg from '../assets/images/Heinz-Fruit&Yogurt-Porridge.jpg';
 import AvonmoreFreshMilkImg from '../assets/images/Avonmore-Fresh-Milk-1L.jpg';
 import KelloggsCornflakesImg from '../assets/images/Kelloggs-Cornflakes-500g.jpg';
+import DunnesCloveCordialImg from '../assets/images/cordial.jpg';
 
 const NewOrBackInStore = ({ onProductClick }) => {
   const [newProducts, setNewProducts] = useState([]);
@@ -66,7 +68,18 @@ const NewOrBackInStore = ({ onProductClick }) => {
           image: KelloggsCornflakesImg,
           isBackInStock: true,
           discount: 20
+        },
+        {
+          id: 6,
+          name: "Dunnes Stores Simply Better Warm & Spicy Clove Cordial 500ml",
+          price: 4.99,
+          originalPrice: 2.00,
+          supermarket: "Dunnes Stores",
+          image: DunnesCloveCordialImg,
+          isNew: true,
+          discount: 25
         }
+
       ];
       
       setNewProducts(mockProducts);
@@ -118,10 +131,10 @@ const NewOrBackInStore = ({ onProductClick }) => {
               style={{ transform: `translateX(-${currentIndex * 25}%)` }}
             >
               {newProducts.map((product) => (
-                <div 
-                  key={product.id} 
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
                   className="product-card"
-                  onClick={() => onProductClick && onProductClick(product)}
                 >
                   <div className="product-image-container">
                     <img 
@@ -152,7 +165,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
                       <span className="supermarket-name">{product.supermarket}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

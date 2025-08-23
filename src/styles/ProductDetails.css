@@ -1,0 +1,133 @@
+.product-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 0;
+}
+
+.product-details-main {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.product-image-section {
+  position: relative;
+  background: #f7f7f7;
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image {
+  max-width: 260px;
+  max-height: 340px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.cart-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #222;
+  color: #fff;
+  border-radius: 50%;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.product-info-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.supermarket-badge {
+  background: #f7f7c7;
+  color: #222;
+  border-radius: 16px;
+  padding: 4px 16px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.promo-info {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.old-price {
+  text-decoration: line-through;
+  margin-right: 8px;
+}
+
+.new-price {
+  color: red;
+}
+
+.promo-dates {
+  font-size: 0.95rem;
+  color: red;
+}
+
+.see-more-link {
+  color: #007bff;
+  text-decoration: underline;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+.product-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.product-price {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+.unit-price {
+  font-size: 1rem;
+  color: #666;
+  margin-left: 8px;
+}
+
+.similar-products-section {
+  margin-top: 32px;
+}
+
+.similar-products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.similar-products-table th,
+.similar-products-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.similar-products-table tr:hover {
+  background: #f7f7f7;
+}
+
+.promo {
+  color: red;
+  font-weight: bold;
+  margin-left: 8px;
+}

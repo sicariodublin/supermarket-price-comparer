@@ -1,6 +1,5 @@
 // AuthContext.js
-import React from 'react';
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
@@ -15,7 +14,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start as not authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [timeoutId, setTimeoutId] = useState(null);
@@ -25,20 +24,36 @@ export const AuthProvider = ({ children }) => {
   // Check if token and user exist on app load
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    const storedToken = localStorage.getItem("token");
+    if (storedUser && storedToken) {
       try {
         setUser(JSON.parse(storedUser));
+        setToken(storedToken);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error("Error loading user data:", error);
+        setIsAuthenticated(false);
+        setUser(null);
+        setToken(null);
       }
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
+      setToken(null);
     }
   }, []);
-  
+
+  // Start or restart inactivity timer
+  const startInactivityTimer = useCallback(() => {
+    clearTimeout(timeoutId);
+    const newTimeout = setTimeout(() => {
+      console.log("Logging out due to inactivity...");
+      logout();
+    }, 55 * 60 * 1000); // 55 minutes
+    setTimeoutId(newTimeout);
+  }, [timeoutId]);
 
   // Login function to set token and user data
-  const login = (newToken, userData) => {
-    console.log("Logging in: ", newToken, userData);
+  const login = useCallback((newToken, userData) => {
     setToken(newToken);
     setUser(userData);
     setIsAuthenticated(true);
@@ -46,10 +61,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(userData));
     startInactivityTimer();
     setShowInactivityModal(false);
-  };
+  }, [startInactivityTimer]);
 
   // Logout function to clear auth data
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       if (token) {
         await fetch("http://localhost:5001/api/logout", {
@@ -65,24 +80,16 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setUser(null);
       setIsAuthenticated(false);
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
       navigate("/"); // Redirect to Home
     }
-  };
-
-  // Start or restart inactivity timer
-  const startInactivityTimer = () => {
-    clearTimeout(timeoutId);
-    const newTimeout = setTimeout(() => {
-      console.log("Logging out due to inactivity...");
-      logout();
-    }, 55 * 60 * 1000); // 5 minutes
-    setTimeoutId(newTimeout);
-  };
+  }, [token, navigate, timeoutId]);
 
   // Reset inactivity timer on user activity
-  const resetInactivityTimer = () => {
+  const resetInactivityTimer = useCallback(() => {
     if (isAuthenticated) startInactivityTimer();
-  };
+  }, [isAuthenticated, startInactivityTimer]);
 
   // Attach event listeners for user activity
   useEffect(() => {
@@ -92,15 +99,24 @@ export const AuthProvider = ({ children }) => {
     return () => {
       events.forEach((event) => window.removeEventListener(event, resetInactivityTimer));
     };
-  }, [isAuthenticated]);
+  }, [resetInactivityTimer]);
 
   const handleInactivityModalClose = () => {
     setShowInactivityModal(false);
     navigate('/login');
   };
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    isAuthenticated,
+    token,
+    user,
+    login,
+    logout
+  }), [isAuthenticated, token, user, login, logout]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, user, login, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
       {showInactivityModal && (
         <div className="inactivity-modal">
@@ -113,7 +129,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-// useAuth is already defined above, so we can remove this duplicate export
 
 export default AuthContext;

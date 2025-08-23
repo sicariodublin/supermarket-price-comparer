@@ -35,17 +35,21 @@ function LoginForm() {
       });
 
       if (response.ok) {
-        const data = await response.json(); // Fetch response data here
-        console.log("Token received:", data.token); // Debug log
-        login(data.token, data.user); // Authenticate with token and user data
-        navigate("/search"); // Redirect
+        const data = await response.json();
+        console.log("Token received:", data.token);
+        
+        // Use setTimeout to ensure state updates are processed
+        setTimeout(() => {
+          login(data.token, data.user);
+          navigate("/search");
+        }, 0);
       } else {
-        const errorData = await response.json(); // Fetch error data here
-        console.error("Login failed:", errorData); // Debug log
+        const errorData = await response.json();
+        console.error("Login failed:", errorData);
         setErrorMessage(errorData.error || "Invalid login credentials");
       }
     } catch (error) {
-      console.error("Error during login:", error); // Debug log
+      console.error("Error during login:", error);
       setErrorMessage("An error occurred. Please try again.");
     }
   };
@@ -60,7 +64,7 @@ function LoginForm() {
       <div className="form-message-slot">
         {verifiedMessage && (
           <div className="success-message">
-            <i className="bi bi-check-circle-fill me-2"></i>
+            <i className="bi bi-check-csrcle-fill me-2"></i>
             {verifiedMessage}
           </div>
         )}
