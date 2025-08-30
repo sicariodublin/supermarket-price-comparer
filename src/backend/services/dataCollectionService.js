@@ -184,6 +184,35 @@ class DataCollectionService {
       console.log('Scheduled data collection completed.');
     });
   }
+
+  // create featured products fucntion to collect data based on discount percentage or featured table in database
+  async createFeaturedProducts() {
+    const featuredProducts = await this.connection.query(
+      'SELECT * FROM products WHERE featured = 1'
+    );
+    console.log('Featured products found:', featuredProducts.length);
+
+    for (const product of featuredProducts) {
+      const productId = product.id;
+      const discountPercentage = product.discount_percentage;
+      const supermarketId = product.supermarket_id;
+
+      // Check if product exists in supermarket
+      const existingProduct = await this.findExistingProduct(product.name, supermarketId);
+      if (existingProduct) {
+        // Update existing product
+        await this.updateProduct(existingProduct.id, product);
+      } else {
+        // Insert new product
+        await this.insertProduct(product);
+      }
+
+      // Update collection date
+      await this.updateCollectionDate(supermarketId);
+
+      console.log(`Featured product ${productId} collected for supermarket ${supermarketId}`);
+    }
+  }
 }
 
 module.exports = DataCollectionService;

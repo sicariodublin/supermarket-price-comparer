@@ -23,6 +23,7 @@ import Register from "./pages/Register";
 import TermsOfService from "./pages/Terms-of-service";
 import DashboardReact from "./routes/dashboardReact";
 import ProductDetails from "./pages/ProductDetails";
+import FeaturedProducts from "./components/FeaturedProducts";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
           <Route path="/delete-account" element={<DeleteAccountPage />} />
           <Route path="/product/:productId" element={<ProductDetails />} />
+          <Route path="/featured-products" element={<FeaturedProducts />} />
         </Routes>
       </div>
       <FeedbackForm />

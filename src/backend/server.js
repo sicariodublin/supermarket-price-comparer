@@ -38,7 +38,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
-app.use('/api/', dashboardExpress);
+app.use('/api/dashboard', dashboardExpress);
 
 // Database connection configuration
 const connection = mysql.createConnection({
@@ -688,11 +688,6 @@ app.delete('/api/delete-account', verifyToken, (req, res) => {
 // Serve React build files
 app.use(express.static(path.join(__dirname, "../../build")));
 
-// Fallback for React routing
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../build", "index.html"));
-});
-
 // Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
@@ -718,7 +713,8 @@ app.get('/api/products/new-or-back', async (req, res) => {
       LIMIT 10
     `;
     
-    const [results] = await db.execute(query);
+    // Change this line:
+    const [results] = await connection.query(query);
     res.json(results);
   } catch (error) {
     console.error('Error fetching new/back in stock products:', error);
@@ -734,7 +730,6 @@ app.get('/api/products/cost-comparison', async (req, res) => {
     const query = `
       SELECT 
         p1.name as product_name,
-        p1.category,
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'id', p2.id,
@@ -742,7 +737,7 @@ app.get('/api/products/cost-comparison', async (req, res) => {
             'unit', p2.unit,
             'supermarket_name', s.name,
             'supermarket_id', s.id
-          ) ORDER BY p2.price ASC
+          )
         ) as price_variations
       FROM products p1
       JOIN products p2 ON LOWER(TRIM(p1.name)) = LOWER(TRIM(p2.name))
@@ -753,33 +748,58 @@ app.get('/api/products/cost-comparison', async (req, res) => {
         GROUP BY LOWER(TRIM(name))
         HAVING COUNT(*) > 1
       )
-      GROUP BY p1.name, p1.category
+      GROUP BY p1.name
       ORDER BY RAND()
       LIMIT ?
     `;
     
-    const [results] = await db.execute(query, [limit]);
-    
-    // Parse JSON and calculate savings
-    const processedResults = results.map(item => {
-      const variations = JSON.parse(item.price_variations);
-      const minPrice = Math.min(...variations.map(v => v.price));
-      const maxPrice = Math.max(...variations.map(v => v.price));
-      const savingsPercentage = maxPrice > 0 ? ((maxPrice - minPrice) / maxPrice * 100).toFixed(1) : 0;
+    connection.query(query, [limit], (err, results) => {
+      if (err) {
+        console.error('Error fetching cost comparisons:', err);
+        return res.status(500).json({ error: 'Failed to fetch cost comparisons' });
+      }
       
-      return {
-        ...item,
-        price_variations: variations,
-        min_price: minPrice,
-        max_price: maxPrice,
-        savings_percentage: savingsPercentage
-      };
+       // Process results without JSON.parse since they're already objects
+      const processedResults = results.map(item => {
+        let variations = item.price_variations;
+        
+        // Handle case where variations might be a string or already an object
+        if (typeof variations === 'string') {
+          try {
+            variations = JSON.parse(variations);
+          } catch (e) {
+            console.error('Error parsing variations:', e);
+            variations = [];
+          }
+        }
+        
+        // Ensure variations is an array
+        if (!Array.isArray(variations)) {
+          variations = [];
+        }
+        
+        // Sort variations by price in JavaScript
+        variations.sort((a, b) => a.price - b.price);
+        
+        const prices = variations.map(v => v.price).filter(p => !isNaN(p));
+        const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+        const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+        const savingsPercentage = maxPrice > 0 ? ((maxPrice - minPrice) / maxPrice * 100).toFixed(1) : 0;
+        
+        return {
+          ...item,
+          price_variations: variations,
+          min_price: minPrice,
+          max_price: maxPrice,
+          savings_percentage: savingsPercentage
+        };
+      });
+      
+      res.json(processedResults);
     });
-    
-    res.json(processedResults);
   } catch (error) {
-    console.error('Error fetching cost comparisons:', error);
-    res.status(500).json({ error: 'Failed to fetch cost comparisons' });
+    console.error('Error in cost comparison endpoint:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -799,7 +819,8 @@ app.get('/api/products/weekly-sales', async (req, res) => {
       LIMIT 8
     `;
     
-    const [results] = await db.execute(query);
+    // Change this line:
+    const [results] = await connection.query(query);
     res.json(results);
   } catch (error) {
     console.error('Error fetching weekly sales:', error);
@@ -822,7 +843,8 @@ app.get('/api/products/:id/pricing-history', async (req, res) => {
       LIMIT 30
     `;
     
-    const [results] = await db.execute(query, [productId]);
+    // Change this line:
+    const [results] = await connection.query(query, [productId]);
     res.json(results);
   } catch (error) {
     console.error('Error fetching pricing history:', error);
@@ -848,7 +870,8 @@ app.get('/api/products/:id/details', async (req, res) => {
       GROUP BY p.id
     `;
     
-    const [results] = await db.execute(query, [productId]);
+    // Change this line:
+    const [results] = await connection.query(query, [productId]);
     
     if (results.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
@@ -862,28 +885,39 @@ app.get('/api/products/:id/details', async (req, res) => {
 });
 
 // Route to get featured products
-app.get('/api/products/featured', (req, res) => {
-  const limit = parseInt(req.query.limit) || 6;
-  
+app.get("/api/products/featured", (req, res) => {
   const query = `
-    SELECT p.*, s.name as supermarket_name
+    SELECT 
+      p.id,
+      p.name,
+      p.quantity,
+      p.unit,
+      p.price,
+      p.original_price,
+      p.discount_percentage,
+      p.promotion_end_date,
+      p.featured,
+      s.name AS supermarket
     FROM products p
-    JOIN supermarkets s ON p.supermarket_id = s.id
-    WHERE p.featured = 1 OR p.discount_percentage > 0
-    ORDER BY p.featured DESC, p.discount_percentage DESC, p.created_at DESC
-    LIMIT ?
+    LEFT JOIN supermarkets s ON p.supermarket_id = s.id
+    WHERE p.featured = 1 OR (p.discount_percentage IS NOT NULL AND p.discount_percentage > 0)
+    ORDER BY COALESCE(p.discount_percentage, 0) DESC, p.id DESC
+    LIMIT 20;
   `;
-  
-  connection.query(query, [limit], (err, results) => {
+
+  connection.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching featured products:', err);
-      res.status(500).json({ error: 'Failed to fetch featured products' });
-    } else {
-      res.json(results);
+      console.error("Error fetching featured products:", err);
+      return res.status(500).json({ error: "Failed to fetch featured products" });
     }
+    res.json(results);
   });
 });
 
+// Fallback for React routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../build", "index.html"));
+});
 
 
 

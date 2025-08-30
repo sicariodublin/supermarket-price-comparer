@@ -156,7 +156,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
                   <div className="product-info">
                     <h3 className="product-name">{product.name}</h3>
                     <div className="price-container">
-                      <span className="current-price">€{product.price}</span>
+                      <span className="current-price">€{product.price }</span>
                       {product.originalPrice && (
                         <span className="original-price">€{product.originalPrice}</span>
                       )}

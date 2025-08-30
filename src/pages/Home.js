@@ -1,30 +1,24 @@
+// Home.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts, getFeaturedProducts } from '../services/api';
+import { getProducts } from '../services/api';
 import NewOrBackInStore from '../components/NewOrBackInStore';
+import FeaturedProducts from '../components/FeaturedProducts';
 import CostComparison from '../components/CostComparison';
 import '../styles/Home.css';
 
 function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [priceComparisons, setPriceComparisons] = useState([]); 
-  const [collectionDates, setCollectionDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
 
   useEffect(() => {
-    fetchFeaturedData();
+    fetchData();
   }, []);
 
-  const fetchFeaturedData = async () => {
+  const fetchData = async () => {
     try {
-      let products = await getFeaturedProducts(6);
-      console.log("API returned:", products); // Debug log
-      if (!Array.isArray(products)) products = [];
-      setFeaturedProducts(products);
-      console.log("Featured products:", products); // Debug log
-      
       // Create price comparison data by grouping products by name
       const allProducts = await getProducts('');
       const productGroups = {};
@@ -48,7 +42,6 @@ function Home() {
       setPriceComparisons(comparisons);
       setLoading(false);
     } catch (error) {
-      setFeaturedProducts([]); // fallback to empty array
       console.error('Error fetching data:', error);
       setLoading(false);
     }
@@ -123,6 +116,7 @@ function Home() {
 
       {/* NEW-STYLE COMPONENTS */}
       <NewOrBackInStore onProductClick={handleProductClick} />
+      <FeaturedProducts onProductClick={handleProductClick} />
       <CostComparison />
       
       {/* Existing Price Comparison Tables */}
@@ -194,34 +188,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      {/* Featured Products Section */}
-      <section className="featured-products-section">
-        <div className="container">
-          <h2>Featured Products</h2>
-          <div className="featured-products-grid">
-            {featuredProducts.length === 0 ? (
-              <div className="no-products-message">
-                No featured products available at the moment.
-              </div>
-            ) : (
-              featuredProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="featured-product-card"
-                >
-                  <img src={product.image} alt={product.name} className="product-image" />
-                  <div className="product-info">
-                    <h3>{product.name}</h3>
-                    <span className="product-price">€{product.price}</span>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-      </section> 
 
       {/* CTA Section */}
       <section className="cta-section">

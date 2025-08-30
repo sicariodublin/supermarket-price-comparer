@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Contact-us.css';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "../styles/Contact-us.css";
 
 function ContactUs() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -15,10 +15,10 @@ function ContactUs() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/contact', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5001/api/contact", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, subject, message }),
       });
@@ -26,15 +26,15 @@ function ContactUs() {
       const data = await response.json();
       if (response.ok) {
         setFeedback("Message sent successfully!");
-        setName('');
-        setEmail('');
-        setSubject('');
-        setMessage('');
+        setName("");
+        setEmail("");
+        setSubject("");
+        setMessage("");
       } else {
         setFeedback("Failed to send message: " + data.message);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       setFeedback("Failed to send message.");
     } finally {
       setIsLoading(false);
@@ -49,7 +49,9 @@ function ContactUs() {
           <div className="hero-content">
             <h1>Contact Us</h1>
             <p className="hero-subtitle">
-              Feel free to contact us directly if you have any inquiries regarding our services. We are very pleased that you are considering us.
+              Feel free to contact us directly if you have any inquiries
+              regarding our services. We are very pleased that you are
+              considering us.
             </p>
           </div>
         </div>
@@ -65,10 +67,14 @@ function ContactUs() {
                 <div className="info-card">
                   <h2>How can we help you today?</h2>
                   <p>
-                    Feel free to contact us directly if you have any inquiries regarding our services. We would love to assist you.
+                    Feel free to contact us directly if you have any inquiries
+                    regarding our services. We would love to assist you.
                   </p>
                   <p>
-                    Simply fill in your personal data and let us get in touch with you. Normally, the support team answers within one business day, so that you don't have to wait. Or call us directly from the phone.
+                    Simply fill in your personal data and let us get in touch
+                    with you. Normally, the support team answers within one
+                    business day, so that you don't have to wait. Or call us
+                    directly from the phone.
                   </p>
                 </div>
 
@@ -114,59 +120,66 @@ function ContactUs() {
                   <form onSubmit={handleSubmit} className="contact-form">
                     <div className="form-group">
                       <label htmlFor="name">Your Name:</label>
-                      <input 
-                        type="text" 
-                        id="name" 
-                        value={name} 
-                        onChange={(e) => setName(e.target.value)} 
-                        required 
+                      <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
                         disabled={isLoading}
                       />
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="email">Your Email:</label>
-                      <input 
-                        type="email" 
-                        id="email" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        required 
+                      <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
                         disabled={isLoading}
                       />
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="subject">Subject:</label>
-                      <input 
-                        type="text" 
-                        id="subject" 
-                        value={subject} 
-                        onChange={(e) => setSubject(e.target.value)} 
-                        required 
+                      <input
+                        type="text"
+                        id="subject"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        required
                         disabled={isLoading}
                       />
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="message">Message:</label>
-                      <textarea 
-                        id="message" 
-                        value={message} 
-                        onChange={(e) => setMessage(e.target.value)} 
+                      <textarea
+                        id="message"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                         required
                         disabled={isLoading}
                       ></textarea>
                     </div>
-                    
-                    <button type="submit" className="submit-btn" disabled={isLoading}>
-                      {isLoading ? 'Sending...' : 'Send Message'}
+
+                    <button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Sending..." : "Send Message"}
                     </button>
                   </form>
-                  
-                  
+
                   {feedback && (
-                    <div className={`feedback-message ${feedback.includes('successfully') ? 'success' : 'error'}`}>
+                    <div
+                      className={`feedback-message ${
+                        feedback.includes("successfully") ? "success" : "error"
+                      }`}
+                    >
                       {feedback}
                     </div>
                   )}
@@ -175,12 +188,12 @@ function ContactUs() {
             </div>
           </div>
           <Link
-                    to="/"
-                      className="btn btn-secondary btn-large"
-                      // style={{ padding: "8px 24px", fontSize: "1rem", }}
-                    >
-                      Back to Home
-                    </Link>
+            to="/"
+            className="btn btn-secondary btn-large"
+            // style={{ padding: "8px 24px", fontSize: "1rem", }}
+          >
+            Back to Home
+          </Link>
         </div>
       </section>
     </div>
