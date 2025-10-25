@@ -72,5 +72,8 @@
     "cross-env": "^7.0.3",
     "gh-pages": "^6.2.0",
     "webpack": "4.42.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
