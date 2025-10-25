@@ -42,27 +42,28 @@ const FeaturedProducts = ({ onProductClick }) => {
           supermarket_name: "Dunnes Stores",
           discount_percentage: 25,
           featured: 2,
-          image: DunnesViledaBucketImg
+          image: DunnesViledaBucketImg,
         },
         {
           id: 3,
           name: "Dunnes Yellow Cabernet Sauvignon Red Wine",
           price: 19.99,
-          original_price: 29.99,
+          original_price: 24.99,
           supermarket_name: "Dunnes Stores",
-          discount_percentage: 25,
+          discount_percentage: 20,
           featured: 3,
-          image: DunnesYellowCabernetImg
+          image: DunnesYellowCabernetImg,
         },
+        // Add more mock products as needed
         {
           id: 4,
-          name: "Dunnes Vileda Bucket",
-          price: 13.99,
-          original_price: 19.99,
-          supermarket_name: "Dunnes Stores",
+          name: "Salted Caramel Truffle",
+          price: 4.99,
+          original_price: 5.99,
+          supermarket_name: "Tesco",
           discount_percentage: 25,
-          featured: 2,
-          image: DunnesViledaBucketImg
+          featured: 1,
+          image: SaltedCaramelTruffleImg,
         },
         {
           id: 5,
@@ -72,123 +73,125 @@ const FeaturedProducts = ({ onProductClick }) => {
           supermarket_name: "Dunnes Stores",
           discount_percentage: 25,
           featured: 2,
-          image: DunnesViledaBucketImg
+          image: DunnesViledaBucketImg,
         },
         {
           id: 6,
-          name: "Dunnes Vileda Bucket",
-          price: 13.99,
-          original_price: 19.99,
+          name: "Dunnes Yellow Cabernet Sauvignon Red Wine",
+          price: 19.99,
+          original_price: 24.99,
           supermarket_name: "Dunnes Stores",
-          discount_percentage: 25,
-          featured: 2,
-          image: DunnesViledaBucketImg
+          discount_percentage: 20,
+          featured: 3,
+          image: DunnesYellowCabernetImg,
         },
       ];
-
+      
       setFeaturedProducts(mockProduct);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching featured products:', error);
-      setFeaturedProducts([]);
       setLoading(false);
     }
   };
-  
-  
-  // const fetchFeaturedProducts = async () => {
-  //   try {
-  //     let products = await getFeaturedProducts(6);
-  //     console.log("Featured products API returned:", products);
-  //     if (!Array.isArray(products)) products = [];
-  //     setFeaturedProducts(products);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error('Error fetching featured products:', error);
-  //     setFeaturedProducts([]);
-  //     setLoading(false);
-  //   }
-  // };
 
-  const handleProductClick = (product) => {
-    if (onProductClick) {
-      onProductClick(product);
-    }
+  /*
+  const mockProd = () => {
+    const mockProduct = {
+      id: 1,
+      name: "Salted Caramel Truffle",
+      price: 4.99,
+      original_price: 5.99,
+      supermarket_name: "Tesco",
+      discount_percentage: 25,
+      featured: 1,
+      image: SaltedCaramelTruffleImg,
+    };
+    
+    setMockProduct([mockProduct]);
+    setLoading(false);
   };
+  */
+
+  if (loading) {
+    return (
+      <section className="featured-products-section">
+        <div className="container">
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+            <p>Loading featured products...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="featured-products-section">
       <div className="container">
         <div className="section-header">
           <h2>Featured Products</h2>
-          <p>Discover our handpicked selection of products with the best deals and discounts</p>
+          <p>Discover our handpicked selection of premium products at unbeatable prices!</p>
         </div>
         
-        {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p>Loading featured products...</p>
+        {featuredProducts.length === 0 ? (
+          <div className="no-products-message">
+            <div className="no-products-icon">📦</div>
+            <h3>No Featured Products Available</h3>
+            <p>Check back soon for exciting featured deals!</p>
           </div>
         ) : (
           <div className="featured-products-grid">
-            {featuredProducts.length === 0 ? (
-              <div className="no-products-message">
-                <div className="no-products-icon">🛒</div>
-                <h3>No featured products available</h3>
-                <p>Check back soon for exciting deals and featured items!</p>
-              </div>
-            ) : (
-              featuredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="featured-product-card"
-                  onClick={() => handleProductClick(product)}
-                >
-                  <div className="product-image-container">
-                    <img 
-                      src={product.image || '/assets/salted_caramel_truffle.jpg'}
-                      alt={product.name} 
-                      className="product-image"
-                      onError={(e) => {
-                        e.target.src = '/assets/salted_caramel_truffle.jpg';
-                      }}
-                    />
-                    {product.discount_percentage > 0 && (
-                      <div className="discount-badge">
-                        -{product.discount_percentage}%
-                      </div>
-                    )}
-                    {product.featured === 1 && (
-                      <div className="featured-badge">
-                        ⭐ Featured
-                      </div>
-                    )}
-                  </div>
-                  <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
-                    <div className="product-details">
-                      <span className="product-quantity">{product.quantity} {product.unit}</span>
-                      <span className="supermarket-name">{product.supermarket_name}</span>
+            {featuredProducts.map((product) => (
+              <div 
+                key={product.id} 
+                className="featured-product-card" 
+                onClick={() => onProductClick && onProductClick(product)}
+              >
+                <div className="featured-product-image-container">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="featured-product-image"
+                    onError={(e) => {
+                      e.target.src = '/assets/placeholder-product.jpg';
+                    }}
+                  />
+                  {product.discount_percentage > 0 && (
+                    <div className="featured-discount-badge">
+                      -{product.discount_percentage}%
                     </div>
-                    <div className="price-container">
-                      <span className="product-price">€{product.price}</span>
-                      {product.discount_percentage > 0 && (
-                        <span className="original-price">
-                          €{(product.price / (1 - product.discount_percentage / 100)).toFixed(2)}
-                        </span>
-                      )}
+                  )}
+                  {product.featured === 1 && (
+                    <div className="featured-badge">
+                      ⭐ Featured
                     </div>
-                    <Link 
-                      to={`/product/${product.id}`} 
-                      className="view-product-btn"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      View Details
-                    </Link>
-                  </div>
+                  )}
                 </div>
-              ))
-            )}
+                <div className="featured-product-info">
+                  <h3 className="featured-product-name">{product.name}</h3>
+                  <div className="featured-product-details">
+                    <span className="featured-product-quantity">{product.quantity} {product.unit}</span>
+                    <span className="featured-supermarket-name">{product.supermarket_name}</span>
+                  </div>
+                  <div className="featured-price-container">
+                    <span className="featured-product-price">€{product.price}</span>
+                    {product.discount_percentage > 0 && (
+                      <span className="featured-original-price">
+                        €{(product.price / (1 - product.discount_percentage / 100)).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <Link 
+                    to={`/product/${product.id}`} 
+                    className="view-product-btn"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    View Details
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

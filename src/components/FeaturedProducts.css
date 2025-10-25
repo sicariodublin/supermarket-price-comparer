@@ -45,7 +45,118 @@
   transition: all 0.3s ease;
   cursor: pointer;
   color: #333;
-  max-height: 450px;
+  height: 450px; /* Fixed height instead of max-height */
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-product-info {
+  padding: 20px;
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-product-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  line-height: 1.4;
+  height: 3.4em; /* Fixed height for 2 lines (1.4 * 2 + margin) */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.featured-product-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.featured-price-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  margin-top: auto; /* Push to bottom */
+}
+
+.view-product-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: auto; /* Ensure button stays at bottom */
+}
+
+.featured-product-image-container {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 1px 20px 10px;
+}
+
+.featured-product-image {
+  width: auto;
+  height: 170px;
+  max-width: 80%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.featured-discount-badge {
+  position: absolute;
+  top: 12px;
+  right: 8px;
+  background: #e74c3c;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  z-index: 2;
+}
+
+.featured-product-info {
+  padding: 20px;
+}
+
+.featured-product-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  line-height: 1.4;
+}
+
+.featured-price-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.featured-supermarket-name {
+  font-weight: 500;
+  color: #495057;
 }
 
 .featured-product-card:hover {

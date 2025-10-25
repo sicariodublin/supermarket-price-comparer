@@ -31,7 +31,7 @@
 .products-container {
   overflow: hidden;
   margin: 0 50px;
-  
+  padding-bottom: 10px;
 }
 
 .products-track {
@@ -40,7 +40,8 @@
   gap: 20px;
 }
 
-.product-card {
+/* Change from generic classes to component-specific ones */
+.new-or-back-product-card {
   flex: 0 0 calc(23% - 15px);
   background: white;
   border-radius: 12px;
@@ -48,53 +49,31 @@
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  max-height: 370px;
-;
 }
 
-.product-card:hover {
+.new-or-back-product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.product-image-container {
+.new-or-back-product-image-container {
   position: relative;
-  height: 200px;
+  max-height: 300px;
+  max-width: 250px;
   overflow: hidden;
+  margin-top: 15px;
 }
 
-.product-image {
+.new-or-back-product-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.product-badge {
+.new-or-back-discount-badge {
   position: absolute;
   top: 8px;
-  left: 0;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  z-index: 2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.new-badge {
-  background: #28a745;
-}
-
-.back-badge {
-  background: #007bff;
-}
-
-.discount-badge {
-  position: absolute;
-  top: 8px;
-  right: 38px;
+  right: 4px;
   background: #dc3545;
   color: white;
   padding: 4px 7px;
@@ -105,25 +84,26 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Better spacing and visual hierarchy */
-.product-image-container {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
+.product-badge {
+  position: absolute;
+  top: 8px;
+  left: 4px;
+  background: #28a745;
+  color: white;
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Ensure badges don't overlap with product name */
-.product-info {
+.new-or-back-product-info {
   padding: 15px;
   position: relative;
   z-index: 1;
 }
 
-.product-info {
-  padding: 15px;
-}
-
-.product-name {
+.new-or-back-product-name {
   font-size: 0.9rem;
   font-weight: 600;
   color: #2c3e50;
@@ -137,45 +117,27 @@
   -webkit-box-orient: vertical;
 }
 
-.price-container {
+.new-or-back-price-container {
   margin-bottom: 8px;
 }
 
-.current-price {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #28a745;
-}
-
-.original-price {
-  font-size: 0.9rem;
-  color: #6c757d;
-  text-decoration: line-through;
-  margin-left: 8px;
-}
-
-.supermarket-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.supermarket-name {
+.new-or-back-supermarket-name {
   font-size: 0.85rem;
   color: #6c757d;
-  background: #e9ecef;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.new-or-back-section .supermarket-name {
-  background: #ffe066; /* Example: yellow background */
-  color: #222;         /* Example: dark text */
+  background: #ffe066;
+  color: #222;
   padding: 1px 10px;
   border-radius: 12px;
   font-weight: 600;
   display: inline-block;
-  margin-bottom: 15px;
+  margin-bottom: 1px;
+}
+
+.new-or-back-price-container .original-price {
+  font-size: 0.85rem;
+  color: #ff0000;
+  text-decoration: line-through;
+  padding-left: 20px;
 }
 
 .carousel-btn {
@@ -186,7 +148,7 @@
   border: 2px solid #e9ecef;
   border-radius: 50%;
   width: 40px;
-  height: 40px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;

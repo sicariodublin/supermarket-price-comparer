@@ -55,6 +55,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           id: 4,
           name: "Avonmore Fresh Milk 1L",
           price: 1.25,
+          originalPrice: 1.50,
           supermarket: "Tesco",
           image: AvonmoreFreshMilkImg,
           isNew: true
@@ -77,7 +78,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
           supermarket: "Dunnes Stores",
           image: DunnesCloveCordialImg,
           isNew: true,
-          discount: 25
+          // discount: 25
         }
 
       ];
@@ -134,13 +135,13 @@ const NewOrBackInStore = ({ onProductClick }) => {
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
-                  className="product-card"
+                  className="new-or-back-product-card"  // Changed from "product-card"
                 >
-                  <div className="product-image-container">
+                  <div className="new-or-back-product-image-container">  {/* Changed */}
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="product-image"
+                      className="new-or-back-product-image"  // Changed
                     />
                     {product.isNew && (
                       <span className="product-badge new-badge">NEW</span>
@@ -149,20 +150,20 @@ const NewOrBackInStore = ({ onProductClick }) => {
                       <span className="product-badge back-badge">BACK</span>
                     )}
                     {product.discount && (
-                      <span className="discount-badge">-{product.discount}%</span>
+                      <span className="new-or-back-discount-badge">-{product.discount}%</span>  // Changed
                     )}
                   </div>
                   
-                  <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
-                    <div className="price-container">
-                      <span className="current-price">€{product.price }</span>
+                  <div className="new-or-back-product-info">  {/* Changed */}
+                    <h3 className="new-or-back-product-name">{product.name}</h3>  {/* Changed */}
+                    <div className="new-or-back-price-container">  {/* Changed */}
+                      <span className="current-price">Now €{product.price}</span>
                       {product.originalPrice && (
-                        <span className="original-price">€{product.originalPrice}</span>
+                        <span className="original-price">Was €{product.originalPrice}</span>
                       )}
                     </div>
                     <div className="supermarket-info">
-                      <span className="supermarket-name">{product.supermarket}</span>
+                      <span className="new-or-back-supermarket-name">{product.supermarket}</span>  {/* Changed */}
                     </div>
                   </div>
                 </Link>

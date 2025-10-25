@@ -34,8 +34,37 @@ const mailjet = require("node-mailjet").apiConnect(
 
 const app = express();
 
-// Rotas
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:4000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:4000',
+  'https://addandcompare.com',
+  'https://www.addandcompare.com',
+];
+
+const isDev = process.env.NODE_ENV !== 'production';
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow REST tools or server-to-server (no origin)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost/127.0.0.1 in development
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
+    if ((isDev && isLocalhost) || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`CORS blocked origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+app.options('*', cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use('/api/dashboard', dashboardExpress);

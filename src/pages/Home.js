@@ -1,3 +1,9 @@
+// How to start Frontend and Backend
+// Backend: C:\Fabio_Projects\supermarket-price-comparer\src\backend>node server.js
+
+//Frontend: C:\Fabio_Projects\supermarket-price-comparer\npm start
+
+
 // Home.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
