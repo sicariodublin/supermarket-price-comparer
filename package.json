@@ -1,5 +1,5 @@
 {
-  "homepage": "https://sicariodublin.github.io/",
+  "homepage": ".",
   "name": "supermarket-price-comparer",
   "proxy": "http://localhost:5001",
   "version": "0.1.0",
@@ -32,9 +32,12 @@
   },
   "scripts": {
     "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider PORT=4000 react-scripts start",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "start:server": "node src/backend/server.js",
+    "install:backend": "npm install --prefix src/backend",
+    "postinstall": "npm run install:backend",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
