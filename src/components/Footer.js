@@ -38,18 +38,18 @@ function Footer() {
               Save money on your weekly shop by comparing prices across all major retailers.
             </p>
             <div className="social-links">
-              <a href="#" className="social-link facebook" aria-label="Facebook">
+              <button type="button" className="social-link facebook" aria-label="Facebook" onClick={scrollToTop}>
                 <i className="bi bi-facebook"></i>
-              </a>
-              <a href="#" className="social-link instagram" aria-label="Instagram">
+                </button>
+              <button type="button" className="social-link instagram" aria-label="Instagram" onClick={scrollToTop}>
                 <i className="bi bi-instagram"></i>
-              </a>
-              <a href="#" className="social-link twitter" aria-label="Twitter">
+                </button>
+              <button type="button" className="social-link twitter" aria-label="Twitter" onClick={scrollToTop}>
                 <i className="bi bi-twitter"></i>
-              </a>
-              <a href="#" className="social-link linkedin" aria-label="LinkedIn">
-                <i className="bi bi-linkedin"></i>
-              </a>
+                </button>
+              <button type="button" className="social-link linkedin" aria-label="LinkedIn" onClick={scrollToTop}>
+               <i className="bi bi-linkedin"></i>
+              </button>
             </div>
           </div>
 

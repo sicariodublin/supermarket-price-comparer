@@ -99,7 +99,7 @@ function ProductSeasonalityModal({ isOpen, onClose }) {
 
         <div className="seasonality-content">
           <div className="seasonal-section">
-            <h4>🌱 In Season (Best Prices)</h4>
+           <h4><span role="img" aria-label="in season">🌱</span> In Season (Best Prices)</h4>
             <ul className="product-list in-season">
               {currentData.inSeason.map((product, index) => (
                 <li key={index}>{product}</li>
@@ -108,7 +108,7 @@ function ProductSeasonalityModal({ isOpen, onClose }) {
           </div>
 
           <div className="seasonal-section">
-            <h4>❄️ Out of Season (Higher Prices)</h4>
+            <h4><span role="img" aria-label="out of season">❄️</span> Out of Season (Higher Prices)</h4>
             <ul className="product-list out-season">
               {currentData.outOfSeason.map((product, index) => (
                 <li key={index}>{product}</li>
@@ -117,7 +117,7 @@ function ProductSeasonalityModal({ isOpen, onClose }) {
           </div>
 
           <div className="seasonal-tips">
-            <h4>💡 Shopping Tips for {months[selectedMonth]}</h4>
+            <h4><span role="img" aria-label="shopping tips">💡</span> Shopping Tips for {months[selectedMonth]}</h4>
             <p>{currentData.tips}</p>
           </div>
         </div>

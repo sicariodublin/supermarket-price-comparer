@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "./static/css/main.6c790596.chunk.css",
-    "main.js": "./static/js/main.253d6d5e.chunk.js",
-    "main.js.map": "./static/js/main.253d6d5e.chunk.js.map",
+    "main.css": "./static/css/main.6dffa425.chunk.css",
+    "main.js": "./static/js/main.3b7230e6.chunk.js",
+    "main.js.map": "./static/js/main.3b7230e6.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.09517e0d.js",
     "runtime-main.js.map": "./static/js/runtime-main.09517e0d.js.map",
     "static/css/2.2a851b34.chunk.css": "./static/css/2.2a851b34.chunk.css",
-    "static/js/2.d0daf021.chunk.js": "./static/js/2.d0daf021.chunk.js",
-    "static/js/2.d0daf021.chunk.js.map": "./static/js/2.d0daf021.chunk.js.map",
+    "static/js/2.1cc2ddb0.chunk.js": "./static/js/2.1cc2ddb0.chunk.js",
+    "static/js/2.1cc2ddb0.chunk.js.map": "./static/js/2.1cc2ddb0.chunk.js.map",
     "index.html": "./index.html",
-    "precache-manifest.d1d8ec2d33c3eba1ba67ede8e6e48015.js": "./precache-manifest.d1d8ec2d33c3eba1ba67ede8e6e48015.js",
+    "precache-manifest.54a9b493fe2f221596f95742d9a0e0c2.js": "./precache-manifest.54a9b493fe2f221596f95742d9a0e0c2.js",
     "service-worker.js": "./service-worker.js",
     "static/css/2.2a851b34.chunk.css.map": "./static/css/2.2a851b34.chunk.css.map",
-    "static/css/main.6c790596.chunk.css.map": "./static/css/main.6c790596.chunk.css.map",
-    "static/js/2.d0daf021.chunk.js.LICENSE.txt": "./static/js/2.d0daf021.chunk.js.LICENSE.txt",
+    "static/css/main.6dffa425.chunk.css.map": "./static/css/main.6dffa425.chunk.css.map",
+    "static/js/2.1cc2ddb0.chunk.js.LICENSE.txt": "./static/js/2.1cc2ddb0.chunk.js.LICENSE.txt",
     "static/media/Heinz-Fruit&Yogurt-Porridge.jpg": "./static/media/Heinz-Fruit&Yogurt-Porridge.2f41ab5e.jpg",
     "static/media/Tesco-Finest-Basmati-Rice.jpg": "./static/media/Tesco-Finest-Basmati-Rice.60457d38.jpg",
     "static/media/bootstrap-icons.css": "./static/media/bootstrap-icons.cc1e5eda.woff2",
@@ -29,8 +29,8 @@
   "entrypoints": [
     "static/js/runtime-main.09517e0d.js",
     "static/css/2.2a851b34.chunk.css",
-    "static/js/2.d0daf021.chunk.js",
-    "static/css/main.6c790596.chunk.css",
-    "static/js/main.253d6d5e.chunk.js"
+    "static/js/2.1cc2ddb0.chunk.js",
+    "static/css/main.6dffa425.chunk.css",
+    "static/js/main.3b7230e6.chunk.js"
   ]
 }

@@ -172,22 +172,22 @@ function Home() {
           <h2>Why Choose AddAndCompare?</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
+              <div className="feature-icon"><span role="img" aria-label="smart savings">💰</span></div>
               <h3>Real-Time Prices</h3>
               <p>Get up-to-date pricing information from all major Irish supermarkets</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">💰</div>
+              <div className="feature-icon"><span role="img" aria-label="mobile friendly">📱</span></div>
               <h3>Smart Savings</h3>
               <p>Our algorithms help you find the best deals and maximize your savings</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📱</div>
+              <div className="feature-icon"><span role="img" aria-label="mobile friendly">📱</span></div>
               <h3>Mobile Friendly</h3>
               <p>Compare prices on the go with our responsive mobile design</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🔔</div>
+              <div className="feature-icon"><span role="img" aria-label="mobile friendly">📱</span></div>
               <h3>Price Alerts</h3>
               <p>Get notified when your favorite products go on sale</p>
             </div>
