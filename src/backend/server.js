@@ -70,12 +70,77 @@ app.use(bodyParser.json());
 app.use('/api/dashboard', dashboardExpress);
 
 // Database connection configuration
+// MySQL connection setup (use Railway vars if available, otherwise DB_*)
+const isProduction = process.env.NODE_ENV === "production";
+
+const hostCandidate =
+  process.env.DB_HOST ||
+  process.env.MYSQLHOST ||
+  process.env.MYSQL_HOST ||
+  process.env.DATABASE_HOST ||
+  "localhost";
+
+const host =
+  isProduction &&
+  (process.env.DB_HOST ||
+    process.env.MYSQLHOST ||
+    process.env.MYSQL_HOST ||
+    process.env.DATABASE_HOST)
+    ? hostCandidate
+    : hostCandidate === "localhost"
+    ? "127.0.0.1"
+    : hostCandidate;
+
+const port = parseInt(
+  process.env.DB_PORT ||
+    process.env.MYSQLPORT ||
+    process.env.MYSQL_PORT ||
+    "3306",
+  10
+);
+
+const user =
+  process.env.DB_USER ||
+  process.env.MYSQLUSER ||
+  process.env.MYSQL_USER ||
+  process.env.DATABASE_USER ||
+  "root";
+
+const password =
+  process.env.DB_PASSWORD ||
+  process.env.MYSQLPASSWORD ||
+  process.env.MYSQL_PASSWORD ||
+  process.env.DATABASE_PASSWORD ||
+  "";
+
+const database =
+  process.env.DB_NAME ||
+  process.env.MYSQLDATABASE ||
+  process.env.MYSQL_DATABASE ||
+  process.env.DATABASE_NAME ||
+  "supermarket_price_comparer";
+
+if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
+  console.error(
+    "Database host is not configured for production. Set MYSQLHOST/DB_HOST in Railway."
+  );
+  process.exit(1);
+}
+
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "supermarket",
-  port: process.env.DB_PORT || 3306
+  host,
+  port,
+  user,
+  password,
+  database,
+});
+
+connection.connect((err) => {
+  if (err) {
+    console.error("Failed to connect to MySQL:", err);
+    process.exit(1);
+  }
+  console.log(`Connected to MySQL at ${host}:${port}`);
 });
 
 // After database connection, add:
