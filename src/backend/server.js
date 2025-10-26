@@ -120,6 +120,35 @@ const database =
   process.env.DATABASE_NAME ||
   "supermarket_price_comparer";
 
+  // Support Railway-style single connection URL if present
+const databaseUrl = process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL;
+if (databaseUrl) {
+  try {
+    const url = new URL(databaseUrl);
+    host = url.hostname || host;
+    port = parseInt(url.port || port, 10);
+    user = url.username || user;
+    password = url.password || password;
+    const pathDb = (url.pathname || "").replace(/^\//, "");
+    database = pathDb || database;
+    console.log("Parsed database URL and applied to config");
+  } catch (e) {
+    console.warn("Invalid DATABASE_URL/RAILWAY_DATABASE_URL:", e.message);
+  }
+}
+
+// Debug: show resolved DB config and env flags
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("Env host flags:", {
+  DB_HOST: !!process.env.DB_HOST,
+  MYSQLHOST: !!process.env.MYSQLHOST,
+  MYSQL_HOST: !!process.env.MYSQL_HOST,
+  DATABASE_HOST: !!process.env.DATABASE_HOST,
+  DATABASE_URL: !!process.env.DATABASE_URL,
+  RAILWAY_DATABASE_URL: !!process.env.RAILWAY_DATABASE_URL,
+});
+console.log("Resolved DB config (server.js):", { host, port, user, database });
+
 if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
   console.error(
     "Database host is not configured for production. Set MYSQLHOST/DB_HOST in Railway."
