@@ -25,7 +25,6 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./middleware/authMiddleware");
-const bcrypt = require("bcrypt");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mailjet = require("node-mailjet").apiConnect(
