@@ -12,9 +12,14 @@ if (typeof globalThis.File === 'undefined') {
   };
 }
 
-require("dotenv").config({
-  path: require("path").resolve(__dirname, "../../.env"),
-});
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config({
+    path: require("path").resolve(__dirname, "../../.env"),
+  });
+  console.log("Environment variables loaded from .env (development)");
+} else {
+  console.log("Environment variables from Railway (production)");
+};
 // Verify environment variables are loaded
 console.log("Environment variables loaded successfully");
 const dashboardExpress = require("./routes/dashboardExpress");
@@ -22,6 +27,8 @@ const DataCollectionService = require('./services/dataCollectionService');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mysql = require("mysql2");
+const NODE_ENV = process.env.NODE_ENV || "development";
+const isDev = NODE_ENV !== "production";
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./middleware/authMiddleware");
@@ -42,8 +49,6 @@ const allowedOrigins = [
   'https://addandcompare.com',
   'https://www.addandcompare.com',
 ];
-
-const isDev = process.env.NODE_ENV !== 'production';
 
 app.use(cors({
   origin: (origin, callback) => {

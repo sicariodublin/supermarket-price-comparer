@@ -68,6 +68,19 @@ if (databaseUrl) {
   }
 }
 
+console.log("Raw env values (authMiddleware):", {
+  DB_HOST: process.env.DB_HOST,
+  DB_PORT: process.env.DB_PORT,
+  DB_USER: process.env.DB_USER,
+  DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_NAME: process.env.DB_NAME,
+  MYSQLHOST: process.env.MYSQLHOST,
+  MYSQLPORT: process.env.MYSQLPORT,
+  MYSQLUSER: process.env.MYSQLUSER,
+  MYSQLPASSWORD: process.env.MYSQLPASSWORD,
+  MYSQLDATABASE: process.env.MYSQLDATABASE,
+});
+
 // Debug: show resolved DB config and env flags
 console.log("Env host flags (authMiddleware):", {
   DB_HOST: !!process.env.DB_HOST,
