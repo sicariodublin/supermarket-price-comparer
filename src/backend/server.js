@@ -20,6 +20,7 @@ console.log("Environment variables loaded successfully");
 const dashboardExpress = require("./routes/dashboardExpress");
 const DataCollectionService = require('./services/dataCollectionService');
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const mysql = require("mysql2");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
