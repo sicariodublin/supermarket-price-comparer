@@ -53,7 +53,7 @@ const database =
 
   // Support Railway-style single connection URL if present
 const databaseUrl = process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL;
-if (databaseUrl) {
+if (databaseUrl && databaseUrl.includes("://")) {
   try {
     const url = new URL(databaseUrl);
     host = url.hostname || host;
@@ -66,6 +66,14 @@ if (databaseUrl) {
   } catch (e) {
     console.warn("Invalid DATABASE_URL/RAILWAY_DATABASE_URL:", e.message);
   }
+} else if (databaseUrl) {
+  console.warn("DATABASE_URL/RAILWAY_DATABASE_URL is present (authMiddleware) but not a full URL; skipping parse");
+}
+// ... existing code ...
+if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
+  console.warn(
+    "Database host appears local in production (authMiddleware). Verify MYSQLHOST/DB_HOST or RAILWAY_DATABASE_URL is set."
+  );
 }
 
 console.log("Raw env values (authMiddleware):", {
@@ -105,14 +113,30 @@ const connection = mysql.createConnection({
   user,
   password,
   database,
+  connectTimeout: Number(process.env.MYSQL_CONNECT_TIMEOUT || 10000),
 });
 
 connection.connect((err) => {
   if (err) {
     console.error("Failed to connect to MySQL (auth middleware):", err);
-    process.exit(1);
+    return;
   }
   console.log(`Auth middleware connected to MySQL at ${host}:${port}`);
+});
+
+connection.on('error', (err) => {
+  if (err && err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.warn('MySQL connection lost (authMiddleware). Attempting reconnect...');
+    connection.connect((reErr) => {
+      if (reErr) {
+        console.error('Reconnect attempt failed (authMiddleware):', reErr.message);
+      } else {
+        console.log('Reconnected to MySQL (authMiddleware).');
+      }
+    });
+  } else {
+    console.error('MySQL error (authMiddleware):', err);
+  }
 });
 
 const updateLoginStatus = (email, status) => {

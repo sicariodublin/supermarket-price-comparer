@@ -127,7 +127,7 @@ const database =
 
   // Support Railway-style single connection URL if present
 const databaseUrl = process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL;
-if (databaseUrl) {
+if (databaseUrl && databaseUrl.includes("://")) {
   try {
     const url = new URL(databaseUrl);
     host = url.hostname || host;
@@ -140,6 +140,14 @@ if (databaseUrl) {
   } catch (e) {
     console.warn("Invalid DATABASE_URL/RAILWAY_DATABASE_URL:", e.message);
   }
+}else if (databaseUrl) {
+  console.warn("DATABASE_URL/RAILWAY_DATABASE_URL is present but not a full URL; skipping parse");
+}
+// ... existing code ...
+if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
+  console.warn(
+    "Database host appears local in production. Verify MYSQLHOST/DB_HOST or RAILWAY_DATABASE_URL is set via Variable Reference on the Node service."
+  );
 }
 
 // Debug: show resolved DB config and env flags
@@ -161,20 +169,47 @@ if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
   process.exit(1);
 }
 
+// Graceful shutdown for Railway
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received: closing MySQL connection...');
+  connection.end(() => {
+    console.log('MySQL connection closed.');
+    process.exit(0);
+  });
+});
+process.on('SIGINT', () => {
+  console.log('SIGINT received: closing MySQL connection...');
+  connection.end(() => {
+    console.log('MySQL connection closed.');
+    process.exit(0);
+  });
+});
+
 const connection = mysql.createConnection({
   host,
   port,
   user,
   password,
   database,
+  connectTimeout: Number(process.env.MYSQL_CONNECT_TIMEOUT || 10000),
 });
 
 connection.connect((err) => {
   if (err) {
     console.error("Failed to connect to MySQL:", err);
-    process.exit(1);
+    return;
   }
   console.log(`Connected to MySQL at ${host}:${port}`);
+});
+
+app.get('/health', (req, res) => {
+  connection.ping((err) => {
+    if (err) {
+      console.error("DB ping failed:", err.message);
+      return res.status(500).json({ status: "unhealthy", db: false, error: err.message });
+    }
+    return res.json({ status: "healthy", db: true });
+  });
 });
 
 // After database connection, add:
@@ -365,8 +400,7 @@ app.post("/api/register", async (req, res) => {
                   Subject: "Verify Your Email",
                   HTMLPart: `
             <h3>Welcome, ${username}!</h3>
-            <p>Please verify your email by clicking the link below:</p>
-            <a href="${verificationUrl}">Verify Email</a>
+            <a href="${(process.env.FRONTEND_URL || "http://localhost:4000")}/verify-email?token=${verificationToken}">Verify Email</a>
           `,
                 },
               ],
