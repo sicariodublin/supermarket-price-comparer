@@ -103,6 +103,46 @@ if (helmet) {
     })
   );
 }
+
+// HTTP Basic Auth protection (site-wide, skip CORS preflight)
+const BASIC_AUTH_ENABLED = (process.env.BASIC_AUTH_ENABLED || "true").toLowerCase() === "true";
+const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER || "admin";
+const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS || "changeme";
+
+app.use((req, res, next) => {
+  if (!BASIC_AUTH_ENABLED) return next();
+  if (req.method === "OPTIONS") return next(); // allow CORS preflight
+
+  const header = req.headers.authorization || "";
+  
+  // Allow Bearer tokens to pass without a Basic challenge (for JWT-protected endpoints)
+  if (header.startsWith("Bearer ")) {
+    return next();
+  }
+  
+  if (!header.startsWith("Basic ")) {
+    res.set("WWW-Authenticate", 'Basic realm="Private Site"');
+    return res.status(401).send("Authentication required");
+  }
+
+  const encoded = header.slice(6);
+  let creds = "";
+  try {
+    creds = Buffer.from(encoded, "base64").toString();
+  } catch {
+    res.set("WWW-Authenticate", 'Basic realm="Private Site"');
+    return res.status(401).send("Invalid authorization header");
+  }
+
+  const [user, pass] = creds.split(":");
+  if (user !== BASIC_AUTH_USER || pass !== BASIC_AUTH_PASS) {
+    res.set("WWW-Authenticate", 'Basic realm="Private Site"');
+    return res.status(401).send("Access denied");
+  }
+
+  return next();
+});
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.use("/api/dashboard", dashboardExpress);
