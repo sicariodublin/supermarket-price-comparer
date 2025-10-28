@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Contact-us.css";
+import { http } from "../services/api";
 
 function ContactUs() {
   const [name, setName] = useState("");
@@ -13,29 +14,18 @@ function ContactUs() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const response = await fetch("http://localhost:5001/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, subject, message }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setFeedback("Message sent successfully!");
-        setName("");
-        setEmail("");
-        setSubject("");
-        setMessage("");
-      } else {
-        setFeedback("Failed to send message: " + data.message);
-      }
+      const { data } = await http.post("/contact", { name, email, message });
+      setFeedback(data?.message || "Message sent successfully!");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      setFeedback("Failed to send message.");
+      setFeedback(
+        error?.response?.data?.message || "Failed to send message."
+      );
     } finally {
       setIsLoading(false);
     }

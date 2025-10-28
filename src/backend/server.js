@@ -1,6 +1,6 @@
 // server.js (Backend)
 // --- Polyfill missing Web File in Node 18 (must be first) ---
-if (typeof globalThis.File === 'undefined') {
+if (typeof globalThis.File === "undefined") {
   const { Blob } = globalThis;
   globalThis.File = class File extends Blob {
     constructor(parts, name, opts = {}) {
@@ -8,8 +8,18 @@ if (typeof globalThis.File === 'undefined') {
       this.name = String(name);
       this.lastModified = opts.lastModified ?? Date.now();
     }
-    get [Symbol.toStringTag]() { return 'File'; }
+    get [Symbol.toStringTag]() {
+      return "File";
+    }
   };
+}
+
+let helmet;
+try {
+  helmet = require("helmet");
+} catch (_) {
+  console.warn("helmet not installed; skipping security headers");
+  helmet = null;
 }
 
 if (process.env.NODE_ENV !== "production") {
@@ -19,11 +29,11 @@ if (process.env.NODE_ENV !== "production") {
   console.log("Environment variables loaded from .env (development)");
 } else {
   console.log("Environment variables from Railway (production)");
-};
+}
 // Verify environment variables are loaded
 console.log("Environment variables loaded successfully");
 const dashboardExpress = require("./routes/dashboardExpress");
-const DataCollectionService = require('./services/dataCollectionService');
+const DataCollectionService = require("./services/dataCollectionService");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const mysql = require("mysql2");
@@ -42,37 +52,60 @@ const mailjet = require("node-mailjet").apiConnect(
 const app = express();
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:4000',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:4000',
-  'https://addandcompare.com',
-  'https://www.addandcompare.com',
+  "http://localhost:3000",
+  "http://localhost:4000",
+  "http://localhost:5001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:4000",
+  "https://addandcompare.com",
+  "https://www.addandcompare.com",
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow REST tools or server-to-server (no origin)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow REST tools or server-to-server (no origin)
+      if (!origin) return callback(null, true);
 
-    // Allow localhost/127.0.0.1 in development
-    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      // Normalize: strip trailing slashes
+      const o = origin.replace(/\/+$/, "");
 
-    if ((isDev && isLocalhost) || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+      // Allow localhost/127.0.0.1 on any port (with optional trailing slash)
+      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
 
-    console.warn(`CORS blocked origin: ${origin}`);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
-app.options('*', cors());
+      // Compare normalized allowed origins
+      const allowed = isLocalhost || allowedOrigins.map(u => u.replace(/\/+$/, "")).includes(o);
+
+      if (allowed) {
+        return callback(null, true);
+      }
+
+      console.warn(`CORS blocked origin: ${origin}`);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+app.options("*", cors());
+if (helmet) {
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // keep off unless CSP configured
+    })
+  );
+  app.use(
+    helmet.hsts({
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    })
+  );
+}
 app.use(express.json());
 app.use(bodyParser.json());
-app.use('/api/dashboard', dashboardExpress);
+app.use("/api/dashboard", dashboardExpress);
 
 // Database connection configuration
 // MySQL connection setup (use Railway vars if available, otherwise DB_*)
@@ -125,23 +158,32 @@ const database =
   process.env.DATABASE_NAME ||
   "supermarket_price_comparer";
 
-  // Support Railway-style single connection URL if present
-const databaseUrl = process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL;
-if (databaseUrl && databaseUrl.includes("://")) {
+// Support Railway-style single connection URL if present
+const rawDbUrlCandidates = [
+  process.env.RAILWAY_DATABASE_URL,
+  process.env.DATABASE_URL
+].filter(Boolean);
+
+const parseableDbUrl = rawDbUrlCandidates.find(
+  (u) => typeof u === "string" && u.includes("://")
+);
+
+if (parseableDbUrl) {
   try {
-    const url = new URL(databaseUrl);
+    const url = new URL(parseableDbUrl);
     host = url.hostname || host;
-    port = parseInt(url.port || port, 10);
+    port = parseInt(url.port || port, 10) || port;
     user = url.username || user;
     password = url.password || password;
     const pathDb = (url.pathname || "").replace(/^\//, "");
     database = pathDb || database;
     console.log("Parsed database URL and applied to config");
   } catch (e) {
-    console.warn("Invalid DATABASE_URL/RAILWAY_DATABASE_URL:", e.message);
+    console.warn("Failed to parse database URL:", e.message);
   }
-}else if (databaseUrl) {
-  console.warn("DATABASE_URL/RAILWAY_DATABASE_URL is present but not a full URL; skipping parse");
+} else if (rawDbUrlCandidates.length) {
+  // One of the DB URL env vars exists but isn't a full URL; use discrete MYSQL* vars without logging warnings
+  console.log("Database URL env present but not a full URL; using discrete MYSQL* variables");
 }
 // ... existing code ...
 if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
@@ -170,17 +212,17 @@ if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
 }
 
 // Graceful shutdown for Railway
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received: closing MySQL connection...');
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received: closing MySQL connection...");
   connection.end(() => {
-    console.log('MySQL connection closed.');
+    console.log("MySQL connection closed.");
     process.exit(0);
   });
 });
-process.on('SIGINT', () => {
-  console.log('SIGINT received: closing MySQL connection...');
+process.on("SIGINT", () => {
+  console.log("SIGINT received: closing MySQL connection...");
   connection.end(() => {
-    console.log('MySQL connection closed.');
+    console.log("MySQL connection closed.");
     process.exit(0);
   });
 });
@@ -202,11 +244,13 @@ connection.connect((err) => {
   console.log(`Connected to MySQL at ${host}:${port}`);
 });
 
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   connection.ping((err) => {
     if (err) {
       console.error("DB ping failed:", err.message);
-      return res.status(500).json({ status: "unhealthy", db: false, error: err.message });
+      return res
+        .status(500)
+        .json({ status: "unhealthy", db: false, error: err.message });
     }
     return res.json({ status: "healthy", db: true });
   });
@@ -228,28 +272,30 @@ connection.connect((err) => {
 });
 
 // Add manual trigger endpoint
-app.post('/api/admin/collect-data/:supermarketId', async (req, res) => {
+app.post("/api/admin/collect-data/:supermarketId", async (req, res) => {
   const { supermarketId } = req.params;
-  
+
   try {
     await dataCollectionService.updateProductPrices(parseInt(supermarketId));
-    res.json({ message: `Data collection completed for supermarket ${supermarketId}` });
+    res.json({
+      message: `Data collection completed for supermarket ${supermarketId}`,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Get collection dates endpoint
-app.get('/api/collection-dates', (req, res) => {
+app.get("/api/collection-dates", (req, res) => {
   const query = `
     SELECT id, name, last_updated 
     FROM supermarkets 
     ORDER BY name
   `;
-  
+
   connection.query(query, (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Failed to fetch collection dates' });
+      res.status(500).json({ error: "Failed to fetch collection dates" });
     } else {
       res.json(results);
     }
@@ -400,7 +446,9 @@ app.post("/api/register", async (req, res) => {
                   Subject: "Verify Your Email",
                   HTMLPart: `
             <h3>Welcome, ${username}!</h3>
-            <a href="${(process.env.FRONTEND_URL || "http://localhost:4000")}/verify-email?token=${verificationToken}">Verify Email</a>
+            <a href="${
+              process.env.FRONTEND_URL || "http://localhost:4000"
+            }/verify-email?token=${verificationToken}">Verify Email</a>
           `,
                 },
               ],
@@ -474,7 +522,7 @@ app.post("/api/login", (req, res) => {
         const token = jwt.sign(
           {
             id: user.id,
-            email: user.email
+            email: user.email,
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
@@ -490,8 +538,8 @@ app.post("/api/login", (req, res) => {
           user: {
             id: user.id,
             email: user.email,
-            name: user.name
-          }
+            name: user.name,
+          },
         });
       } catch (error) {
         console.error("Authentication error:", error);
@@ -500,7 +548,6 @@ app.post("/api/login", (req, res) => {
     }
   );
 });
-
 
 // Route for user logout
 app.post("/api/logout", (req, res) => {
@@ -517,10 +564,7 @@ app.post("/api/logout", (req, res) => {
   console.log("Token received during logout:", token);
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const email = decoded.email;
 
     const query = "UPDATE users SET isLoggedIn = FALSE WHERE email = ?";
@@ -544,14 +588,16 @@ app.post("/api/logout", (req, res) => {
 // Middleware to authenticate token
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Access token is missing or invalid' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res
+      .status(401)
+      .json({ error: "Access token is missing or invalid" });
   }
 
-  const token = authHeader.split(' ')[1]; // Extract the token from "Bearer <token>"
+  const token = authHeader.split(" ")[1]; // Extract the token from "Bearer <token>"
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
+      return res.status(403).json({ error: "Invalid or expired token" });
     }
 
     req.user = user; // Attach the user payload to the request
@@ -559,7 +605,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-app.get('/api/user/dashboard', authenticateToken, (req, res) => {
+app.get("/api/user/dashboard", authenticateToken, (req, res) => {
   const userId = req.user.id; // Extracted from the decoded JWT
 
   const query = `
@@ -567,7 +613,7 @@ app.get('/api/user/dashboard', authenticateToken, (req, res) => {
   `;
   connection.query(query, [userId], (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Database error' });
+      res.status(500).json({ error: "Database error" });
     } else {
       res.json({ userData: results });
     }
@@ -637,7 +683,7 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 // Route to search products by name
 app.get("/api/products/search", (req, res) => {
   const searchName = req.query.name || "";
-  
+
   let query = `
 SELECT 
   products.id, 
@@ -698,10 +744,7 @@ app.get("/api/verify-email", (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.id;
 
     const updateQuery = "UPDATE users SET isVerified = TRUE WHERE id = ?";
@@ -725,21 +768,21 @@ app.get("/api/verify-email", (req, res) => {
   }
 });
 
-app.post('/api/password-reset', async (req, res) => {
+app.post("/api/password-reset", async (req, res) => {
   const { username, email } = req.body;
 
   if (!username || !email) {
-    return res.status(400).json({ message: 'Username and email are required' });
+    return res.status(400).json({ message: "Username and email are required" });
   }
 
   try {
     const user = await findUserInDatabase(username, email); // Replace with your DB logic
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
+      expiresIn: "1h",
     });
     const resetUrl = `http://localhost:4000/password-reset?token=${token}`;
 
@@ -748,11 +791,11 @@ app.post('/api/password-reset', async (req, res) => {
       Messages: [
         {
           From: {
-            Email: 'addandcomparemessageus@hotmail.com',
-            Name: 'Add and Compare',
+            Email: "addandcomparemessageus@hotmail.com",
+            Name: "Add and Compare",
           },
           To: [{ Email: email }],
-          Subject: 'Password Reset Request',
+          Subject: "Password Reset Request",
           HTMLPart: `
             <p>Hi ${username},</p>
             <p>You requested to reset your password. Please click the link below to reset it:</p>
@@ -762,20 +805,26 @@ app.post('/api/password-reset', async (req, res) => {
         },
       ],
     };
-    await mailjet.post('send', { version: 'v3.1' }).request(emailOptions);
+    await mailjet.post("send", { version: "v3.1" }).request(emailOptions);
 
-    res.status(200).json({ message: 'Password reset email sent successfully.' });
+    res
+      .status(200)
+      .json({ message: "Password reset email sent successfully." });
   } catch (error) {
-    console.error('Error handling password reset:', error);
-    res.status(500).json({ message: 'Failed to handle password reset request.' });
+    console.error("Error handling password reset:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to handle password reset request." });
   }
 });
 
-app.post('/api/password-reset/confirm', async (req, res) => {
+app.post("/api/password-reset/confirm", async (req, res) => {
   const { token, newPassword } = req.body;
 
   if (!token || !newPassword) {
-    return res.status(400).json({ message: 'Token and new password are required' });
+    return res
+      .status(400)
+      .json({ message: "Token and new password are required" });
   }
 
   try {
@@ -783,25 +832,25 @@ app.post('/api/password-reset/confirm', async (req, res) => {
     const userId = decoded.userId;
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const query = 'UPDATE users SET password = ? WHERE id = ?';
+    const query = "UPDATE users SET password = ? WHERE id = ?";
     connection.query(query, [hashedPassword, userId], (err) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ message: 'Failed to reset password.' });
+        return res.status(500).json({ message: "Failed to reset password." });
       }
 
-      res.status(200).json({ message: 'Password reset successfully.' });
+      res.status(200).json({ message: "Password reset successfully." });
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: 'Invalid or expired token.' });
+    res.status(400).json({ message: "Invalid or expired token." });
   }
 });
 
 // Helper function to find a user in the database
 function findUserInDatabase(username, email) {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users WHERE username = ? AND email = ?';
+    const query = "SELECT * FROM users WHERE username = ? AND email = ?";
     connection.query(query, [username, email], (err, results) => {
       if (err) {
         return reject(err);
@@ -815,12 +864,15 @@ function findUserInDatabase(username, email) {
 }
 
 let users = [
-  { id: "user-id-placeholder", username: "Fsteyer", email: "fsteyer@example.com" },
-];  
+  {
+    id: "user-id-placeholder",
+    username: "Fsteyer",
+    email: "fsteyer@example.com",
+  },
+];
 
 // Delete Account Endpoint
-app.delete('/api/delete-account', verifyToken, (req, res) => {
-
+app.delete("/api/delete-account", verifyToken, (req, res) => {
   console.log("Full request headers:", req.headers);
   console.log("Full decoded token:", req.user);
   console.log("UserID from request:", req.userId);
@@ -831,20 +883,24 @@ app.delete('/api/delete-account', verifyToken, (req, res) => {
     return res.status(400).json({ message: "Invalid user ID" });
   }
 
-  connection.query('DELETE FROM users WHERE id = ?', [userId], (err, result) => {
-    if (err) {
-      console.error('Error deleting user from database:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
+  connection.query(
+    "DELETE FROM users WHERE id = ?",
+    [userId],
+    (err, result) => {
+      if (err) {
+        console.error("Error deleting user from database:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
 
-    if (result.affectedRows === 0) {
-      console.log("No user found with ID:", userId); // Log if no user is found
-      return res.status(404).json({ message: 'User not found' });
-    }
+      if (result.affectedRows === 0) {
+        console.log("No user found with ID:", userId); // Log if no user is found
+        return res.status(404).json({ message: "User not found" });
+      }
 
-    console.log("Deleted user with ID:", userId); // Log success
-    return res.status(200).json({ message: 'Account deleted successfully' });
-  });
+      console.log("Deleted user with ID:", userId); // Log success
+      return res.status(200).json({ message: "Account deleted successfully" });
+    }
+  );
 });
 
 // Serve React build files
@@ -857,7 +913,7 @@ app.listen(PORT, () => {
 });
 
 // Route to get new or back in stock products
-app.get('/api/products/new-or-back', async (req, res) => {
+app.get("/api/products/new-or-back", async (req, res) => {
   try {
     const query = `
       SELECT p.*, s.name as supermarket_name, 
@@ -874,21 +930,21 @@ app.get('/api/products/new-or-back', async (req, res) => {
       ORDER BY p.created_at DESC, p.back_in_stock_date DESC
       LIMIT 10
     `;
-    
+
     // Change this line:
     const [results] = await connection.query(query);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching new/back in stock products:', error);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    console.error("Error fetching new/back in stock products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
 // Route to get cost comparison data
-app.get('/api/products/cost-comparison', async (req, res) => {
+app.get("/api/products/cost-comparison", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 4;
-    
+
     const query = `
       SELECT 
         p1.name as product_name,
@@ -914,59 +970,64 @@ app.get('/api/products/cost-comparison', async (req, res) => {
       ORDER BY RAND()
       LIMIT ?
     `;
-    
+
     connection.query(query, [limit], (err, results) => {
       if (err) {
-        console.error('Error fetching cost comparisons:', err);
-        return res.status(500).json({ error: 'Failed to fetch cost comparisons' });
+        console.error("Error fetching cost comparisons:", err);
+        return res
+          .status(500)
+          .json({ error: "Failed to fetch cost comparisons" });
       }
-      
-       // Process results without JSON.parse since they're already objects
-      const processedResults = results.map(item => {
+
+      // Process results without JSON.parse since they're already objects
+      const processedResults = results.map((item) => {
         let variations = item.price_variations;
-        
+
         // Handle case where variations might be a string or already an object
-        if (typeof variations === 'string') {
+        if (typeof variations === "string") {
           try {
             variations = JSON.parse(variations);
           } catch (e) {
-            console.error('Error parsing variations:', e);
+            console.error("Error parsing variations:", e);
             variations = [];
           }
         }
-        
+
         // Ensure variations is an array
         if (!Array.isArray(variations)) {
           variations = [];
         }
-        
+
         // Sort variations by price in JavaScript
         variations.sort((a, b) => a.price - b.price);
-        
-        const prices = variations.map(v => v.price).filter(p => !isNaN(p));
+
+        const prices = variations.map((v) => v.price).filter((p) => !isNaN(p));
         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-        const savingsPercentage = maxPrice > 0 ? ((maxPrice - minPrice) / maxPrice * 100).toFixed(1) : 0;
-        
+        const savingsPercentage =
+          maxPrice > 0
+            ? (((maxPrice - minPrice) / maxPrice) * 100).toFixed(1)
+            : 0;
+
         return {
           ...item,
           price_variations: variations,
           min_price: minPrice,
           max_price: maxPrice,
-          savings_percentage: savingsPercentage
+          savings_percentage: savingsPercentage,
         };
       });
-      
+
       res.json(processedResults);
     });
   } catch (error) {
-    console.error('Error in cost comparison endpoint:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error in cost comparison endpoint:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // Route to get weekly sales/promotions
-app.get('/api/products/weekly-sales', async (req, res) => {
+app.get("/api/products/weekly-sales", async (req, res) => {
   try {
     const query = `
       SELECT p.*, s.name as supermarket_name,
@@ -980,21 +1041,21 @@ app.get('/api/products/weekly-sales', async (req, res) => {
       ORDER BY p.discount_percentage DESC, p.created_at DESC
       LIMIT 8
     `;
-    
+
     // Change this line:
     const [results] = await connection.query(query);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching weekly sales:', error);
-    res.status(500).json({ error: 'Failed to fetch weekly sales' });
+    console.error("Error fetching weekly sales:", error);
+    res.status(500).json({ error: "Failed to fetch weekly sales" });
   }
 });
 
 // Route to get product pricing history
-app.get('/api/products/:id/pricing-history', async (req, res) => {
+app.get("/api/products/:id/pricing-history", async (req, res) => {
   try {
     const productId = req.params.id;
-    
+
     const query = `
       SELECT ph.*, p.name as product_name, s.name as supermarket_name
       FROM price_history ph
@@ -1004,21 +1065,21 @@ app.get('/api/products/:id/pricing-history', async (req, res) => {
       ORDER BY ph.recorded_date DESC
       LIMIT 30
     `;
-    
+
     // Change this line:
     const [results] = await connection.query(query, [productId]);
     res.json(results);
   } catch (error) {
-    console.error('Error fetching pricing history:', error);
-    res.status(500).json({ error: 'Failed to fetch pricing history' });
+    console.error("Error fetching pricing history:", error);
+    res.status(500).json({ error: "Failed to fetch pricing history" });
   }
 });
 
 // Route to get detailed product information
-app.get('/api/products/:id/details', async (req, res) => {
+app.get("/api/products/:id/details", async (req, res) => {
   try {
     const productId = req.params.id;
-    
+
     const query = `
       SELECT p.*, s.name as supermarket_name, s.logo_url as supermarket_logo,
              AVG(ph.price) as avg_price_30_days,
@@ -1031,18 +1092,18 @@ app.get('/api/products/:id/details', async (req, res) => {
       WHERE p.id = ?
       GROUP BY p.id
     `;
-    
+
     // Change this line:
     const [results] = await connection.query(query, [productId]);
-    
+
     if (results.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
+      return res.status(404).json({ error: "Product not found" });
     }
-    
+
     res.json(results[0]);
   } catch (error) {
-    console.error('Error fetching product details:', error);
-    res.status(500).json({ error: 'Failed to fetch product details' });
+    console.error("Error fetching product details:", error);
+    res.status(500).json({ error: "Failed to fetch product details" });
   }
 });
 
@@ -1070,7 +1131,9 @@ app.get("/api/products/featured", (req, res) => {
   connection.query(query, (err, results) => {
     if (err) {
       console.error("Error fetching featured products:", err);
-      return res.status(500).json({ error: "Failed to fetch featured products" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch featured products" });
     }
     res.json(results);
   });
@@ -1080,6 +1143,3 @@ app.get("/api/products/featured", (req, res) => {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../../build", "index.html"));
 });
-
-
-

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './FeedbackForm.css';
+import { http } from "../services/api";
 
 function FeedbackForm() {
   const [message, setMessage] = useState('');
@@ -7,29 +8,19 @@ function FeedbackForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    
+    if (!message.trim() || isSubmitting) return;
+
     setIsSubmitting(true);
-
     try {
-      const response = await fetch('http://localhost:5001/api/feedback/sendFeedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-      });
-
-      if (response.ok) {
-        alert('Thank you for your feedback!');
-        setMessage('');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to send feedback');
-      }
+      const { data } = await http.post("/feedback/sendFeedback", { message });
+      alert(data?.message || 'Thank you for your feedback!');
+      setMessage('');
     } catch (error) {
       console.error('Error sending feedback:', error);
-      alert('An error occurred. Please try again later.');
+      alert(
+        error?.response?.data?.message ||
+        'An error occurred. Please try again later.'
+      );
     } finally {
       setIsSubmitting(false);
     }

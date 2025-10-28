@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
+import { http } from "../services/api";
 
 function LoginForm() {
   const [username, setUsername] = useState("");
@@ -28,29 +29,21 @@ function LoginForm() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5001/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: username, password }),
+      const { data } = await http.post("/login", {
+        email: username,
+        password,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Token received:", data.token);
-        
-        // Use setTimeout to ensure state updates are processed
-        setTimeout(() => {
-          login(data.token, data.user);
-          navigate("/search");
-        }, 0);
-      } else {
-        const errorData = await response.json();
-        console.error("Login failed:", errorData);
-        setErrorMessage(errorData.error || "Invalid login credentials");
-      }
+      console.log("Token received:", data.token);
+      setTimeout(() => {
+        login(data.token, data.user);
+        navigate("/search");
+      }, 0);
     } catch (error) {
-      console.error("Error during login:", error);
-      setErrorMessage("An error occurred. Please try again.");
+      console.error("Login failed:", error);
+      const message =
+        error?.response?.data?.error || "Invalid login credentials";
+      setErrorMessage(message);
     }
   };
 

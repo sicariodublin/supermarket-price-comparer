@@ -1,6 +1,7 @@
 // AuthContext.js
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { http } from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -13,7 +14,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
@@ -42,36 +43,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Start or restart inactivity timer
-  const startInactivityTimer = useCallback(() => {
-    clearTimeout(timeoutId);
-    const newTimeout = setTimeout(() => {
-      console.log("Logging out due to inactivity...");
-      logout();
-    }, 55 * 60 * 1000); // 55 minutes
-    setTimeoutId(newTimeout);
-  }, [timeoutId]);
-
-  // Login function to set token and user data
-  const login = useCallback((newToken, userData) => {
-    setToken(newToken);
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(userData));
-    startInactivityTimer();
-    setShowInactivityModal(false);
-  }, [startInactivityTimer]);
-
   // Logout function to clear auth data
   const logout = useCallback(async () => {
     try {
-      if (token) {
-        await fetch("http://localhost:5001/api/logout", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      await http.post("/logout", null, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
     } catch (error) {
       console.error("Error during logout:", error.message);
     } finally {
@@ -84,7 +61,28 @@ export const AuthProvider = ({ children }) => {
       setTimeoutId(null);
       navigate("/"); // Redirect to Home
     }
-  }, [token, navigate, timeoutId]);
+  }, [navigate, timeoutId, token]);
+
+  // Start or restart inactivity timer
+  const startInactivityTimer = useCallback(() => {
+    clearTimeout(timeoutId);
+    const newTimeout = setTimeout(() => {
+      console.log("Logging out due to inactivity...");
+      logout();
+    }, 55 * 60 * 1000); // 55 minutes
+    setTimeoutId(newTimeout);
+  }, [timeoutId, logout]);
+
+  // Login function to set token and user data
+  const login = useCallback((newToken, userData) => {
+    setToken(newToken);
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("user", JSON.stringify(userData));
+    startInactivityTimer();
+    setShowInactivityModal(false);
+  }, [startInactivityTimer]);
 
   // Reset inactivity timer on user activity
   const resetInactivityTimer = useCallback(() => {

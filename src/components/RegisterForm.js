@@ -3,6 +3,7 @@ import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import '../styles/Register.css';
+import { http } from "../services/api";
 
 function RegisterForm() {
   const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -39,22 +41,20 @@ function RegisterForm() {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+      const { data } = await http.post("/register", {
+        username,
+        email,
+        password,
       });
-
-      if (response.ok) {
-        alert('Registration successful! Please check your email to verify your account.');
-        navigate('/login');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error);
-      }
+      alert(data?.message || 'Registration successful! Please check your email to verify your account.');
+      navigate('/login');
     } catch (error) {
       console.error('Error during registration:', error);
-      alert('An error occurred. Please try again.');
+      const msg =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        'An error occurred. Please try again.';
+      alert(msg);
     }
   };
 

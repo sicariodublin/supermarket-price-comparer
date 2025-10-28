@@ -158,19 +158,16 @@
 // src/services/api.js
 import axios from "axios";
 
-/**
- * Normalize the base URL so we always end up with:
- *   <HOST>/api
- * regardless of whether REACT_APP_API_URL includes /api or trailing slashes.
- */
-const RAW_BASE = process.env.REACT_APP_API_URL || "http://localhost:5001";
-// strip trailing slashes, then strip a trailing /api if present
+// Safe base URL resolution without assuming 'process' exists in the browser
+const RAW_BASE =
+  (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_URL)
+    ? process.env.REACT_APP_API_URL
+    : (typeof window !== "undefined" ? window.location.origin : "http://localhost:5001");
+
 const HOST = RAW_BASE.replace(/\/+$/, "").replace(/\/api$/, "");
 
-// Single axios instance for all API calls
 export const http = axios.create({
   baseURL: `${HOST}/api`,
-  // withCredentials: true, // enable if you use cookies
 });
 
 // -------- Products --------

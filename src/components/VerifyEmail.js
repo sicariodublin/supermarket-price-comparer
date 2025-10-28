@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { http } from "../services/api";
 
 function VerifyEmail() {
   const navigate = useNavigate();
@@ -7,35 +8,15 @@ function VerifyEmail() {
   const [message, setMessage] = useState("Verifying your email...");
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search); 
-    const token = queryParams.get("token");
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (!token) return;
 
-    if (token) {
-      fetch(`http://localhost:5001/api/verify-email?token=${token}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to verify email");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Verification response:", data);
-          if (data.message === "Email verified successfully. You can now log in.") {
-            setMessage(data.message);
-            setTimeout(() => navigate("/login"), 3000); // Redirect after 3 seconds
-          } else {
-            setMessage("Verification failed. Please try again.");
-          }
-        })
-        .catch((error) => {
-          console.error('Error verifying email:', error);
-          setMessage("An error occurred. Please try again later.");
-        });
-    } else {
-      setMessage("Invalid verification link.");
-    }
-  }, [location, navigate]);
-
+    http
+      .get("/verify-email", { params: { token } })
+      .then(() => setMessage("Email verified successfully!"))
+      .catch(() => setMessage("Verification failed. Please try again."));
+  }, []);
   return (
     <div className="verify-email">
       <h1>{message}</h1>

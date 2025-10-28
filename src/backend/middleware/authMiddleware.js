@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const mysql = require("mysql2");
 
 // Top-level MySQL connection used by auth middleware
@@ -51,25 +51,33 @@ const database =
   process.env.DATABASE_NAME ||
   "supermarket_price_comparer";
 
-  // Support Railway-style single connection URL if present
-const databaseUrl = process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL;
-if (databaseUrl && databaseUrl.includes("://")) {
+// Support Railway-style single connection URL if present
+const rawDbUrlCandidates = [
+  process.env.RAILWAY_DATABASE_URL,
+  process.env.DATABASE_URL
+].filter(Boolean);
+
+const parseableDbUrl = rawDbUrlCandidates.find(
+  (u) => typeof u === "string" && u.includes("://")
+);
+
+if (parseableDbUrl) {
   try {
-    const url = new URL(databaseUrl);
+    const url = new URL(parseableDbUrl);
     host = url.hostname || host;
-    port = parseInt(url.port || port, 10);
+    port = parseInt(url.port || port, 10) || port;
     user = url.username || user;
     password = url.password || password;
     const pathDb = (url.pathname || "").replace(/^\//, "");
     database = pathDb || database;
     console.log("Parsed database URL (authMiddleware) and applied to config");
   } catch (e) {
-    console.warn("Invalid DATABASE_URL/RAILWAY_DATABASE_URL:", e.message);
+    console.warn("Failed to parse database URL (authMiddleware):", e.message);
   }
-} else if (databaseUrl) {
-  console.warn("DATABASE_URL/RAILWAY_DATABASE_URL is present (authMiddleware) but not a full URL; skipping parse");
+} else if (rawDbUrlCandidates.length) {
+  // One of the DB URL env vars exists but isn't a full URL; use discrete MYSQL* vars without logging warnings
+  console.log("Database URL env present but not a full URL (authMiddleware); using discrete MYSQL* variables");
 }
-// ... existing code ...
 if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
   console.warn(
     "Database host appears local in production (authMiddleware). Verify MYSQLHOST/DB_HOST or RAILWAY_DATABASE_URL is set."
@@ -98,7 +106,12 @@ console.log("Env host flags (authMiddleware):", {
   DATABASE_URL: !!process.env.DATABASE_URL,
   RAILWAY_DATABASE_URL: !!process.env.RAILWAY_DATABASE_URL,
 });
-console.log("Resolved DB config (authMiddleware):", { host, port, user, database });
+console.log("Resolved DB config (authMiddleware):", {
+  host,
+  port,
+  user,
+  database,
+});
 
 if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
   console.error(
@@ -124,29 +137,34 @@ connection.connect((err) => {
   console.log(`Auth middleware connected to MySQL at ${host}:${port}`);
 });
 
-connection.on('error', (err) => {
-  if (err && err.code === 'PROTOCOL_CONNECTION_LOST') {
-    console.warn('MySQL connection lost (authMiddleware). Attempting reconnect...');
+connection.on("error", (err) => {
+  if (err && err.code === "PROTOCOL_CONNECTION_LOST") {
+    console.warn(
+      "MySQL connection lost (authMiddleware). Attempting reconnect..."
+    );
     connection.connect((reErr) => {
       if (reErr) {
-        console.error('Reconnect attempt failed (authMiddleware):', reErr.message);
+        console.error(
+          "Reconnect attempt failed (authMiddleware):",
+          reErr.message
+        );
       } else {
-        console.log('Reconnected to MySQL (authMiddleware).');
+        console.log("Reconnected to MySQL (authMiddleware).");
       }
     });
   } else {
-    console.error('MySQL error (authMiddleware):', err);
+    console.error("MySQL error (authMiddleware):", err);
   }
 });
 
 const updateLoginStatus = (email, status) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      'UPDATE users SET isLoggedIn = ? WHERE email = ?',
+      "UPDATE users SET isLoggedIn = ? WHERE email = ?",
       [status, email],
       (err, result) => {
         if (err) {
-          console.error('Error updating login status:', err);
+          console.error("Error updating login status:", err);
           reject(err);
         } else {
           console.log(`Updated isLoggedIn for ${email}`);
@@ -160,23 +178,20 @@ const updateLoginStatus = (email, status) => {
 const verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.error('Missing or invalid Authorization header');
-      return res.status(401).json({ message: 'No token provided' });
+
+    if (!authHeader?.startsWith("Bearer ")) {
+      console.error("Missing or invalid Authorization header");
+      return res.status(401).json({ message: "No token provided" });
     }
 
-    const token = authHeader.split(' ')[1];
-    
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     console.log("Token verification:", {
       decoded,
       hasId: !!decoded.id,
-      hasEmail: !!decoded.email
+      hasEmail: !!decoded.email,
     });
 
     if (!decoded.email) {
@@ -184,7 +199,7 @@ const verifyToken = (req, res, next) => {
     }
 
     connection.query(
-      'SELECT id, email, isLoggedIn FROM users WHERE email = ?',
+      "SELECT id, email, isLoggedIn FROM users WHERE email = ?",
       [decoded.email],
       async (err, results) => {
         if (err) {
@@ -206,18 +221,17 @@ const verifyToken = (req, res, next) => {
         req.user = {
           id: results[0].id,
           email: decoded.email,
-          isLoggedIn: 1
+          isLoggedIn: 1,
         };
 
         console.log("User verified:", req.user);
         next();
       }
     );
-
   } catch (error) {
     console.error("Token verification failed:", {
       name: error.name,
-      message: error.message
+      message: error.message,
     });
     return res.status(401).json({ message: "Invalid token" });
   }

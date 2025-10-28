@@ -1,37 +1,29 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { useAuth } from "../context/AuthContext";
+import { http } from "../services/api";
 
-
-const DeleteConfirmationModal = ({ isOpen, onClose }) => {
+function DeleteConfirmationModal({ isOpen, onClose }) {
   const { token, logout } = useAuth(); // Retrieve token and logout from AuthContext
 
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
     try {
-      const response = await fetch("http://localhost:5001/api/delete-account", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Ensure the token is correct
-        },
+      await http.delete("/delete-account", {
+        headers: { Authorization: `Bearer ${token}` },
       });
-  
-      if (response.ok) {
-        alert("Account deleted successfully!");
-        logout(); // Log out the user after successful deletion
-      } else {
-        const errorData = await response.json();
-        console.error("Error response:", errorData);
-        alert(`Failed to delete account: ${errorData.message}`);
-      }
+      alert("Account deleted successfully!");
+      logout(); // Log out the user after successful deletion
     } catch (error) {
       console.error("Error deleting account:", error);
-      alert("An error occurred while deleting your account.");
+      const msg =
+        error?.response?.data?.message ||
+        "An error occurred while deleting your account.";
+      alert(msg);
     }
-  };  
-  
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal">
@@ -55,7 +47,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
-};
+}
 
 DeleteConfirmationModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,

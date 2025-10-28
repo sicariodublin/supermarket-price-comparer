@@ -113,9 +113,11 @@ function SearchPage() {
     } else if (sort === "price") {
       filtered = filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (sort === "date") {
-      filtered = filtered.sort(
-        (a, b) => new Date(a.product_date) - new Date(b.product_date)
-      );
+      filtered = filtered.sort((a, b) => {
+        const dateA = a.product_date ? new Date(a.product_date).getTime() : 0;
+        const dateB = b.product_date ? new Date(b.product_date).getTime() : 0;
+        return dateB - dateA;
+      });
     } else if (sort === "supermarket") {
       filtered = filtered.sort((a, b) =>
         (a.supermarket_name || "").localeCompare(b.supermarket_name || "")
