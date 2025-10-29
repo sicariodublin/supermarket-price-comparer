@@ -136,7 +136,7 @@ const FeaturedProducts = ({ onProductClick }) => {
         
         {featuredProducts.length === 0 ? (
           <div className="no-products-message">
-            <div className="no-products-icon">📦</div>
+            <div className="no-products-icon"><span role="img" aria-label="box">📦</span></div>
             <h3>No Featured Products Available</h3>
             <p>Check back soon for exciting featured deals!</p>
           </div>
@@ -164,7 +164,7 @@ const FeaturedProducts = ({ onProductClick }) => {
                   )}
                   {product.featured === 1 && (
                     <div className="featured-badge">
-                      ⭐ Featured
+                      <span role="img" aria-label="star">⭐</span> Featured
                     </div>
                   )}
                 </div>

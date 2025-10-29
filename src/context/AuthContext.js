@@ -120,7 +120,7 @@ export function AuthProvider({ children }) {
         <div className="inactivity-modal">
           <div className="modal-content">
             <p>You have been logged out due to inactivity.</p>
-            <button onClick={() => navigate("/login")}>OK</button>
+            <button onClick={handleInactivityModalClose}>OK</button>
           </div>
         </div>
       )}

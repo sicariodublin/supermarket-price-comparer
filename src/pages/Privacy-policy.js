@@ -30,7 +30,7 @@ function PrivacyPolicy() {
 
             <div className="privacy-sections">
               <div className="privacy-card">
-                <div className="card-icon">📊</div>
+                <div className="card-icon"><span role="img" aria-label="chart">📊</span></div>
                 <h2>Information we collect</h2>
                 <p>
                   We collect information you voluntarily provide to us, such as your
@@ -42,7 +42,7 @@ function PrivacyPolicy() {
               </div>
 
               <div className="privacy-card">
-                <div className="card-icon">🎯</div>
+                <div className="card-icon"><span role="img" aria-label="magnifying glass">🎯</span></div>
                 <h2>Why we collect this information</h2>
                 <p>
                   The information you provide to us enables us to fulfill your service
@@ -53,7 +53,7 @@ function PrivacyPolicy() {
               </div>
 
               <div className="privacy-card">
-                <div className="card-icon">🔒</div>
+                <div className="card-icon"><span role="img" aria-label="closed lock">🔒</span></div>
                 <h2>Information sharing and disclosure</h2>
                 <p>
                   We do not share or disclose your personal information to any third
@@ -63,7 +63,7 @@ function PrivacyPolicy() {
               </div>
 
               <div className="privacy-card">
-                <div className="card-icon">🛡️</div>
+                <div className="card-icon"><span role="img" aria-label="shield">🛡️</span></div>
                 <h2>Security</h2>
                 <p>
                   We take reasonable measures to protect your personal information
@@ -73,7 +73,7 @@ function PrivacyPolicy() {
               </div>
 
               <div className="privacy-card">
-                <div className="card-icon">🔄</div>
+                <div className="card-icon"><span role="img" aria-label="recycling symbol">🔄</span></div>
                 <h2>Changes to this policy</h2>
                 <p>
                   We may update this policy from time to time. We will notify you of
@@ -82,7 +82,7 @@ function PrivacyPolicy() {
               </div>
 
               <div className="privacy-card featured">
-                <div className="card-icon">📞</div>
+                <div className="card-icon"><span role="img" aria-label="telephone">📞</span></div>
                 <h2>Contact us</h2>
                 <p>
                   If you have any questions or concerns about our privacy policy,

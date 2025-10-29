@@ -65,7 +65,7 @@ function ProductDetails() {
       <div className="product-details-main">
         <div className="product-image-section">
           <img src={product?.image} alt={product?.name} className="product-image" />
-          <button className="cart-btn">🛒</button>
+          <button className="cart-btn"><span role="img" aria-label="shopping cart">🛒</span></button>
         </div>
         <div className="product-info-section">
           <span className="supermarket-badge">{product?.supermarket}</span>

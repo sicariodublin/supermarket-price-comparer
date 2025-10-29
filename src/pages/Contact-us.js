@@ -70,7 +70,7 @@ function ContactUs() {
 
                 <div className="contact-details">
                   <div className="detail-item">
-                    <div className="detail-icon">📍</div>
+                    <span className="detail-icon"><span role="img" aria-label="house">🏠</span></span>
                     <div className="detail-content">
                       <h3>Address</h3>
                       <p>To be Confirmed</p>
@@ -78,7 +78,7 @@ function ContactUs() {
                   </div>
 
                   <div className="detail-item">
-                    <div className="detail-icon">📞</div>
+                    <div className="detail-icon"><span role="img" aria-label="telephone">📞</span></div>
                     <div className="detail-content">
                       <h3>Phone</h3>
                       <p>To be Confirmed</p>
@@ -86,7 +86,7 @@ function ContactUs() {
                   </div>
 
                   <div className="detail-item">
-                    <div className="detail-icon">📞</div>
+                    <div className="detail-icon"><span role="img" aria-label="telephone">📞</span></div>
                     <div className="detail-content">
                       <h3>Toll-Free</h3>
                       <p>To be Confirmed</p>
@@ -94,7 +94,7 @@ function ContactUs() {
                   </div>
 
                   <div className="detail-item">
-                    <div className="detail-icon">📧</div>
+                    <div className="detail-icon"><span role="img" aria-label="email">📧</span></div>
                     <div className="detail-content">
                       <h3>Email</h3>
                       <p>addandcomparemessageus@hotmail.com</p>

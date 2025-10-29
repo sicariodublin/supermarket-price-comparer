@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { http } from "../services/api";
 
 function VerifyEmail() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [message, setMessage] = useState("Verifying your email...");
 
   useEffect(() => {

@@ -64,7 +64,6 @@ function SearchPage() {
     if (!isAuthenticated) return;
 
     try {
-      const result = await updateProduct(updatedProduct.id, updatedProduct);
       const updatedProducts = products.map((product) =>
         product.id === updatedProduct.id ? updatedProduct : product
       );
@@ -297,7 +296,7 @@ function SearchPage() {
 
           {filteredProducts.length === 0 && searchTerm && (
             <div className="no-results">
-              <div className="no-results-icon">🔍</div>
+              <div className="no-results-icon"><span role="img" aria-label="search">🔍</span></div>
               <h3>No products found for "{searchTerm}"</h3>
               <p>Try searching for different keywords or check your spelling</p>
             </div>
@@ -305,7 +304,7 @@ function SearchPage() {
 
           {filteredProducts.length === 0 && !searchTerm && (
             <div className="search-placeholder">
-              <div className="placeholder-icon">🛒</div>
+              <div className="placeholder-icon"><span role="img" aria-label="shopping cart">🛒</span></div>
               <h3>Start searching to compare prices</h3>
               <p>Enter a product name above to find the best deals across Irish supermarkets</p>
             </div>
@@ -328,15 +327,15 @@ function SearchPage() {
               <p>Help the community by adding product prices you've found in stores.</p>
               <div className="auth-benefits">
                 <div className="benefit-item">
-                  <span className="benefit-icon">✅</span>
+                  <span className="benefit-icon"><span role="img" aria-label="checkmark">✅</span></span>
                   <span>Add product prices</span>
                 </div>
                 <div className="benefit-item">
-                  <span className="benefit-icon">✅</span>
+                  <span className="benefit-icon"><span role="img" aria-label="checkmark">✅</span></span>
                   <span>Edit your submissions</span>
                 </div>
                 <div className="benefit-item">
-                  <span className="benefit-icon">✅</span>
+                  <span className="benefit-icon"><span role="img" aria-label="checkmark">✅</span></span>
                   <span>Help others save money</span>
                 </div>
               </div>
@@ -373,7 +372,7 @@ function SearchPage() {
       )}
 
       <div className="disclaimer">
-        <p>💡 Disclaimer: Displayed results may not always be perfectly accurate. Product availability may vary depending on your location.</p>
+        <p><span role="img" aria-label="lightbulb">💡</span> Disclaimer: Displayed results may not always be perfectly accurate. Product availability may vary depending on your location.</p>
       </div>
     </div>
   );

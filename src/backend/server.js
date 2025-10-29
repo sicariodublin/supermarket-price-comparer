@@ -64,17 +64,17 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow REST tools or server-to-server (no origin)
       if (!origin) return callback(null, true);
 
-      // Normalize: strip trailing slashes
       const o = origin.replace(/\/+$/, "");
-
-      // Allow localhost/127.0.0.1 on any port (with optional trailing slash)
       const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
-
-      // Compare normalized allowed origins
       const allowed = isLocalhost || allowedOrigins.map(u => u.replace(/\/+$/, "")).includes(o);
+
+      // In development, allow unknown origins (e.g., embedded preview)
+      if (!allowed && isDev) {
+        console.warn(`Dev CORS allowed temporarily: ${origin}`);
+        return callback(null, true);
+      }
 
       if (allowed) {
         return callback(null, true);
@@ -115,7 +115,7 @@ app.use((req, res, next) => {
 
   const header = req.headers.authorization || "";
   
-  // Allow Bearer tokens to pass without a Basic challenge (for JWT-protected endpoints)
+  // Allow Bearer tokens to bypass Basic challenge (for JWT-protected endpoints)
   if (header.startsWith("Bearer ")) {
     return next();
   }

@@ -27,7 +27,7 @@ function HowItWorks() {
           <div className="content-grid">
             {/* Guest Users */}
             <div className="info-card">
-              <div className="card-icon">👥</div>
+              <div className="card-icon"><span role="img" aria-label="user">👥</span></div>
               <h2>For Guests (Unregistered Users)</h2>
               <ul>
                 <li>Search for products to see current prices from different supermarkets in Ireland.</li>
@@ -37,7 +37,7 @@ function HowItWorks() {
 
             {/* Registered Users */}
             <div className="info-card featured">
-              <div className="card-icon">🔐</div>
+              <div className="card-icon"><span role="img" aria-label="lock">🔐</span></div>
               <h2>For Registered Users</h2>
               <p>By creating a free account on addandcompare.com, you unlock additional features that enhance your shopping experience. Registered users can:</p>
               <ul>
@@ -49,7 +49,7 @@ function HowItWorks() {
 
             {/* Getting Started */}
             <div className="info-card">
-              <div className="card-icon">🚀</div>
+              <div className="card-icon"><span role="img" aria-label="rocket">🚀</span></div>
               <ol>
                 <li>Visit our registration page to create your account.</li>
                 <li>Once registered, log in to access your personalized dashboard.</li>
@@ -59,14 +59,14 @@ function HowItWorks() {
 
             {/* Our Commitment */}
             <div className="info-card">
-              <div className="card-icon">💪</div>
+              <div className="card-icon"><span role="img" aria-label="strong">💪</span></div>
               <h2>Our Commitment</h2>
               <li>We are dedicated to keeping our platform up-to-date and reliable. We encourage our users to contribute by updating product prices and information to help fellow shoppers.</li>
             </div>
 
             {/* Need Help */}
             <div className="info-card">
-              <div className="card-icon">❓</div>
+              <div className="card-icon"><span role="img" aria-label="question">❓</span></div>
               <h2>Need Help?</h2>
               <li>If you need assistance or have any questions, visit our <a href="/contact-us" className="link-primary">Contact Us</a> page, and we'll be happy to help you navigate our site or resolve any issues.</li>
             </div>

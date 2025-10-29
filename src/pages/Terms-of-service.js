@@ -28,7 +28,7 @@ function TermsOfService() {
 
             <div className="terms-sections">
               <div className="terms-card">
-                <div className="card-icon">✅</div>
+                <div className="card-icon"><span role="img" aria-label="checkmark">✅</span></div>
                 <h2>Acceptance of Terms</h2>
                 <p>
                   When you use our services, you're agreeing to our terms, so please
@@ -37,7 +37,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card">
-                <div className="card-icon">🔄</div>
+                <div className="card-icon"><span role="img" aria-label="refresh">🔄</span></div>
                 <h2>Changes to Terms</h2>
                 <p>
                   We may modify these terms at any time. We will notify you of any
@@ -46,7 +46,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card">
-                <div className="card-icon">📧</div>
+                <div className="card-icon"><span role="img" aria-label="envelope">📧</span></div>
                 <h2>Communication</h2>
                 <p>
                   By creating an account on our website, you agree to subscribe to
@@ -56,7 +56,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card">
-                <div className="card-icon">📄</div>
+                <div className="card-icon"><span role="img" aria-label="page">📄</span></div>
                 <h2>Content</h2>
                 <p>
                   The content found on or through this service are the property of
@@ -68,7 +68,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card">
-                <div className="card-icon">👤</div>
+                <div className="card-icon"><span role="img" aria-label="person">👤</span></div>
                 <h2>Accounts</h2>
                 <p>
                   When you create an account with us, you guarantee that you are above
@@ -80,7 +80,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card">
-                <div className="card-icon">©️</div>
+                <div className="card-icon"><span role="img" aria-label="copyright">©️</span></div>
                 <h2>Intellectual Property</h2>
                 <p>
                   The service and its original content (excluding Content provided by
@@ -90,7 +90,7 @@ function TermsOfService() {
               </div>
 
               <div className="terms-card featured">
-                <div className="card-icon">📞</div>
+                <div className="card-icon"><span role="img" aria-label="phone">📞</span></div>
                 <h2>Contact Us</h2>
                 <p>
                   If you have any questions about these Terms, please contact us.

@@ -4,7 +4,7 @@ import { http } from "../services/api";
 import AuthContext from "../context/AuthContext";
 
 function Logout() {
-  const { isAuthenticated, token, setToken, setIsAuthenticated, setUser } = useContext(AuthContext);
+  const { isAuthenticated, setToken, setIsAuthenticated, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {

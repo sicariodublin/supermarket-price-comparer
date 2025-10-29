@@ -1,29 +1,19 @@
 // Top-level axios client setup
 import axios from "axios";
 
-// Robust base URL resolution
 const env = typeof process !== "undefined" && process.env ? process.env : {};
-const port = typeof window !== "undefined" ? window.location.port : "";
-const isDevFrontend = port === "3000" || port === "4000";
-
-const defaultBase =
-  typeof window !== "undefined"
-    ? isDevFrontend
-      ? "http://localhost:5001"
-      : window.location.origin
-    : "http://localhost:5001";
 
 const API_BASE =
   env.REACT_APP_API_URL ||
   (typeof window !== "undefined" && window.__API_URL) ||
-  defaultBase;
+  "http://localhost:5001";
 
 export const http = axios.create({
   baseURL: `${API_BASE}/api`,
   withCredentials: true,
 });
 
-// Attach Basic Auth only if no Authorization is set (preserve Bearer for JWT)
+// Attach Basic Auth only if no Authorization header is already set (preserve Bearer)
 const BASIC_USER =
   env.REACT_APP_BASIC_USER ||
   (typeof window !== "undefined" && window.__BASIC_USER) ||
@@ -36,11 +26,11 @@ const BASIC_PASS =
 if (BASIC_USER && BASIC_PASS) {
   http.interceptors.request.use((config) => {
     config.headers = config.headers || {};
-    const hasAuthHeader =
+    const hasAuth =
       typeof config.headers["Authorization"] === "string" &&
       config.headers["Authorization"].length > 0;
 
-    if (!hasAuthHeader) {
+    if (!hasAuth) {
       const token = btoa(`${BASIC_USER}:${BASIC_PASS}`);
       config.headers["Authorization"] = `Basic ${token}`;
     }
@@ -48,7 +38,7 @@ if (BASIC_USER && BASIC_PASS) {
   });
 }
 
-// -------- Featured / Home widgets --------
+// Featured products
 export async function getFeaturedProducts(limit = 6) {
   const { data } = await http.get("/products/featured", { params: { limit } });
   return data;
