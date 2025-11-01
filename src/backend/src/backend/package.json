@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "backend": "file:../..",
     "helmet": "^8.1.0"
   }
 }
