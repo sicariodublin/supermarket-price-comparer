@@ -53,7 +53,10 @@ class DataCollectionService {
     const supermarket = this.supermarkets[supermarketId];
     if (!supermarket) throw new Error('Supermarket not found');
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
     
     try {
