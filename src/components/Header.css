@@ -41,8 +41,9 @@
 }
 
 .brand-logo {
-  height: 50px;
+  height: 57px;
   width: auto;
+  margin-top: 5px;
 }
 
 /* Mobile Menu Toggle */
@@ -145,7 +146,7 @@
 
 .search-input {
   width: 100%;
-  padding: 10px 15px 10px 5px;
+  padding: 10px 15px 10px 2px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -226,10 +227,11 @@
   justify-content: center;
 }
 
-.btn-outline {
+.btn.btn-outline {
   background: transparent;
   color: #667eea;
   border-color: #667eea;
+  padding: 6px 6px 7px;
 }
 
 .btn-outline:hover {
@@ -238,10 +240,11 @@
   transform: translateY(-1px);
 }
 
-.btn-primary {
+.btn.btn-primary {
   background: #667eea;
   color: white;
   border-color: #667eea;
+  padding: 6px 6px 7px;
 }
 
 .btn-primary:hover {

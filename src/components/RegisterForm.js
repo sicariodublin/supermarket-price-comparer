@@ -14,12 +14,12 @@ function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
 
-  const { login } = useContext(AuthContext);
+  useContext(AuthContext);
   const navigate = useNavigate();
 
   // Password validation function
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[£$%&*\/\\@-]).{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[£$%&*@\-]).{8,}$/;
     return passwordRegex.test(password);
   };
 

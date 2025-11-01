@@ -1,7 +1,7 @@
 // SearchPage.js
 import React, { useEffect, useState } from "react";
 import { useAuth } from '../context/AuthContext';
-import { getProducts, addProduct, updateProduct } from '../services/api';
+import { getProducts, addProduct } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
@@ -27,7 +27,7 @@ function SearchPage() {
     if (queryFromUrl && queryFromUrl !== searchTerm) {
       setSearchTerm(queryFromUrl);
     }
-  }, [location.search]);
+  }, [location.search, searchTerm]);
 
   const fetchProducts = async (searchTerm = "", sortOption = "") => {
     try {
@@ -43,7 +43,7 @@ function SearchPage() {
     if (searchTerm || sortOption) {
       fetchProducts(searchTerm, sortOption);
     }
-  }, [searchTerm, sortOption]);
+  }, [searchTerm, sortOption, fetchProducts]);
 
   const handleProductSaved = async (newProduct) => {
     if (!isAuthenticated) return;

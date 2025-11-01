@@ -23,7 +23,6 @@ function AddProduct() {
     };
 
     try {
-      const { data } = await http.post("/products", newProduct);
       alert('Product added successfully!');
 
       // Reset form fields

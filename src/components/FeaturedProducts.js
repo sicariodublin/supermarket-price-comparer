@@ -1,7 +1,7 @@
 // FeaturedProducts.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getFeaturedProducts } from '../services/api';
+//import { getFeaturedProducts } from '../services/api';
 import './FeaturedProducts.css';
 
 import SaltedCaramelTruffleImg from '../assets/images/salted_caramel_truffle.jpg';
