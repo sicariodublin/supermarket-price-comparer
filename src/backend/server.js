@@ -113,6 +113,22 @@ app.use((req, res, next) => {
   if (!BASIC_AUTH_ENABLED) return next();
   if (req.method === "OPTIONS") return next(); // allow CORS preflight
 
+  // Allow public/static assets and health endpoint without auth
+  const PUBLIC_PATHS = new Set([
+    "/",
+    "/index.html",
+    "/manifest.json",
+    "/favicon.ico",
+    "/logo192.png",
+    "/logo512.png",
+    "/robots.txt",
+    "/health",
+    "/asset-manifest.json",
+    "/service-worker.js"
+  ]);
+  const isStatic = req.path.startsWith("/static/");
+  if (PUBLIC_PATHS.has(req.path) || isStatic) return next();
+
   const header = req.headers.authorization || "";
   
   // Allow Bearer tokens to bypass Basic challenge (for JWT-protected endpoints)
