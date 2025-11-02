@@ -190,9 +190,12 @@ class DataCollectionService {
 
   // create featured products fucntion to collect data based on discount percentage or featured table in database
   async createFeaturedProducts() {
-    const featuredProducts = await this.connection.query(
-      'SELECT * FROM products WHERE featured = 1'
-    );
+    const featuredProducts = await new Promise((resolve, reject) => {
+      this.connection.query(
+        "SELECT * FROM products WHERE featured = 1",
+        (err, rows) => (err ? reject(err) : resolve(rows))
+      );
+    });
     console.log('Featured products found:', featuredProducts.length);
 
     for (const product of featuredProducts) {

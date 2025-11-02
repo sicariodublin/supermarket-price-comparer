@@ -253,63 +253,71 @@ if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
 
 // Graceful shutdown for Railway
 process.on("SIGTERM", () => {
-  console.log("SIGTERM received: closing MySQL connection...");
-  connection.end(() => {
-    console.log("MySQL connection closed.");
-    process.exit(0);
-  });
+  console.log("Received SIGTERM, closing gracefully...");
+  try {
+    pool.end(() => console.log("MySQL pool closed"));
+  } catch (e) {
+    console.warn("Error closing MySQL pool:", e.message);
+  }
+  process.exit(0);
 });
 process.on("SIGINT", () => {
-  console.log("SIGINT received: closing MySQL connection...");
-  connection.end(() => {
-    console.log("MySQL connection closed.");
-    process.exit(0);
-  });
+  console.log("Received SIGINT, closing gracefully...");
+  try {
+    pool.end(() => console.log("MySQL pool closed"));
+  } catch (e) {
+    console.warn("Error closing MySQL pool:", e.message);
+  }
+  process.exit(0);
 });
 
-const connection = mysql.createConnection({
+// Replace single connection with a pooled connection
+const pool = mysql.createPool({
   host,
   port,
   user,
   password,
   database,
+  waitForConnections: true,
+  connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT || 10),
+  queueLimit: 0,
   connectTimeout: Number(process.env.MYSQL_CONNECT_TIMEOUT || 10000),
 });
 
-connection.connect((err) => {
+// Keep the original variable name so all existing code continues to work
+const connection = pool;
+
+// Keep-alive ping every minute to prevent idle disconnects
+setInterval(() => {
+  pool.query("SELECT 1", (err) => {
+    if (err) console.warn("DB keepalive failed:", err.message);
+  });
+}, 60000);
+
+console.log("DB pool created; performing initial ping...");
+pool.query("SELECT 1", (err) => {
   if (err) {
-    console.error("Failed to connect to MySQL:", err);
-    return;
+    console.error("Initial DB ping failed:", err);
+  } else {
+    console.log(`Connected to MySQL pool at ${host}:${port}`);
   }
-  console.log(`Connected to MySQL at ${host}:${port}`);
 });
 
 app.get("/health", (req, res) => {
-  connection.ping((err) => {
-    if (err) {
-      console.error("DB ping failed:", err.message);
-      return res
-        .status(500)
-        .json({ status: "unhealthy", db: false, error: err.message });
-    }
-    return res.json({ status: "healthy", db: true });
+  connection.query("SELECT 1", (err) => {
+    const ok = !err;
+    res.json({ status: ok ? "healthy" : "degraded", db: ok });
   });
 });
 
-// After database connection, add:
+// Instantiate DataCollectionService with the pooled connection
 const dataCollectionService = new DataCollectionService(connection);
 
 // Start scheduled data collection
 dataCollectionService.scheduleDataCollection();
 
-connection.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database: " + err.message);
-    // Implement proper error handling
-    process.exit(1); // Exit with error code if database connection fails
-  }
-  console.log("Connected to the database.");
-});
+// Database connection is already established via pool
+// No need to call connect() on the pool
 
 // Add manual trigger endpoint
 app.post("/api/admin/collect-data/:supermarketId", async (req, res) => {
@@ -824,7 +832,10 @@ app.post("/api/password-reset", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    const resetUrl = `http://localhost:4000/password-reset?token=${token}`;
+    const frontendBase =
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production" ? "https://www.addandcompare.com" : "http://localhost:4000");
+    const resetUrl = `${frontendBase}/password-reset?token=${token}`;
 
     // Email Logic
     const emailOptions = {
