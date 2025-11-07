@@ -10,7 +10,8 @@
           "backdrop-filter",
           "position: sticky",
           "min-height: auto",
-          "inset"
+          "inset",
+          "-moz-appearance"
         ]
       }
     ],
