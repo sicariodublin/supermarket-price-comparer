@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 function AddProduct() {
   const [productName, setProductName] = useState('');
+  const [brand, setBrand] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [price, setPrice] = useState('');
@@ -15,6 +16,7 @@ function AddProduct() {
 
     const newProduct = {
       name: productName,
+      brand,
       quantity,
       unit,
       price,
@@ -44,6 +46,12 @@ function AddProduct() {
         placeholder="Product Name"
         value={productName}
         onChange={(e) => setProductName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Brand"
+        value={brand}
+        onChange={(e) => setBrand(e.target.value)}
       />
       <input
         type="number"

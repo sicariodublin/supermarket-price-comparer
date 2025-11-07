@@ -12,6 +12,7 @@ const supermarkets = [
 
 function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpdated, onCancel }) {
   const [name, setName] = useState('');
+  const [brand, setBrand] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [price, setPrice] = useState('');
@@ -22,6 +23,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
   useEffect(() => {
     if (isEditing && productToEdit) {
       setName(productToEdit.name);
+      setBrand(productToEdit.brand);
       setQuantity(productToEdit.quantity);
       setUnit(productToEdit.unit);
       setPrice(productToEdit.price);
@@ -34,6 +36,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
 
   const resetForm = () => {
     setName('');
+    setBrand('');
     setQuantity('');
     setUnit('');
     setPrice('');
@@ -46,6 +49,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
     const updatedProduct = {
       id: isEditing && productToEdit ? productToEdit.id : null,
       name,
+      brand,
       quantity,
       unit,
       price,
@@ -77,6 +81,15 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
           />
         </div>
         <div className="form-group">
+          <label>Brand: e.g., Milbona, Nestlé, etc.</label>
+          <input
+            type="text"
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
           <label>Quantity:</label>
           <input
             type="number"
@@ -86,7 +99,7 @@ function SearchPageForm({ isEditing, productToEdit, onProductSaved, onProductUpd
           />
         </div>
         <div className="form-group">
-          <label>Unit:</label>
+          <label>Unit: e.g., gr, kg, ml, etc.</label>
           <input
             type="text"
             value={unit}

@@ -4,6 +4,7 @@ import { addProduct } from '../services/api';
 
 function AddProductForm({ onProductSaved }) {
   const [name, setName] = useState('');
+  const [brand, setBrand] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('');
   const [price, setPrice] = useState('');
@@ -15,6 +16,7 @@ function AddProductForm({ onProductSaved }) {
     
     const newProduct = {
       name,
+      brand,
       quantity,
       unit,
       price,
@@ -49,6 +51,12 @@ function AddProductForm({ onProductSaved }) {
         placeholder="Product Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Brand"
+        value={brand}
+        onChange={(e) => setBrand(e.target.value)}
       />
       <input
         type="text"
