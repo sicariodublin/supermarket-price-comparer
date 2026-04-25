@@ -2,10 +2,15 @@
 import axios from "axios";
 
 const env = typeof process !== "undefined" && process.env ? process.env : {};
+const isLocalFrontend =
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
 
 const API_BASE =
-  env.REACT_APP_API_URL ||
   (typeof window !== "undefined" && window.__API_URL) ||
+  (isLocalFrontend
+    ? env.REACT_APP_API_URL_LOCAL || "http://localhost:5001"
+    : env.REACT_APP_API_URL) ||
   "http://localhost:5001";
 
 export const http = axios.create({

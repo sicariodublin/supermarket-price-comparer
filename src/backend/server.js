@@ -51,6 +51,11 @@ const mailjet = require("node-mailjet").apiConnect(
 
 const app = express();
 
+const configuredCorsOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:4000",
@@ -59,36 +64,39 @@ const allowedOrigins = [
   "http://127.0.0.1:4000",
   "https://addandcompare.com",
   "https://www.addandcompare.com",
+  ...configuredCorsOrigins,
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
 
-      const o = origin.replace(/\/+$/, "");
-      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o);
-      const allowed = isLocalhost || allowedOrigins.map(u => u.replace(/\/+$/, "")).includes(o);
+    const normalizedOrigin = origin.replace(/\/+$/, "");
+    const normalizedAllowedOrigins = allowedOrigins.map((u) => u.replace(/\/+$/, ""));
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
+    const allowed = isLocalhost || normalizedAllowedOrigins.includes(normalizedOrigin);
 
-      // In development, allow unknown origins (e.g., embedded preview)
-      if (!allowed && isDev) {
-        console.warn(`Dev CORS allowed temporarily: ${origin}`);
-        return callback(null, true);
-      }
+    // In development, allow unknown origins (e.g., embedded preview)
+    if (!allowed && isDev) {
+      console.warn(`Dev CORS allowed temporarily: ${origin}`);
+      return callback(null, true);
+    }
 
-      if (allowed) {
-        return callback(null, true);
-      }
+    if (allowed) {
+      return callback(null, true);
+    }
 
-      console.warn(`CORS blocked origin: ${origin}`);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
-app.options("*", cors());
+    console.warn(`CORS blocked origin: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 if (helmet) {
   app.use(
     helmet({
