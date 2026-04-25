@@ -40,10 +40,12 @@ const mysql = require("mysql2");
 const NODE_ENV = process.env.NODE_ENV || "development";
 const isDev = NODE_ENV !== "production";
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./middleware/authMiddleware");
 const path = require("path");
 const bodyParser = require("body-parser");
+const { z } = require("zod");
 const mailjet = require("node-mailjet").apiConnect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
@@ -169,6 +171,107 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(bodyParser.json());
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.API_RATE_LIMIT || 300),
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please try again later." },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.AUTH_RATE_LIMIT || 20),
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many authentication attempts. Please try again later." },
+});
+
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: Number(process.env.CONTACT_RATE_LIMIT || 10),
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many messages submitted. Please try again later." },
+});
+
+app.use("/api", apiLimiter);
+
+const validateBody = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({
+      error: "Invalid request data",
+      details: result.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+  }
+
+  req.body = result.data;
+  next();
+};
+
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const textField = (max) => z.string().trim().min(1).max(max);
+const passwordSchema = z
+  .string()
+  .min(8)
+  .max(128)
+  .regex(/^(?=.*[A-Z])(?=.*[£$%&*\/\\@-]).{8,}$/, {
+    message:
+      "Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*/\\@-).",
+  });
+
+const schemas = {
+  contact: z.object({
+    name: textField(100),
+    email: z.string().trim().email().max(254),
+    subject: z.string().trim().max(150).optional().default("New Contact Request"),
+    message: textField(5000),
+  }),
+  feedback: z.object({
+    message: textField(5000),
+  }),
+  register: z.object({
+    username: textField(80),
+    email: z.string().trim().email().max(254).toLowerCase(),
+    password: passwordSchema,
+  }),
+  login: z.object({
+    email: z.string().trim().email().max(254).toLowerCase(),
+    password: z.string().min(1).max(128),
+  }),
+  product: z.object({
+    name: textField(200),
+    brand: z.string().trim().max(120).optional().default(""),
+    quantity: z.coerce.number().positive().max(100000),
+    unit: textField(30),
+    price: z.coerce.number().nonnegative().max(100000),
+    supermarket_id: z.coerce.number().int().positive().max(1000),
+    product_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: "Product date must use YYYY-MM-DD format.",
+    }),
+  }),
+  passwordReset: z.object({
+    username: textField(80),
+    email: z.string().trim().email().max(254).toLowerCase(),
+  }),
+  passwordResetConfirm: z.object({
+    token: textField(2048),
+    newPassword: passwordSchema,
+  }),
+};
+
 app.use("/api/dashboard", dashboardExpress);
 
 // Database connection configuration
@@ -403,8 +506,12 @@ app.get("/api/collection-dates", (req, res) => {
 });
 
 // Rota para enviar contact form
-app.post("/api/contact", async (req, res) => {
+app.post("/api/contact", contactLimiter, validateBody(schemas.contact), async (req, res) => {
   const { name, email, subject, message } = req.body;
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safeSubject = escapeHtml(subject || "New Contact Request");
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
 
   const emailOptions = {
     Messages: [
@@ -419,12 +526,12 @@ app.post("/api/contact", async (req, res) => {
             Name: "Support Team",
           },
         ],
-        Subject: subject || "New Contact Request",
+        Subject: safeSubject,
         HTMLPart: `
-        <h3>Contact Request from ${name}</h3>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong><br />${message}</p>
+        <h3>Contact Request from ${safeName}</h3>
+        <p><strong>Email:</strong> ${safeEmail}</p>
+        <p><strong>Subject:</strong> ${safeSubject}</p>
+        <p><strong>Message:</strong><br />${safeMessage}</p>
       `,
       },
     ],
@@ -445,8 +552,9 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // Rota para enviar feedback
-app.post("/api/feedback/sendFeedback", async (req, res) => {
+app.post("/api/feedback/sendFeedback", contactLimiter, validateBody(schemas.feedback), async (req, res) => {
   const { message } = req.body;
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
 
   const emailOptions = {
     Messages: [
@@ -462,7 +570,7 @@ app.post("/api/feedback/sendFeedback", async (req, res) => {
           },
         ],
         Subject: "Website Feedback",
-        HTMLPart: `<p>${message}</p>`,
+        HTMLPart: `<p>${safeMessage}</p>`,
       },
     ],
   };
@@ -482,17 +590,8 @@ app.post("/api/feedback/sendFeedback", async (req, res) => {
 });
 
 // Route for user registration
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", authLimiter, validateBody(schemas.register), async (req, res) => {
   const { username, email, password } = req.body;
-
-  // Password validation
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[£$%&*\/\\@-]).{8,}$/;
-  if (!passwordRegex.test(password)) {
-    return res.status(400).json({
-      error:
-        "Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*//* \\@-).",
-    });
-  }
 
   // Check if user already exists
   const checkUserQuery = "SELECT * FROM users WHERE email = ?";
@@ -577,7 +676,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 // Route for user login
-app.post("/api/login", (req, res) => {
+app.post("/api/login", authLimiter, validateBody(schemas.login), (req, res) => {
   const { email, password } = req.body;
 
   // Validate request body
@@ -725,7 +824,7 @@ app.get("/api/user/dashboard", authenticateToken, (req, res) => {
 });
 
 // Route to add a product
-app.post("/api/products", verifyToken, (req, res) => {
+app.post("/api/products", verifyToken, validateBody(schemas.product), (req, res) => {
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
   console.log("Received product data:", req.body);
@@ -819,7 +918,7 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 });
 
 // API route to update a product
-app.put("/api/products/:id", verifyToken, (req, res) => {
+app.put("/api/products/:id", verifyToken, validateBody(schemas.product), (req, res) => {
   const { id } = req.params;
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
@@ -872,7 +971,7 @@ app.get("/api/verify-email", (req, res) => {
   }
 });
 
-app.post("/api/password-reset", async (req, res) => {
+app.post("/api/password-reset", authLimiter, validateBody(schemas.passwordReset), async (req, res) => {
   const { username, email } = req.body;
 
   if (!username || !email) {
@@ -925,7 +1024,7 @@ app.post("/api/password-reset", async (req, res) => {
   }
 });
 
-app.post("/api/password-reset/confirm", async (req, res) => {
+app.post("/api/password-reset/confirm", authLimiter, validateBody(schemas.passwordResetConfirm), async (req, res) => {
   const { token, newPassword } = req.body;
 
   if (!token || !newPassword) {
