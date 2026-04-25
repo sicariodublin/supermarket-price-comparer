@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "./static/css/main.8ddc69b1.chunk.css",
-    "main.js": "./static/js/main.f1e41d2f.chunk.js",
-    "main.js.map": "./static/js/main.f1e41d2f.chunk.js.map",
+    "main.css": "./static/css/main.4d1357c7.chunk.css",
+    "main.js": "./static/js/main.81d20d07.chunk.js",
+    "main.js.map": "./static/js/main.81d20d07.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.09517e0d.js",
     "runtime-main.js.map": "./static/js/runtime-main.09517e0d.js.map",
     "static/css/2.2a851b34.chunk.css": "./static/css/2.2a851b34.chunk.css",
     "static/js/2.db6dc128.chunk.js": "./static/js/2.db6dc128.chunk.js",
     "static/js/2.db6dc128.chunk.js.map": "./static/js/2.db6dc128.chunk.js.map",
     "index.html": "./index.html",
-    "precache-manifest.f3a050cd1f997dfd7914459beb31ce89.js": "./precache-manifest.f3a050cd1f997dfd7914459beb31ce89.js",
+    "precache-manifest.657dc45fb8faef31141de915aac8437f.js": "./precache-manifest.657dc45fb8faef31141de915aac8437f.js",
     "service-worker.js": "./service-worker.js",
     "static/css/2.2a851b34.chunk.css.map": "./static/css/2.2a851b34.chunk.css.map",
-    "static/css/main.8ddc69b1.chunk.css.map": "./static/css/main.8ddc69b1.chunk.css.map",
+    "static/css/main.4d1357c7.chunk.css.map": "./static/css/main.4d1357c7.chunk.css.map",
     "static/js/2.db6dc128.chunk.js.LICENSE.txt": "./static/js/2.db6dc128.chunk.js.LICENSE.txt",
     "static/media/Heinz-Fruit&Yogurt-Porridge.jpg": "./static/media/Heinz-Fruit&Yogurt-Porridge.2f41ab5e.jpg",
     "static/media/Tesco-Finest-Basmati-Rice.jpg": "./static/media/Tesco-Finest-Basmati-Rice.60457d38.jpg",
@@ -30,7 +30,7 @@
     "static/js/runtime-main.09517e0d.js",
     "static/css/2.2a851b34.chunk.css",
     "static/js/2.db6dc128.chunk.js",
-    "static/css/main.8ddc69b1.chunk.css",
-    "static/js/main.f1e41d2f.chunk.js"
+    "static/css/main.4d1357c7.chunk.css",
+    "static/js/main.81d20d07.chunk.js"
   ]
 }

@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 import './Footer.css';
 
 function Footer() {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
 
   // Function to scroll to top smoothly
@@ -15,14 +14,6 @@ function Footer() {
       top: 0,
       behavior: 'smooth'
     });
-  };
-
-  const handleDashboardClick = (e) => {
-    if (!isAuthenticated) {
-      e.preventDefault();
-      navigate('/login');
-    }
-    // If authenticated, let Link handle navigation to /dashboard
   };
 
   return (

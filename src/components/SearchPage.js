@@ -1,7 +1,7 @@
 // SearchPage.js
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from '../context/AuthContext';
-import { getProducts, addProduct } from '../services/api';
+import { getProducts, addProduct, updateProduct } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
@@ -29,7 +29,41 @@ function SearchPage() {
     }
   }, [location.search, searchTerm]);
 
-  const fetchProducts = async (searchTerm = "", sortOption = "") => {
+  const filterAndSortProducts = useCallback((term, sort, productList = []) => {
+    let filtered = Array.isArray(productList) ? [...productList] : [];
+
+    if (term) {
+      filtered = filtered.filter((product) =>
+        product.name?.toLowerCase().includes(term.toLowerCase())
+      );
+    }
+
+    if (sort === "name") {
+      filtered.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
+    } else if (sort === "price") {
+      filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sort === "date") {
+      filtered.sort((a, b) => {
+        const dateA = a.product_date ? new Date(a.product_date).getTime() : 0;
+        const dateB = b.product_date ? new Date(b.product_date).getTime() : 0;
+        return dateB - dateA;
+      });
+    } else if (sort === "supermarket") {
+      filtered.sort((a, b) =>
+        (a.supermarket_name || "").localeCompare(b.supermarket_name || "")
+      );
+    } else if (["Lidl", "SuperValu", "TESCO", "Aldi", "M&S", "Dunnes Stores"].includes(sort)) {
+      filtered = filtered.filter(
+        (product) => product.supermarket_name === sort
+      );
+    }
+
+    setFilteredProducts(filtered);
+  }, []);
+
+  const fetchProducts = useCallback(async (searchTerm = "", sortOption = "") => {
     try {
       const data = await getProducts(searchTerm);
       setProducts(data);
@@ -37,7 +71,7 @@ function SearchPage() {
     } catch (error) {
       console.error("Error fetching products:", error);
     }
-  };
+  }, [filterAndSortProducts]);
 
   useEffect(() => {
     if (searchTerm || sortOption) {
@@ -49,12 +83,8 @@ function SearchPage() {
     if (!isAuthenticated) return;
 
     try {
-      const savedProduct = await addProduct(newProduct);
-      setProducts((prev) => [...prev, savedProduct]);
-      filterAndSortProducts(searchTerm, sortOption, [
-        ...products,
-        savedProduct,
-      ]);
+      await addProduct(newProduct);
+      await fetchProducts(searchTerm, sortOption);
     } catch (error) {
       console.error("Error saving product:", error);
     }
@@ -64,11 +94,8 @@ function SearchPage() {
     if (!isAuthenticated) return;
 
     try {
-      const updatedProducts = products.map((product) =>
-        product.id === updatedProduct.id ? updatedProduct : product
-      );
-      setProducts(updatedProducts);
-      filterAndSortProducts(searchTerm, sortOption, updatedProducts);
+      await updateProduct(updatedProduct.id, updatedProduct);
+      await fetchProducts(searchTerm, sortOption);
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating product:", error);
@@ -92,42 +119,8 @@ function SearchPage() {
       setSearchTerm("");
       setFilteredProducts([]);
     } else {
-      filterAndSortProducts(searchTerm, selectedSort);
+      filterAndSortProducts(searchTerm, selectedSort, products);
     }
-  };
-
-  const filterAndSortProducts = (term, sort, productList = products) => {
-    let filtered = Array.isArray(productList) ? productList : [];
-
-    if (term) {
-      filtered = filtered.filter((product) =>
-        product.name?.toLowerCase().includes(term.toLowerCase())
-      );
-    }
-
-    if (sort === "name") {
-      filtered = filtered.sort((a, b) =>
-        (a.name || "").localeCompare(b.name || "")
-      );
-    } else if (sort === "price") {
-      filtered = filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (sort === "date") {
-      filtered = filtered.sort((a, b) => {
-        const dateA = a.product_date ? new Date(a.product_date).getTime() : 0;
-        const dateB = b.product_date ? new Date(b.product_date).getTime() : 0;
-        return dateB - dateA;
-      });
-    } else if (sort === "supermarket") {
-      filtered = filtered.sort((a, b) =>
-        (a.supermarket_name || "").localeCompare(b.supermarket_name || "")
-      );
-    } else if (["Lidl", "SuperValu", "TESCO", "Aldi", "M&S", "Dunnes Stores"].includes(sort)) {
-      filtered = filtered.filter(
-        (product) => product.supermarket_name === sort
-      );
-    }
-
-    setFilteredProducts(filtered);
   };
 
   const handleEditClick = (product) => {

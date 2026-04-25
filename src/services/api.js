@@ -30,10 +30,35 @@ if (BASIC_USER && BASIC_PASS) {
       typeof config.headers["Authorization"] === "string" &&
       config.headers["Authorization"].length > 0;
 
+    const storedToken =
+      typeof window !== "undefined" ? window.localStorage.getItem("token") : "";
+
+    if (!hasAuth && storedToken) {
+      config.headers["Authorization"] = `Bearer ${storedToken}`;
+      return config;
+    }
+
     if (!hasAuth) {
       const token = btoa(`${BASIC_USER}:${BASIC_PASS}`);
       config.headers["Authorization"] = `Basic ${token}`;
     }
+    return config;
+  });
+}
+
+if (!BASIC_USER || !BASIC_PASS) {
+  http.interceptors.request.use((config) => {
+    config.headers = config.headers || {};
+    const hasAuth =
+      typeof config.headers["Authorization"] === "string" &&
+      config.headers["Authorization"].length > 0;
+    const storedToken =
+      typeof window !== "undefined" ? window.localStorage.getItem("token") : "";
+
+    if (!hasAuth && storedToken) {
+      config.headers["Authorization"] = `Bearer ${storedToken}`;
+    }
+
     return config;
   });
 }

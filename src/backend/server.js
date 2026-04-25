@@ -174,7 +174,7 @@ const hostCandidate =
   process.env.DATABASE_HOST ||
   "localhost";
 
-const host =
+let host =
   isProduction &&
   (process.env.DB_HOST ||
     process.env.MYSQLHOST ||
@@ -185,7 +185,7 @@ const host =
     ? "127.0.0.1"
     : hostCandidate;
 
-const port = parseInt(
+let port = parseInt(
   process.env.DB_PORT ||
     process.env.MYSQLPORT ||
     process.env.MYSQL_PORT ||
@@ -193,21 +193,21 @@ const port = parseInt(
   10
 );
 
-const user =
+let user =
   process.env.DB_USER ||
   process.env.MYSQLUSER ||
   process.env.MYSQL_USER ||
   process.env.DATABASE_USER ||
   "root";
 
-const password =
+let password =
   process.env.DB_PASSWORD ||
   process.env.MYSQLPASSWORD ||
   process.env.MYSQL_PASSWORD ||
   process.env.DATABASE_PASSWORD ||
   "";
 
-const database =
+let database =
   process.env.DB_NAME ||
   process.env.MYSQLDATABASE ||
   process.env.MYSQL_DATABASE ||
@@ -303,6 +303,14 @@ const pool = mysql.createPool({
 // Keep the original variable name so all existing code continues to work
 const connection = pool;
 
+const queryAsync = (query, params = []) =>
+  new Promise((resolve, reject) => {
+    connection.query(query, params, (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+
 // Keep-alive ping every minute to prevent idle disconnects
 setInterval(() => {
   pool.query("SELECT 1", (err) => {
@@ -335,8 +343,28 @@ dataCollectionService.scheduleDataCollection();
 // Database connection is already established via pool
 // No need to call connect() on the pool
 
+const requireAdmin = (req, res, next) => {
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!adminEmails.length) {
+    return res.status(403).json({
+      error: "Admin access is not configured. Set ADMIN_EMAILS in the server environment.",
+    });
+  }
+
+  const email = (req.userEmail || req.user?.email || "").toLowerCase();
+  if (!adminEmails.includes(email)) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  next();
+};
+
 // Add manual trigger endpoint
-app.post("/api/admin/collect-data/:supermarketId", async (req, res) => {
+app.post("/api/admin/collect-data/:supermarketId", verifyToken, requireAdmin, async (req, res) => {
   const { supermarketId } = req.params;
 
   try {
@@ -571,6 +599,12 @@ app.post("/api/login", (req, res) => {
           return res.status(401).json({ message: "Invalid credentials" });
         }
 
+        if (!user.isVerified) {
+          return res.status(403).json({
+            message: "Please verify your email before logging in.",
+          });
+        }
+
         // Update isLoggedIn status
         connection.query(
           "UPDATE users SET isLoggedIn = ? WHERE email = ?",
@@ -592,9 +626,7 @@ app.post("/api/login", (req, res) => {
           { expiresIn: "1h" }
         );
 
-        // Log for debugging
         console.log("User authenticated:", { id: user.id, email: user.email });
-        console.log("Generated token payload:", jwt.decode(token));
 
         // Send response
         res.json({
@@ -685,7 +717,7 @@ app.get("/api/user/dashboard", authenticateToken, (req, res) => {
 });
 
 // Route to add a product
-app.post("/api/products", (req, res) => {
+app.post("/api/products", verifyToken, (req, res) => {
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
   console.log("Received product data:", req.body);
@@ -779,7 +811,7 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 });
 
 // API route to update a product
-app.put("/api/products/:id", (req, res) => {
+app.put("/api/products/:id", verifyToken, (req, res) => {
   const { id } = req.params;
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
@@ -998,8 +1030,7 @@ app.get("/api/products/new-or-back", async (req, res) => {
       LIMIT 10
     `;
 
-    // Change this line:
-    const [results] = await connection.query(query);
+    const results = await queryAsync(query);
     res.json(results);
   } catch (error) {
     console.error("Error fetching new/back in stock products:", error);
@@ -1109,8 +1140,7 @@ app.get("/api/products/weekly-sales", async (req, res) => {
       LIMIT 8
     `;
 
-    // Change this line:
-    const [results] = await connection.query(query);
+    const results = await queryAsync(query);
     res.json(results);
   } catch (error) {
     console.error("Error fetching weekly sales:", error);
@@ -1133,8 +1163,7 @@ app.get("/api/products/:id/pricing-history", async (req, res) => {
       LIMIT 30
     `;
 
-    // Change this line:
-    const [results] = await connection.query(query, [productId]);
+    const results = await queryAsync(query, [productId]);
     res.json(results);
   } catch (error) {
     console.error("Error fetching pricing history:", error);
@@ -1160,8 +1189,7 @@ app.get("/api/products/:id/details", async (req, res) => {
       GROUP BY p.id
     `;
 
-    // Change this line:
-    const [results] = await connection.query(query, [productId]);
+    const results = await queryAsync(query, [productId]);
 
     if (results.length === 0) {
       return res.status(404).json({ error: "Product not found" });

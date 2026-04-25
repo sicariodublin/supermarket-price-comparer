@@ -1,6 +1,5 @@
-// AddProduct.js (Component)
-import { http } from "../services/api";
 import React, { useState } from 'react';
+import { addProduct } from "../services/api";
 
 function AddProduct() {
   const [productName, setProductName] = useState('');
@@ -25,10 +24,12 @@ function AddProduct() {
     };
 
     try {
+      await addProduct(newProduct);
       alert('Product added successfully!');
 
       // Reset form fields
       setProductName('');
+      setBrand('');
       setQuantity('');
       setUnit('');
       setPrice('');
@@ -36,6 +37,7 @@ function AddProduct() {
       setDate('');
     } catch (error) {
       console.error('Error adding product:', error);
+      alert(error?.response?.data?.message || error?.response?.data?.error || 'Failed to add product.');
     }
   };
 

@@ -16,8 +16,6 @@ import '../styles/Home.css';
 function Home() {
   const [priceComparisons, setPriceComparisons] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showProductModal, setShowProductModal] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -51,16 +49,6 @@ function Home() {
       console.error('Error fetching data:', error);
       setLoading(false);
     }
-  };
-
-  const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    setShowProductModal(true);
-  };
-
-  const closeProductModal = () => {
-    setShowProductModal(false);
-    setSelectedProduct(null);
   };
 
   const calculateSavings = (products) => {
@@ -121,8 +109,8 @@ function Home() {
       </section>
 
       {/* NEW-STYLE COMPONENTS */}
-      <NewOrBackInStore onProductClick={handleProductClick} />
-      <FeaturedProducts onProductClick={handleProductClick} />
+      <NewOrBackInStore />
+      <FeaturedProducts />
       <CostComparison />
       
       {/* Existing Price Comparison Tables */}
@@ -207,14 +195,6 @@ function Home() {
           </div>
         </div>
       </section>
-
-      {/* Product Detail Modal - temporarily commented out */}
-      {/* {showProductModal && selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={closeProductModal}
-        />
-      )} */}
     </div>
   );
 }

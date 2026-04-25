@@ -1,7 +1,5 @@
-// RegisterForm.js
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
 import '../styles/Register.css';
 import { http } from "../services/api";
 
@@ -12,29 +10,23 @@ function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-
-  useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Password validation function
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[£$%&*@\-]).{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[£$%&*@-]).{8,}$/;
     return passwordRegex.test(password);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate password strength
     if (!validatePassword(password)) {
       alert(
-        'Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*/\\@-).'
+        'Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*@-).'
       );
       return;
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       alert('Passwords do not match.');
       return;
@@ -68,7 +60,6 @@ function RegisterForm() {
 
   return (
     <form className="register-form" onSubmit={handleSubmit}>
-      {/* Username Field */}
       <div className="input-group">
         <label htmlFor="username">Username</label>
         <input
@@ -81,7 +72,6 @@ function RegisterForm() {
         />
       </div>
 
-      {/* Email Field */}
       <div className="input-group">
         <label htmlFor="email">Email</label>
         <input
@@ -94,7 +84,6 @@ function RegisterForm() {
         />
       </div>
 
-      {/* Password Field */}
       <div className="input-group" style={{ position: 'relative' }}>
         <label htmlFor="password">Password</label>
         <input
@@ -105,12 +94,16 @@ function RegisterForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <div className="icon-container" onClick={togglePasswordVisibility}>
+        <button
+          type="button"
+          className="icon-container"
+          onClick={togglePasswordVisibility}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
           <i className={showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'}></i>
-        </div>
+        </button>
       </div>
 
-      {/* Confirm Password Field */}
       <div className="input-group" style={{ position: 'relative' }}>
         <label htmlFor="confirmPassword">Confirm Password</label>
         <input
@@ -121,9 +114,14 @@ function RegisterForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
-        <div className="icon-container" onClick={toggleConfirmPasswordVisibility}>
+        <button
+          type="button"
+          className="icon-container"
+          onClick={toggleConfirmPasswordVisibility}
+          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+        >
           <i className={showConfirmPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'}></i>
-        </div>
+        </button>
       </div>
 
       <button type="submit" className="register-button">

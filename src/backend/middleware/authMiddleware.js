@@ -11,7 +11,7 @@ const hostCandidate =
   process.env.DATABASE_HOST ||
   "localhost";
 
-const host =
+let host =
   isProduction &&
   (process.env.DB_HOST ||
     process.env.MYSQLHOST ||
@@ -22,7 +22,7 @@ const host =
     ? "127.0.0.1"
     : hostCandidate;
 
-const port = parseInt(
+let port = parseInt(
   process.env.DB_PORT ||
     process.env.MYSQLPORT ||
     process.env.MYSQL_PORT ||
@@ -30,21 +30,21 @@ const port = parseInt(
   10
 );
 
-const user =
+let user =
   process.env.DB_USER ||
   process.env.MYSQLUSER ||
   process.env.MYSQL_USER ||
   process.env.DATABASE_USER ||
   "root";
 
-const password =
+let password =
   process.env.DB_PASSWORD ||
   process.env.MYSQLPASSWORD ||
   process.env.MYSQL_PASSWORD ||
   process.env.DATABASE_PASSWORD ||
   "";
 
-const database =
+let database =
   process.env.DB_NAME ||
   process.env.MYSQLDATABASE ||
   process.env.MYSQL_DATABASE ||
@@ -83,19 +83,6 @@ if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
     "Database host appears local in production (authMiddleware). Verify MYSQLHOST/DB_HOST or RAILWAY_DATABASE_URL is set."
   );
 }
-
-console.log("Raw env values (authMiddleware):", {
-  DB_HOST: process.env.DB_HOST,
-  DB_PORT: process.env.DB_PORT,
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  DB_NAME: process.env.DB_NAME,
-  MYSQLHOST: process.env.MYSQLHOST,
-  MYSQLPORT: process.env.MYSQLPORT,
-  MYSQLUSER: process.env.MYSQLUSER,
-  MYSQLPASSWORD: process.env.MYSQLPASSWORD,
-  MYSQLDATABASE: process.env.MYSQLDATABASE,
-});
 
 // Debug: show resolved DB config and env flags
 console.log("Env host flags (authMiddleware):", {

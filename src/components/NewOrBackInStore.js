@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getNewOrBackInStockProducts } from '../services/api';
 import './NewOrBackInStore.css';
 
-// ✅ Import your local image
 import BionaGarlicImg from '../assets/images/Biona-Organic-Garlic-Paste.jpg';
 import TescoFinestBasmatiRiceImg from '../assets/images/Tesco-Finest-Basmati-Rice.jpg';
 import HeinzFruitYogurtPorridgeImg from '../assets/images/Heinz-Fruit&Yogurt-Porridge.jpg';
@@ -10,97 +10,60 @@ import AvonmoreFreshMilkImg from '../assets/images/Avonmore-Fresh-Milk-1L.jpg';
 import KelloggsCornflakesImg from '../assets/images/Kelloggs-Cornflakes-500g.jpg';
 import DunnesCloveCordialImg from '../assets/images/cordial.jpg';
 
+const fallbackImages = [
+  TescoFinestBasmatiRiceImg,
+  BionaGarlicImg,
+  HeinzFruitYogurtPorridgeImg,
+  AvonmoreFreshMilkImg,
+  KelloggsCornflakesImg,
+  DunnesCloveCordialImg,
+];
+
+const formatPrice = (price) => {
+  const value = Number(price);
+  return Number.isFinite(value) ? `€${value.toFixed(2)}` : 'Price unavailable';
+};
+
 const NewOrBackInStore = ({ onProductClick }) => {
   const [newProducts, setNewProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    const fetchNewProducts = async () => {
+      try {
+        const products = await getNewOrBackInStockProducts();
+        const normalizedProducts = products.map((product, index) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.original_price,
+          supermarket: product.supermarket_name,
+          image: product.image_url || fallbackImages[index % fallbackImages.length],
+          isNew: product.status === 'new',
+          isBackInStock: product.status === 'back',
+          discount: product.discount_percentage,
+        }));
+
+        setNewProducts(normalizedProducts);
+      } catch (error) {
+        console.error('Error fetching new products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNewProducts();
   }, []);
 
-  const fetchNewProducts = async () => {
-    try {
-      // Mock data for now - will be replaced with real API
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Tesco Finest Basmati Rice 250g",
-          price: 1.50,
-          originalPrice: 2.00,
-          supermarket: "Tesco",
-          image: TescoFinestBasmatiRiceImg,
-          isNew: true,
-          discount: 25
-        },
-        {
-          id: 2,
-          name: "Biona Organic Garlic Paste 130g",
-          price: 4.20,
-          supermarket: "SuperValu",
-          image: BionaGarlicImg,
-          isNew: true
-        },
-        {
-          id: 3,
-          name: "Heinz Fruit & Yogurt Porridge 125g",
-          price: 3.00,
-          originalPrice: 3.50,
-          supermarket: "Dunnes Stores",
-          image: HeinzFruitYogurtPorridgeImg,
-          isBackInStock: true,
-          discount: 14
-        },
-        {
-          id: 4,
-          name: "Avonmore Fresh Milk 1L",
-          price: 1.25,
-          originalPrice: 1.50,
-          supermarket: "Tesco",
-          image: AvonmoreFreshMilkImg,
-          isNew: true
-        },
-        {
-          id: 5,
-          name: "Kellogg's Cornflakes 500g",
-          price: 3.99,
-          originalPrice: 4.99,
-          supermarket: "Tesco",
-          image: KelloggsCornflakesImg,
-          isBackInStock: true,
-          discount: 20
-        },
-        {
-          id: 6,
-          name: "Dunnes Stores Simply Better Warm & Spicy Clove Cordial 500ml",
-          price: 4.99,
-          originalPrice: 2.00,
-          supermarket: "Dunnes Stores",
-          image: DunnesCloveCordialImg,
-          isNew: true,
-          // discount: 25
-        }
-
-      ];
-      
-      setNewProducts(mockProducts);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching new products:', error);
-      setLoading(false);
-    }
-  };
+  const maxIndex = Math.max(0, newProducts.length - 4);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === newProducts.length - 4 ? 0 : prevIndex + 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === maxIndex ? 0 : prevIndex + 1));
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? newProducts.length - 4 : prevIndex - 1
-    );
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? maxIndex : prevIndex - 1));
   };
 
   if (loading) {
@@ -113,21 +76,25 @@ const NewOrBackInStore = ({ onProductClick }) => {
     );
   }
 
+  if (!newProducts.length) {
+    return null;
+  }
+
   return (
     <section className="new-or-back-section">
       <div className="container">
         <div className="section-header">
           <h2>New or Back in Stock</h2>
-          <p>Discover the latest additions and restocked items showcased across our website!</p>
+          <p>Latest products and restocked items from the current product database.</p>
         </div>
-        
+
         <div className="products-carousel">
-          <button className="carousel-btn prev-btn" onClick={prevSlide}>
+          <button className="carousel-btn prev-btn" onClick={prevSlide} aria-label="Previous products">
             ‹
           </button>
-          
+
           <div className="products-container">
-            <div 
+            <div
               className="products-track"
               style={{ transform: `translateX(-${currentIndex * 25}%)` }}
             >
@@ -135,13 +102,14 @@ const NewOrBackInStore = ({ onProductClick }) => {
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
-                  className="new-or-back-product-card"  // Changed from "product-card"
+                  className="new-or-back-product-card"
+                  onClick={() => onProductClick?.(product)}
                 >
-                  <div className="new-or-back-product-image-container">  {/* Changed */}
-                    <img 
-                      src={product.image} 
+                  <div className="new-or-back-product-image-container">
+                    <img
+                      src={product.image}
                       alt={product.name}
-                      className="new-or-back-product-image"  // Changed
+                      className="new-or-back-product-image"
                     />
                     {product.isNew && (
                       <span className="product-badge new-badge">NEW</span>
@@ -150,38 +118,39 @@ const NewOrBackInStore = ({ onProductClick }) => {
                       <span className="product-badge back-badge">BACK</span>
                     )}
                     {product.discount && (
-                      <span className="new-or-back-discount-badge">-{product.discount}%</span>  // Changed
+                      <span className="new-or-back-discount-badge">-{product.discount}%</span>
                     )}
                   </div>
-                  
-                  <div className="new-or-back-product-info">  {/* Changed */}
-                    <h3 className="new-or-back-product-name">{product.name}</h3>  {/* Changed */}
-                    <div className="new-or-back-price-container">  {/* Changed */}
-                      <span className="current-price">Now €{product.price}</span>
+
+                  <div className="new-or-back-product-info">
+                    <h3 className="new-or-back-product-name">{product.name}</h3>
+                    <div className="new-or-back-price-container">
+                      <span className="current-price">Now {formatPrice(product.price)}</span>
                       {product.originalPrice && (
-                        <span className="original-price">Was €{product.originalPrice}</span>
+                        <span className="original-price">Was {formatPrice(product.originalPrice)}</span>
                       )}
                     </div>
                     <div className="supermarket-info">
-                      <span className="new-or-back-supermarket-name">{product.supermarket}</span>  {/* Changed */}
+                      <span className="new-or-back-supermarket-name">{product.supermarket}</span>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
-          
-          <button className="carousel-btn next-btn" onClick={nextSlide}>
+
+          <button className="carousel-btn next-btn" onClick={nextSlide} aria-label="Next products">
             ›
           </button>
         </div>
-        
+
         <div className="carousel-indicators">
           {Array.from({ length: Math.max(1, newProducts.length - 3) }).map((_, index) => (
             <button
               key={index}
               className={`indicator ${index === currentIndex ? 'active' : ''}`}
               onClick={() => setCurrentIndex(index)}
+              aria-label={`Show product page ${index + 1}`}
             />
           ))}
         </div>
