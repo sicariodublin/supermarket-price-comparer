@@ -272,6 +272,51 @@
   font-size: 0.9rem;
 }
 
+.trust-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.trust-pill {
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 6px 9px;
+}
+
+.trust-pill.approved {
+  background: #218739;
+}
+
+.trust-pill.pending {
+  background: #a16207;
+}
+
+.trust-pill.rejected {
+  background: #b42318;
+}
+
+.trust-pill.unknown {
+  background: #64748b;
+}
+
+.trust-pill.source {
+  background: #334155;
+}
+
+.freshness-label {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
 .quantity {
   background: #e3f2fd;
   color: #1976d2;
@@ -288,6 +333,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14px;
 }
 
 .price-section {
@@ -308,15 +354,34 @@
   color: #666;
 }
 
+.product-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.details-btn,
 .edit-btn {
   padding: 12px 16px;
-  background: #667eea;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   transition: background 0.3s ease;
+}
+
+.details-btn {
+  background: #334155;
+}
+
+.details-btn:hover {
+  background: #1e293b;
+}
+
+.edit-btn {
+  background: #667eea;
 }
 
 .edit-btn:hover {

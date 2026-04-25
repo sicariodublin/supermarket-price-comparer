@@ -1,10 +1,19 @@
 // SearchPage.js
 import React, { useCallback, useEffect, useState } from "react";
-import { useAuth } from '../context/AuthContext';
-import { getProducts, addProduct, updateProduct } from '../services/api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { addProduct, getProducts, updateProduct } from "../services/api";
 import "../styles/SearchPage.css";
 import SearchPageForm from "./SearchPageForm";
+import {
+  formatEuro,
+  getApprovalLabel,
+  getFreshnessLabel,
+  getSourceLabel,
+  getTrustClass,
+} from "../utilities/productTrust";
+
+const supermarketFilters = ["Lidl", "SuperValu", "TESCO", "Aldi", "M&S", "Dunnes Stores"];
 
 function SearchPage() {
   const { isAuthenticated } = useAuth();
@@ -17,13 +26,12 @@ function SearchPage() {
   const [sortOption, setSortOption] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [viewMode, setViewMode] = useState("grid");
 
-  // Handle URL query parameters from quick search
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const queryFromUrl = queryParams.get('q');
-    
+    const queryFromUrl = queryParams.get("q");
+
     if (queryFromUrl && queryFromUrl !== searchTerm) {
       setSearchTerm(queryFromUrl);
     }
@@ -39,9 +47,7 @@ function SearchPage() {
     }
 
     if (sort === "name") {
-      filtered.sort((a, b) =>
-        (a.name || "").localeCompare(b.name || "")
-      );
+      filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     } else if (sort === "price") {
       filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (sort === "date") {
@@ -54,24 +60,25 @@ function SearchPage() {
       filtered.sort((a, b) =>
         (a.supermarket_name || "").localeCompare(b.supermarket_name || "")
       );
-    } else if (["Lidl", "SuperValu", "TESCO", "Aldi", "M&S", "Dunnes Stores"].includes(sort)) {
-      filtered = filtered.filter(
-        (product) => product.supermarket_name === sort
-      );
+    } else if (supermarketFilters.includes(sort)) {
+      filtered = filtered.filter((product) => product.supermarket_name === sort);
     }
 
     setFilteredProducts(filtered);
   }, []);
 
-  const fetchProducts = useCallback(async (searchTerm = "", sortOption = "") => {
-    try {
-      const data = await getProducts(searchTerm);
-      setProducts(data);
-      filterAndSortProducts(searchTerm, sortOption, data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  }, [filterAndSortProducts]);
+  const fetchProducts = useCallback(
+    async (query = "", sort = "") => {
+      try {
+        const data = await getProducts(query);
+        setProducts(data);
+        filterAndSortProducts(query, sort, data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    },
+    [filterAndSortProducts]
+  );
 
   useEffect(() => {
     if (searchTerm || sortOption) {
@@ -140,40 +147,39 @@ function SearchPage() {
 
   const handleAuthChoice = (choice) => {
     setShowAuthPrompt(false);
-    if (choice === 'login') {
-      navigate('/login');
-    } else if (choice === 'register') {
-      navigate('/register');
+    if (choice === "login") {
+      navigate("/login");
+    } else if (choice === "register") {
+      navigate("/register");
     }
   };
 
   const getSupermarketLogo = (supermarketName) => {
     const logos = {
-      'Lidl': '🛒',
-      'SuperValu': '🏪',
-      'TESCO': '🏬',
-      'Aldi': '🛍️',
-      'M&S': '🏢',
-      'Dunnes Stores': '🏪'
+      Lidl: "🛒",
+      SuperValu: "🏪",
+      TESCO: "🏬",
+      Aldi: "🛍️",
+      "M&S": "🏢",
+      "Dunnes Stores": "🏪",
     };
-    return logos[supermarketName] || '🏪';
+    return logos[supermarketName] || "🏪";
   };
 
   const getBestPrice = () => {
     if (filteredProducts.length === 0) return null;
-    return Math.min(...filteredProducts.map(p => p.price));
+    return Math.min(...filteredProducts.map((p) => Number(p.price)));
   };
 
   const bestPrice = getBestPrice();
 
   return (
     <div className="search-page">
-      {/* Hero Section */}
       <div className="search-hero">
         <div className="search-hero-content">
           <h1>Compare Prices Across Ireland's Top Supermarkets</h1>
           <p className="search-subtitle">Find the best deals and save money on your grocery shopping</p>
-          
+
           <div className="search-container">
             <div className="search-input-wrapper">
               <input
@@ -183,7 +189,7 @@ function SearchPage() {
                 onChange={handleSearchChange}
                 className="modern-search-input"
               />
-              <button className="search-btn">
+              <button className="search-btn" type="button">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -200,27 +206,26 @@ function SearchPage() {
                 <option value="price">Price (Low to High)</option>
                 <option value="date">Date Added</option>
                 <option value="supermarket">Supermarket</option>
-                <option value="Lidl">Lidl</option>
-                <option value="SuperValu">SuperValu</option>
-                <option value="TESCO">TESCO</option>
-                <option value="Aldi">Aldi</option>
-                <option value="M&S">M&S</option>
-                <option value="Dunnes Stores">Dunnes Stores</option>
+                {supermarketFilters.map((supermarket) => (
+                  <option key={supermarket} value={supermarket}>{supermarket}</option>
+                ))}
               </select>
             </div>
-            
+
             <div className="view-toggle">
-              <button 
-                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
+              <button
+                className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
+                onClick={() => setViewMode("grid")}
+                type="button"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
                 </svg>
               </button>
-              <button 
-                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
+              <button
+                className={`view-btn ${viewMode === "list" ? "active" : ""}`}
+                onClick={() => setViewMode("list")}
+                type="button"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
@@ -233,14 +238,13 @@ function SearchPage() {
 
       <div className="search-content">
         <div className="search-main">
-          {/* Results Section */}
           {filteredProducts.length > 0 && (
             <>
               <div className="results-header">
                 <h2>Results for '{searchTerm}' ({filteredProducts.length} results)</h2>
-                {bestPrice && (
+                {bestPrice !== null && (
                   <div className="best-price-badge">
-                    <span>Best Price: €{bestPrice.toFixed(2)}</span>
+                    <span>Best Price: {formatEuro(bestPrice)}</span>
                   </div>
                 )}
               </div>
@@ -253,33 +257,56 @@ function SearchPage() {
                         <span className="supermarket-logo">{getSupermarketLogo(product.supermarket_name)}</span>
                         <span className="supermarket-name">{product.supermarket_name}</span>
                       </div>
-                      {product.price === bestPrice && (
+                      {Number(product.price) === bestPrice && (
                         <div className="best-deal-badge">Best Deal</div>
                       )}
                     </div>
-                    
+
                     <div className="product-info">
                       <h3 className="product-name">{product.name}</h3>
                       <div className="product-details">
                         <span className="quantity">{product.quantity} {product.unit}</span>
                         <span className="date">{new Date(product.product_date).toLocaleDateString()}</span>
                       </div>
+                      <div className="trust-row">
+                        <span className={`trust-pill ${getTrustClass(product.approval_status)}`}>
+                          {getApprovalLabel(product.approval_status)}
+                        </span>
+                        <span className="trust-pill source">
+                          {getSourceLabel(product.source)}
+                        </span>
+                        <span className="freshness-label">
+                          {getFreshnessLabel(product.last_checked_at || product.product_date)}
+                        </span>
+                      </div>
                     </div>
-                    
+
                     <div className="product-footer">
                       <div className="price-section">
-                        <span className="price">€{product.price}</span>
-                        <span className="price-per-unit">€{(product.price / product.quantity).toFixed(2)}/{product.unit}</span>
+                        <span className="price">{formatEuro(product.price)}</span>
+                        <span className="price-per-unit">
+                          {formatEuro(Number(product.price) / Number(product.quantity))}/{product.unit}
+                        </span>
                       </div>
-                      
-                      {isAuthenticated && (
-                        <button 
-                          className="edit-btn"
-                          onClick={() => handleEditClick(product)}
+
+                      <div className="product-card-actions">
+                        <button
+                          className="details-btn"
+                          onClick={() => navigate(`/product/${product.id}`)}
+                          type="button"
                         >
-                          Edit
+                          Details
                         </button>
-                      )}
+                        {isAuthenticated && (
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEditClick(product)}
+                            type="button"
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -304,7 +331,6 @@ function SearchPage() {
           )}
         </div>
 
-        {/* Add Product Section */}
         <div className="search-sidebar">
           {isAuthenticated ? (
             <SearchPageForm
@@ -332,31 +358,30 @@ function SearchPage() {
                   <span>Help others save money</span>
                 </div>
               </div>
-              <button className="auth-cta-btn" onClick={handleAddProductClick}>
+              <button className="auth-cta-btn" onClick={handleAddProductClick} type="button">
                 Sign Up to Add Products
               </button>
               <p className="auth-login-text">
-                Already have an account? <button className="link-btn" onClick={() => navigate('/login')}>Sign In</button>
+                Already have an account? <button className="link-btn" onClick={() => navigate("/login")} type="button">Sign In</button>
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Authentication Modal */}
       {showAuthPrompt && (
         <div className="auth-modal-overlay">
           <div className="auth-modal">
             <h3>Account Required</h3>
             <p>You need an account to add or edit products. This helps us maintain quality and prevent spam.</p>
             <div className="auth-modal-actions">
-              <button className="btn btn-primary" onClick={() => handleAuthChoice('register')}>
+              <button className="btn btn-primary" onClick={() => handleAuthChoice("register")} type="button">
                 Create Account
               </button>
-              <button className="btn btn-secondary" onClick={() => handleAuthChoice('login')}>
+              <button className="btn btn-secondary" onClick={() => handleAuthChoice("login")} type="button">
                 Sign In
               </button>
-              <button className="btn btn-text" onClick={() => setShowAuthPrompt(false)}>
+              <button className="btn btn-text" onClick={() => setShowAuthPrompt(false)} type="button">
                 Cancel
               </button>
             </div>

@@ -36,13 +36,13 @@ const dashboardExpress = require("./routes/dashboardExpress");
 const DataCollectionService = require("./services/dataCollectionService");
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const mysql = require("mysql2");
 const NODE_ENV = process.env.NODE_ENV || "development";
 const isDev = NODE_ENV !== "production";
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("./middleware/authMiddleware");
+const { pool, connection, queryAsync, dbConfig, closePool } = require("./db");
 const path = require("path");
 const bodyParser = require("body-parser");
 const { z } = require("zod");
@@ -270,157 +270,37 @@ const schemas = {
     token: textField(2048),
     newPassword: passwordSchema,
   }),
+  productApproval: z.object({
+    status: z.enum(["approved", "rejected"]),
+    rejected_reason: z.string().trim().max(500).optional().default(""),
+  }),
+  productReport: z.object({
+    report_type: z
+      .enum(["incorrect_price", "incorrect_details", "not_available", "duplicate", "other"])
+      .optional()
+      .default("incorrect_price"),
+    reported_price: z.coerce.number().nonnegative().max(100000).optional().nullable(),
+    message: textField(1000),
+  }),
+  productReportReview: z.object({
+    status: z.enum(["reviewed", "resolved", "dismissed"]),
+    admin_notes: z.string().trim().max(1000).optional().default(""),
+  }),
 };
 
 app.use("/api/dashboard", dashboardExpress);
 
-// Database connection configuration
-// MySQL connection setup (use Railway vars if available, otherwise DB_*)
-const isProduction = process.env.NODE_ENV === "production";
-
-const hostCandidate =
-  process.env.DB_HOST ||
-  process.env.MYSQLHOST ||
-  process.env.MYSQL_HOST ||
-  process.env.DATABASE_HOST ||
-  "localhost";
-
-let host =
-  isProduction &&
-  (process.env.DB_HOST ||
-    process.env.MYSQLHOST ||
-    process.env.MYSQL_HOST ||
-    process.env.DATABASE_HOST)
-    ? hostCandidate
-    : hostCandidate === "localhost"
-    ? "127.0.0.1"
-    : hostCandidate;
-
-let port = parseInt(
-  process.env.DB_PORT ||
-    process.env.MYSQLPORT ||
-    process.env.MYSQL_PORT ||
-    "3306",
-  10
-);
-
-let user =
-  process.env.DB_USER ||
-  process.env.MYSQLUSER ||
-  process.env.MYSQL_USER ||
-  process.env.DATABASE_USER ||
-  "root";
-
-let password =
-  process.env.DB_PASSWORD ||
-  process.env.MYSQLPASSWORD ||
-  process.env.MYSQL_PASSWORD ||
-  process.env.DATABASE_PASSWORD ||
-  "";
-
-let database =
-  process.env.DB_NAME ||
-  process.env.MYSQLDATABASE ||
-  process.env.MYSQL_DATABASE ||
-  process.env.DATABASE_NAME ||
-  "supermarket_price_comparer";
-
-// Support Railway-style single connection URL if present
-const rawDbUrlCandidates = [
-  process.env.RAILWAY_DATABASE_URL,
-  process.env.DATABASE_URL
-].filter(Boolean);
-
-const parseableDbUrl = rawDbUrlCandidates.find(
-  (u) => typeof u === "string" && u.includes("://")
-);
-
-if (parseableDbUrl) {
-  try {
-    const url = new URL(parseableDbUrl);
-    host = url.hostname || host;
-    port = parseInt(url.port || port, 10) || port;
-    user = url.username || user;
-    password = url.password || password;
-    const pathDb = (url.pathname || "").replace(/^\//, "");
-    database = pathDb || database;
-    console.log("Parsed database URL and applied to config");
-  } catch (e) {
-    console.warn("Failed to parse database URL:", e.message);
-  }
-} else if (rawDbUrlCandidates.length) {
-  // One of the DB URL env vars exists but isn't a full URL; use discrete MYSQL* vars without logging warnings
-  console.log("Database URL env present but not a full URL; using discrete MYSQL* variables");
-}
-// ... existing code ...
-if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
-  console.warn(
-    "Database host appears local in production. Verify MYSQLHOST/DB_HOST or RAILWAY_DATABASE_URL is set via Variable Reference on the Node service."
-  );
-}
-
-// Debug: show resolved DB config and env flags
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("Env host flags:", {
-  DB_HOST: !!process.env.DB_HOST,
-  MYSQLHOST: !!process.env.MYSQLHOST,
-  MYSQL_HOST: !!process.env.MYSQL_HOST,
-  DATABASE_HOST: !!process.env.DATABASE_HOST,
-  DATABASE_URL: !!process.env.DATABASE_URL,
-  RAILWAY_DATABASE_URL: !!process.env.RAILWAY_DATABASE_URL,
-});
-console.log("Resolved DB config (server.js):", { host, port, user, database });
-
-if (isProduction && (host === "127.0.0.1" || host === "localhost")) {
-  console.error(
-    "Database host is not configured for production. Set MYSQLHOST/DB_HOST in Railway."
-  );
-  process.exit(1);
-}
-
 // Graceful shutdown for Railway
-process.on("SIGTERM", () => {
+process.on("SIGTERM", async () => {
   console.log("Received SIGTERM, closing gracefully...");
-  try {
-    pool.end(() => console.log("MySQL pool closed"));
-  } catch (e) {
-    console.warn("Error closing MySQL pool:", e.message);
-  }
+  await closePool();
   process.exit(0);
 });
-process.on("SIGINT", () => {
+process.on("SIGINT", async () => {
   console.log("Received SIGINT, closing gracefully...");
-  try {
-    pool.end(() => console.log("MySQL pool closed"));
-  } catch (e) {
-    console.warn("Error closing MySQL pool:", e.message);
-  }
+  await closePool();
   process.exit(0);
 });
-
-// Replace single connection with a pooled connection
-const pool = mysql.createPool({
-  host,
-  port,
-  user,
-  password,
-  database,
-  waitForConnections: true,
-  connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT || 10),
-  queueLimit: 0,
-  connectTimeout: Number(process.env.MYSQL_CONNECT_TIMEOUT || 10000),
-});
-
-// Keep the original variable name so all existing code continues to work
-const connection = pool;
-
-const queryAsync = (query, params = []) =>
-  new Promise((resolve, reject) => {
-    connection.query(query, params, (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
-  });
 
 // Keep-alive ping every minute to prevent idle disconnects
 setInterval(() => {
@@ -434,7 +314,7 @@ pool.query("SELECT 1", (err) => {
   if (err) {
     console.error("Initial DB ping failed:", err);
   } else {
-    console.log(`Connected to MySQL pool at ${host}:${port}`);
+    console.log(`Connected to MySQL pool at ${dbConfig.host}:${dbConfig.port}`);
   }
 });
 
@@ -443,6 +323,117 @@ app.get("/health", (req, res) => {
     const ok = !err;
     res.json({ status: ok ? "healthy" : "degraded", db: ok });
   });
+});
+
+const productSchema = {
+  loaded: false,
+  columns: new Set(),
+};
+
+const productReportsSchema = {
+  loaded: false,
+  exists: false,
+};
+
+const loadProductSchema = async () => {
+  const rows = await queryAsync(
+    `
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'products'
+    `
+  );
+
+  productSchema.columns = new Set(rows.map((row) => row.COLUMN_NAME));
+  productSchema.loaded = true;
+  console.log("Product schema capabilities loaded:", {
+    moderation: hasProductModeration(),
+    columns: Array.from(productSchema.columns).filter((column) =>
+      [
+        "source",
+        "approval_status",
+        "created_by_user_id",
+        "approved_by_user_id",
+        "approved_at",
+        "last_checked_at",
+        "rejected_reason",
+      ].includes(column)
+    ),
+  });
+};
+
+const ensureProductSchemaLoaded = async () => {
+  if (!productSchema.loaded) {
+    await loadProductSchema();
+  }
+};
+
+const loadProductReportsSchema = async () => {
+  const rows = await queryAsync(
+    `
+      SELECT TABLE_NAME
+      FROM INFORMATION_SCHEMA.TABLES
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'product_reports'
+      LIMIT 1
+    `
+  );
+
+  productReportsSchema.exists = rows.length > 0;
+  productReportsSchema.loaded = true;
+  console.log("Product reports capability loaded:", {
+    enabled: productReportsSchema.exists,
+  });
+};
+
+const ensureProductReportsTable = async () => {
+  if (!productReportsSchema.loaded) {
+    await loadProductReportsSchema();
+  }
+
+  return productReportsSchema.exists;
+};
+
+const hasProductColumn = (column) => productSchema.columns.has(column);
+
+function hasProductModeration() {
+  return (
+    hasProductColumn("source") &&
+    hasProductColumn("approval_status") &&
+    hasProductColumn("created_by_user_id") &&
+    hasProductColumn("approved_by_user_id") &&
+    hasProductColumn("approved_at") &&
+    hasProductColumn("last_checked_at") &&
+    hasProductColumn("rejected_reason")
+  );
+}
+
+const moderationSelectFields = (alias = "products") => {
+  const fields = [];
+
+  if (hasProductColumn("source")) fields.push(`${alias}.source`);
+  if (hasProductColumn("approval_status")) fields.push(`${alias}.approval_status`);
+  if (hasProductColumn("created_by_user_id")) fields.push(`${alias}.created_by_user_id`);
+  if (hasProductColumn("approved_by_user_id")) fields.push(`${alias}.approved_by_user_id`);
+  if (hasProductColumn("approved_at")) fields.push(`${alias}.approved_at`);
+  if (hasProductColumn("last_checked_at")) fields.push(`${alias}.last_checked_at`);
+  if (hasProductColumn("rejected_reason")) fields.push(`${alias}.rejected_reason`);
+
+  return fields.length ? `,\n  ${fields.join(",\n  ")}` : "";
+};
+
+const publicApprovalClause = (alias = "products") =>
+  hasProductColumn("approval_status")
+    ? `(${alias}.approval_status = 'approved' OR ${alias}.approval_status IS NULL)`
+    : "";
+
+loadProductSchema().catch((error) => {
+  console.warn("Could not load product schema capabilities:", error.message);
+});
+
+loadProductReportsSchema().catch((error) => {
+  console.warn("Could not load product reports capability:", error.message);
 });
 
 // Instantiate DataCollectionService with the pooled connection
@@ -454,11 +445,20 @@ dataCollectionService.scheduleDataCollection();
 // Database connection is already established via pool
 // No need to call connect() on the pool
 
-const requireAdmin = (req, res, next) => {
-  const adminEmails = (process.env.ADMIN_EMAILS || "")
+const getAdminEmails = () =>
+  (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
+
+const isAdminRequest = (req) => {
+  const adminEmails = getAdminEmails();
+  const email = (req.userEmail || req.user?.email || "").toLowerCase();
+  return adminEmails.length > 0 && adminEmails.includes(email);
+};
+
+const requireAdmin = (req, res, next) => {
+  const adminEmails = getAdminEmails();
 
   if (!adminEmails.length) {
     return res.status(403).json({
@@ -466,8 +466,7 @@ const requireAdmin = (req, res, next) => {
     });
   }
 
-  const email = (req.userEmail || req.user?.email || "").toLowerCase();
-  if (!adminEmails.includes(email)) {
+  if (!isAdminRequest(req)) {
     return res.status(403).json({ error: "Admin access required" });
   }
 
@@ -487,6 +486,202 @@ app.post("/api/admin/collect-data/:supermarketId", verifyToken, requireAdmin, as
     res.status(500).json({ error: error.message });
   }
 });
+
+app.get("/api/admin/products/pending", verifyToken, requireAdmin, async (req, res) => {
+  try {
+    await ensureProductSchemaLoaded();
+
+    if (!hasProductModeration()) {
+      return res.status(400).json({
+        error: "Product moderation columns are not installed. Run src/backend/migrations/001_product_moderation.sql.",
+      });
+    }
+
+    const query = `
+      SELECT
+        p.id,
+        p.name,
+        p.quantity,
+        p.unit,
+        p.price,
+        p.product_date,
+        p.source,
+        p.approval_status,
+        p.created_by_user_id,
+        p.rejected_reason,
+        s.name AS supermarket_name,
+        u.email AS submitted_by_email
+      FROM products p
+      LEFT JOIN supermarkets s ON p.supermarket_id = s.id
+      LEFT JOIN users u ON p.created_by_user_id = u.id
+      WHERE p.approval_status = 'pending'
+      ORDER BY p.id DESC
+      LIMIT 100
+    `;
+
+    const results = await queryAsync(query);
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching pending products:", error);
+    res.status(500).json({ error: "Failed to fetch pending products" });
+  }
+});
+
+app.put(
+  "/api/admin/products/:id/approval",
+  verifyToken,
+  requireAdmin,
+  validateBody(schemas.productApproval),
+  async (req, res) => {
+    const { id } = req.params;
+    const { status, rejected_reason } = req.body;
+
+    try {
+      await ensureProductSchemaLoaded();
+
+      if (!hasProductModeration()) {
+        return res.status(400).json({
+          error: "Product moderation columns are not installed. Run src/backend/migrations/001_product_moderation.sql.",
+        });
+      }
+
+      const query = `
+        UPDATE products
+        SET approval_status = ?,
+            approved_by_user_id = ?,
+            approved_at = ?,
+            rejected_reason = ?
+        WHERE id = ?
+      `;
+
+      const approvedAt = status === "approved" ? new Date() : null;
+      const reason = status === "rejected" ? rejected_reason || null : null;
+      const result = await queryAsync(query, [
+        status,
+        req.userId,
+        approvedAt,
+        reason,
+        id,
+      ]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      res.json({ message: `Product ${status}.` });
+    } catch (error) {
+      console.error("Error updating product approval:", error);
+      res.status(500).json({ error: "Failed to update product approval" });
+    }
+  }
+);
+
+app.get("/api/admin/product-reports", verifyToken, requireAdmin, async (req, res) => {
+  const allowedStatuses = ["open", "reviewed", "resolved", "dismissed", "all"];
+  const status = allowedStatuses.includes(req.query.status)
+    ? req.query.status
+    : "open";
+
+  try {
+    await ensureProductSchemaLoaded();
+    const reportsEnabled = await ensureProductReportsTable();
+
+    if (!reportsEnabled) {
+      return res.status(400).json({
+        error: "Product report table is not installed. Run src/backend/migrations/002_product_reports.sql.",
+      });
+    }
+
+    const where = [];
+    const params = [];
+
+    if (status !== "all") {
+      where.push("pr.status = ?");
+      params.push(status);
+    }
+
+    const query = `
+      SELECT
+        pr.id,
+        pr.product_id,
+        pr.report_type,
+        pr.reported_price,
+        pr.message,
+        pr.status,
+        pr.admin_notes,
+        pr.created_at,
+        pr.updated_at,
+        pr.reviewed_at,
+        p.name AS product_name,
+        p.quantity,
+        p.unit,
+        p.price AS current_price,
+        p.product_date,
+        ${hasProductColumn("source") ? "p.source" : "NULL"} AS source,
+        ${hasProductColumn("approval_status") ? "p.approval_status" : "NULL"} AS approval_status,
+        ${hasProductColumn("last_checked_at") ? "p.last_checked_at" : "NULL"} AS last_checked_at,
+        s.name AS supermarket_name,
+        reporter.email AS reported_by_email,
+        reviewer.email AS reviewed_by_email
+      FROM product_reports pr
+      LEFT JOIN products p ON pr.product_id = p.id
+      LEFT JOIN supermarkets s ON p.supermarket_id = s.id
+      LEFT JOIN users reporter ON pr.reported_by_user_id = reporter.id
+      LEFT JOIN users reviewer ON pr.reviewed_by_user_id = reviewer.id
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY pr.created_at DESC
+      LIMIT 100
+    `;
+
+    const results = await queryAsync(query, params);
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching product reports:", error);
+    res.status(500).json({ error: "Failed to fetch product reports" });
+  }
+});
+
+app.put(
+  "/api/admin/product-reports/:id",
+  verifyToken,
+  requireAdmin,
+  validateBody(schemas.productReportReview),
+  async (req, res) => {
+    const { id } = req.params;
+    const { status, admin_notes } = req.body;
+
+    try {
+      const reportsEnabled = await ensureProductReportsTable();
+
+      if (!reportsEnabled) {
+        return res.status(400).json({
+          error: "Product report table is not installed. Run src/backend/migrations/002_product_reports.sql.",
+        });
+      }
+
+      const result = await queryAsync(
+        `
+          UPDATE product_reports
+          SET status = ?,
+              admin_notes = ?,
+              reviewed_by_user_id = ?,
+              reviewed_at = NOW()
+          WHERE id = ?
+        `,
+        [status, admin_notes || null, req.userId, id]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Product report not found" });
+      }
+
+      res.json({ message: `Product report marked as ${status}.` });
+    } catch (error) {
+      console.error("Error updating product report:", error);
+      res.status(500).json({ error: "Failed to update product report" });
+    }
+  }
+);
 
 // Get collection dates endpoint
 app.get("/api/collection-dates", (req, res) => {
@@ -824,7 +1019,7 @@ app.get("/api/user/dashboard", authenticateToken, (req, res) => {
 });
 
 // Route to add a product
-app.post("/api/products", verifyToken, validateBody(schemas.product), (req, res) => {
+app.post("/api/products", verifyToken, validateBody(schemas.product), async (req, res) => {
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
   console.log("Received product data:", req.body);
@@ -841,26 +1036,50 @@ app.post("/api/products", verifyToken, validateBody(schemas.product), (req, res)
     return res.status(400).json({ error: "All fields are required." });
   }
 
-  const query =
-    "INSERT INTO products (name, quantity, unit, price, supermarket_id, product_date) VALUES (?, ?, ?, ?, ?, ?)";
-  connection.query(
-    query,
-    [name, quantity, unit, price, supermarket_id, product_date],
-    (err, result) => {
-      if (err) {
-        console.error("Error saving to database:", err);
-        res.status(500).json({ error: "Failed to save product" });
-      } else {
-        console.log("Product saved successfully:", result);
-        res.json({ id: result.insertId });
-      }
+  try {
+    await ensureProductSchemaLoaded();
+
+    const columns = ["name", "quantity", "unit", "price", "supermarket_id", "product_date"];
+    const placeholders = ["?", "?", "?", "?", "?", "?"];
+    const values = [name, quantity, unit, price, supermarket_id, product_date];
+
+    if (hasProductModeration()) {
+      columns.push("source", "approval_status", "created_by_user_id");
+      placeholders.push("?", "?", "?");
+      values.push("user", "pending", req.userId);
     }
-  );
+
+    if (hasProductColumn("last_checked_at")) {
+      columns.push("last_checked_at");
+      placeholders.push("NOW()");
+    }
+
+    const query = `INSERT INTO products (${columns.join(", ")}) VALUES (${placeholders.join(", ")})`;
+    const result = await queryAsync(query, values);
+
+    console.log("Product saved successfully:", result);
+    res.json({
+      id: result.insertId,
+      approval_status: hasProductModeration() ? "pending" : "approved",
+      message: hasProductModeration()
+        ? "Product submitted for review."
+        : "Product added successfully.",
+    });
+  } catch (err) {
+    console.error("Error saving to database:", err);
+    res.status(500).json({ error: "Failed to save product" });
+  }
 });
 
 // Route to get all products
-app.get("/api/products", (req, res) => {
-  const query = `
+app.get("/api/products", async (req, res) => {
+  try {
+    await ensureProductSchemaLoaded();
+    const where = [];
+    const approvalClause = publicApprovalClause("products");
+    if (approvalClause) where.push(approvalClause);
+
+    let query = `
 SELECT 
   products.id, 
   products.name, 
@@ -869,25 +1088,31 @@ SELECT
   products.price, 
   supermarkets.name AS supermarket_name, 
   products.product_date
+  ${moderationSelectFields("products")}
 FROM products
 LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 `;
 
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error("Error retrieving products:", err);
-      res.status(500).json({ error: "Failed to retrieve products" });
-    } else {
-      res.json(results);
+    if (where.length) {
+      query += ` WHERE ${where.join(" AND ")}`;
     }
-  });
+
+    const results = await queryAsync(query);
+    res.json(results);
+  } catch (err) {
+    console.error("Error retrieving products:", err);
+    res.status(500).json({ error: "Failed to retrieve products" });
+  }
 });
 
 // Route to search products by name
-app.get("/api/products/search", (req, res) => {
+app.get("/api/products/search", async (req, res) => {
   const searchName = req.query.name || "";
 
-  let query = `
+  try {
+    await ensureProductSchemaLoaded();
+
+    let query = `
 SELECT 
   products.id, 
   products.name, 
@@ -896,47 +1121,186 @@ SELECT
   products.price, 
   supermarkets.name AS supermarket_name, 
   products.product_date
+  ${moderationSelectFields("products")}
 FROM products
 LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 `;
 
-  let queryParams = [];
+    const where = [];
+    const queryParams = [];
+    const approvalClause = publicApprovalClause("products");
+    if (approvalClause) where.push(approvalClause);
 
-  if (searchName) {
-    query += " WHERE products.name LIKE ?";
-    queryParams.push(`%${searchName}%`);
-  }
-
-  connection.query(query, queryParams, (err, results) => {
-    if (err) {
-      console.error("Error searching products:", err);
-      res.status(500).json({ error: "Failed to search products" });
-    } else {
-      res.json(results);
+    if (searchName) {
+      where.push("products.name LIKE ?");
+      queryParams.push(`%${searchName}%`);
     }
-  });
+
+    if (where.length) {
+      query += ` WHERE ${where.join(" AND ")}`;
+    }
+
+    const results = await queryAsync(query, queryParams);
+    res.json(results);
+  } catch (err) {
+    console.error("Error searching products:", err);
+    res.status(500).json({ error: "Failed to search products" });
+  }
 });
 
 // API route to update a product
-app.put("/api/products/:id", verifyToken, validateBody(schemas.product), (req, res) => {
+app.put("/api/products/:id", verifyToken, validateBody(schemas.product), async (req, res) => {
   const { id } = req.params;
   const { name, quantity, unit, price, supermarket_id, product_date } =
     req.body;
 
-  const query =
-    "UPDATE products SET name = ?, quantity = ?, unit = ?, price = ?, supermarket_id = ?, product_date = ? WHERE id = ?";
-  connection.query(
-    query,
-    [name, quantity, unit, price, supermarket_id, product_date, id],
-    (err, result) => {
-      if (err) {
-        console.error("Error updating product:", err);
-        res.status(500).send(err.message);
-      } else {
-        res.json({ message: "Product updated successfully" });
-      }
+  try {
+    await ensureProductSchemaLoaded();
+
+    const updates = [
+      "name = ?",
+      "quantity = ?",
+      "unit = ?",
+      "price = ?",
+      "supermarket_id = ?",
+      "product_date = ?",
+    ];
+    const params = [name, quantity, unit, price, supermarket_id, product_date];
+
+    if (hasProductModeration() && !isAdminRequest(req)) {
+      updates.push("approval_status = 'pending'");
+      if (hasProductColumn("approved_by_user_id")) updates.push("approved_by_user_id = NULL");
+      if (hasProductColumn("approved_at")) updates.push("approved_at = NULL");
+      if (hasProductColumn("rejected_reason")) updates.push("rejected_reason = NULL");
     }
-  );
+
+    let query = `UPDATE products SET ${updates.join(", ")} WHERE id = ?`;
+    params.push(id);
+
+    if (hasProductModeration() && !isAdminRequest(req)) {
+      query += " AND created_by_user_id = ?";
+      params.push(req.userId);
+    }
+
+    const result = await queryAsync(query, params);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: hasProductModeration() && !isAdminRequest(req)
+          ? "Product not found or you do not own this submission."
+          : "Product not found.",
+      });
+    }
+
+    res.json({
+      message: hasProductModeration() && !isAdminRequest(req)
+        ? "Product updated and submitted for review."
+        : "Product updated successfully",
+    });
+  } catch (err) {
+    console.error("Error updating product:", err);
+    res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+app.post(
+  "/api/products/:id/reports",
+  verifyToken,
+  contactLimiter,
+  validateBody(schemas.productReport),
+  async (req, res) => {
+    const { id } = req.params;
+    const { report_type, reported_price, message } = req.body;
+
+    try {
+      await ensureProductSchemaLoaded();
+      const reportsEnabled = await ensureProductReportsTable();
+
+      if (!reportsEnabled) {
+        return res.status(400).json({
+          error: "Product report table is not installed. Run src/backend/migrations/002_product_reports.sql.",
+        });
+      }
+
+      const where = ["id = ?"];
+      const params = [id];
+      const approvalClause = publicApprovalClause("products");
+      if (approvalClause) where.push(approvalClause);
+
+      const products = await queryAsync(
+        `SELECT id FROM products WHERE ${where.join(" AND ")} LIMIT 1`,
+        params
+      );
+
+      if (!products.length) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const result = await queryAsync(
+        `
+          INSERT INTO product_reports (
+            product_id,
+            reported_by_user_id,
+            report_type,
+            reported_price,
+            message
+          )
+          VALUES (?, ?, ?, ?, ?)
+        `,
+        [
+          id,
+          req.userId,
+          report_type,
+          reported_price ?? null,
+          message,
+        ]
+      );
+
+      res.status(201).json({
+        id: result.insertId,
+        message: "Thanks. Your report was sent for admin review.",
+      });
+    } catch (err) {
+      console.error("Error creating product report:", err);
+      res.status(500).json({ error: "Failed to submit product report" });
+    }
+  }
+);
+
+app.get("/api/user/products/submissions", verifyToken, async (req, res) => {
+  try {
+    await ensureProductSchemaLoaded();
+
+    if (!hasProductModeration()) {
+      return res.json([]);
+    }
+
+    const query = `
+      SELECT
+        p.id,
+        p.name,
+        p.quantity,
+        p.unit,
+        p.price,
+        p.product_date,
+        p.source,
+        p.approval_status,
+        p.rejected_reason,
+        p.created_by_user_id,
+        p.approved_at,
+        s.name AS supermarket_name
+      FROM products p
+      LEFT JOIN supermarkets s ON p.supermarket_id = s.id
+      WHERE p.created_by_user_id = ?
+      ORDER BY p.id DESC
+      LIMIT 100
+    `;
+
+    const results = await queryAsync(query, [req.userId]);
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching user product submissions:", err);
+    res.status(500).json({ error: "Failed to fetch your product submissions" });
+  }
 });
 
 app.get("/api/verify-email", (req, res) => {
@@ -1121,6 +1485,14 @@ app.listen(PORT, () => {
 // Route to get new or back in stock products
 app.get("/api/products/new-or-back", async (req, res) => {
   try {
+    await ensureProductSchemaLoaded();
+    const where = [
+      `(p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) 
+             OR p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY))`,
+    ];
+    const approvalClause = publicApprovalClause("p");
+    if (approvalClause) where.push(approvalClause);
+
     const query = `
       SELECT p.*, s.name as supermarket_name, 
              CASE 
@@ -1131,8 +1503,7 @@ app.get("/api/products/new-or-back", async (req, res) => {
              p.discount_percentage
       FROM products p
       JOIN supermarkets s ON p.supermarket_id = s.id
-      WHERE (p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) 
-             OR p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY))
+      WHERE ${where.join(" AND ")}
       ORDER BY p.created_at DESC, p.back_in_stock_date DESC
       LIMIT 10
     `;
@@ -1148,7 +1519,22 @@ app.get("/api/products/new-or-back", async (req, res) => {
 // Route to get cost comparison data
 app.get("/api/products/cost-comparison", async (req, res) => {
   try {
+    await ensureProductSchemaLoaded();
     const limit = parseInt(req.query.limit) || 4;
+    const approvalP1 = publicApprovalClause("p1");
+    const approvalP2 = publicApprovalClause("p2");
+    const subqueryApproval = publicApprovalClause("products");
+    const where = [
+      approvalP1,
+      approvalP2,
+      `p1.id IN (
+        SELECT MIN(id) 
+        FROM products 
+        ${subqueryApproval ? `WHERE ${subqueryApproval}` : ""}
+        GROUP BY LOWER(TRIM(name))
+        HAVING COUNT(*) > 1
+      )`,
+    ].filter(Boolean);
 
     const query = `
       SELECT 
@@ -1165,66 +1551,50 @@ app.get("/api/products/cost-comparison", async (req, res) => {
       FROM products p1
       JOIN products p2 ON LOWER(TRIM(p1.name)) = LOWER(TRIM(p2.name))
       JOIN supermarkets s ON p2.supermarket_id = s.id
-      WHERE p1.id IN (
-        SELECT MIN(id) 
-        FROM products 
-        GROUP BY LOWER(TRIM(name))
-        HAVING COUNT(*) > 1
-      )
+      WHERE ${where.join(" AND ")}
       GROUP BY p1.name
       ORDER BY RAND()
       LIMIT ?
     `;
 
-    connection.query(query, [limit], (err, results) => {
-      if (err) {
-        console.error("Error fetching cost comparisons:", err);
-        return res
-          .status(500)
-          .json({ error: "Failed to fetch cost comparisons" });
-      }
+    const results = await queryAsync(query, [limit]);
 
-      // Process results without JSON.parse since they're already objects
-      const processedResults = results.map((item) => {
-        let variations = item.price_variations;
+    const processedResults = results.map((item) => {
+      let variations = item.price_variations;
 
-        // Handle case where variations might be a string or already an object
-        if (typeof variations === "string") {
-          try {
-            variations = JSON.parse(variations);
-          } catch (e) {
-            console.error("Error parsing variations:", e);
-            variations = [];
-          }
-        }
-
-        // Ensure variations is an array
-        if (!Array.isArray(variations)) {
+      if (typeof variations === "string") {
+        try {
+          variations = JSON.parse(variations);
+        } catch (e) {
+          console.error("Error parsing variations:", e);
           variations = [];
         }
+      }
 
-        // Sort variations by price in JavaScript
-        variations.sort((a, b) => a.price - b.price);
+      if (!Array.isArray(variations)) {
+        variations = [];
+      }
 
-        const prices = variations.map((v) => v.price).filter((p) => !isNaN(p));
-        const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
-        const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-        const savingsPercentage =
-          maxPrice > 0
-            ? (((maxPrice - minPrice) / maxPrice) * 100).toFixed(1)
-            : 0;
+      variations.sort((a, b) => a.price - b.price);
 
-        return {
-          ...item,
-          price_variations: variations,
-          min_price: minPrice,
-          max_price: maxPrice,
-          savings_percentage: savingsPercentage,
-        };
-      });
+      const prices = variations.map((v) => v.price).filter((p) => !isNaN(p));
+      const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+      const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+      const savingsPercentage =
+        maxPrice > 0
+          ? (((maxPrice - minPrice) / maxPrice) * 100).toFixed(1)
+          : 0;
 
-      res.json(processedResults);
+      return {
+        ...item,
+        price_variations: variations,
+        min_price: minPrice,
+        max_price: maxPrice,
+        savings_percentage: savingsPercentage,
+      };
     });
+
+    res.json(processedResults);
   } catch (error) {
     console.error("Error in cost comparison endpoint:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -1234,6 +1604,8 @@ app.get("/api/products/cost-comparison", async (req, res) => {
 // Route to get weekly sales/promotions
 app.get("/api/products/weekly-sales", async (req, res) => {
   try {
+    await ensureProductSchemaLoaded();
+    const approvalClause = publicApprovalClause("p");
     const query = `
       SELECT p.*, s.name as supermarket_name,
              p.original_price,
@@ -1243,6 +1615,7 @@ app.get("/api/products/weekly-sales", async (req, res) => {
       JOIN supermarkets s ON p.supermarket_id = s.id
       WHERE p.discount_percentage > 0 
         AND (p.promotion_end_date IS NULL OR p.promotion_end_date >= CURDATE())
+        ${approvalClause ? `AND ${approvalClause}` : ""}
       ORDER BY p.discount_percentage DESC, p.created_at DESC
       LIMIT 8
     `;
@@ -1258,7 +1631,9 @@ app.get("/api/products/weekly-sales", async (req, res) => {
 // Route to get product pricing history
 app.get("/api/products/:id/pricing-history", async (req, res) => {
   try {
+    await ensureProductSchemaLoaded();
     const productId = req.params.id;
+    const approvalClause = publicApprovalClause("p");
 
     const query = `
       SELECT ph.*, p.name as product_name, s.name as supermarket_name
@@ -1266,6 +1641,7 @@ app.get("/api/products/:id/pricing-history", async (req, res) => {
       JOIN products p ON ph.product_id = p.id
       JOIN supermarkets s ON p.supermarket_id = s.id
       WHERE ph.product_id = ?
+        ${approvalClause ? `AND ${approvalClause}` : ""}
       ORDER BY ph.recorded_date DESC
       LIMIT 30
     `;
@@ -1281,7 +1657,9 @@ app.get("/api/products/:id/pricing-history", async (req, res) => {
 // Route to get detailed product information
 app.get("/api/products/:id/details", async (req, res) => {
   try {
+    await ensureProductSchemaLoaded();
     const productId = req.params.id;
+    const approvalClause = publicApprovalClause("p");
 
     const query = `
       SELECT p.*, s.name as supermarket_name, s.logo_url as supermarket_logo,
@@ -1293,6 +1671,7 @@ app.get("/api/products/:id/details", async (req, res) => {
       LEFT JOIN price_history ph ON p.id = ph.product_id 
         AND ph.recorded_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
       WHERE p.id = ?
+        ${approvalClause ? `AND ${approvalClause}` : ""}
       GROUP BY p.id
     `;
 
@@ -1310,7 +1689,10 @@ app.get("/api/products/:id/details", async (req, res) => {
 });
 
 // Route to get featured products
-app.get("/api/products/featured", (req, res) => {
+app.get("/api/products/featured", async (req, res) => {
+  try {
+    await ensureProductSchemaLoaded();
+    const approvalClause = publicApprovalClause("p");
   const query = `
     SELECT 
       p.id,
@@ -1325,20 +1707,18 @@ app.get("/api/products/featured", (req, res) => {
       s.name AS supermarket
     FROM products p
     LEFT JOIN supermarkets s ON p.supermarket_id = s.id
-    WHERE p.featured = 1 OR (p.discount_percentage IS NOT NULL AND p.discount_percentage > 0)
+    WHERE (p.featured = 1 OR (p.discount_percentage IS NOT NULL AND p.discount_percentage > 0))
+      ${approvalClause ? `AND ${approvalClause}` : ""}
     ORDER BY COALESCE(p.discount_percentage, 0) DESC, p.id DESC
     LIMIT 20;
   `;
 
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error("Error fetching featured products:", err);
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch featured products" });
-    }
+    const results = await queryAsync(query);
     res.json(results);
-  });
+  } catch (err) {
+    console.error("Error fetching featured products:", err);
+    res.status(500).json({ error: "Failed to fetch featured products" });
+  }
 });
 
 // Fallback for React routing

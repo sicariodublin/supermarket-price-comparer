@@ -5,6 +5,7 @@ const cron = require('node-cron');
 class DataCollectionService {
   constructor(connection) {
     this.connection = connection;
+    this.productColumns = null;
     this.supermarkets = {
       1: { // Lidl
         name: 'Lidl',
@@ -136,9 +137,26 @@ class DataCollectionService {
   }
 
   async updateProduct(productId, productData) {
+    const updates = ['price = ?', 'product_date = ?'];
+    const values = [productData.price, productData.product_date];
+
+    if (await this.hasProductColumn('source')) {
+      updates.push("source = 'scraper'");
+    }
+
+    if (await this.hasProductColumn('approval_status')) {
+      updates.push("approval_status = 'approved'");
+    }
+
+    if (await this.hasProductColumn('last_checked_at')) {
+      updates.push('last_checked_at = NOW()');
+    }
+
+    values.push(productId);
+
     return new Promise((resolve, reject) => {
-      const query = 'UPDATE products SET price = ?, product_date = ? WHERE id = ?';
-      this.connection.query(query, [productData.price, productData.product_date, productId], (err, result) => {
+      const query = `UPDATE products SET ${updates.join(', ')} WHERE id = ?`;
+      this.connection.query(query, values, (err, result) => {
         if (err) reject(err);
         else resolve(result);
       });
@@ -146,16 +164,37 @@ class DataCollectionService {
   }
 
   async insertProduct(productData) {
+    const columns = ['name', 'quantity', 'unit', 'price', 'supermarket_id', 'product_date'];
+    const placeholders = ['?', '?', '?', '?', '?', '?'];
+    const values = [
+      productData.name,
+      1, // default quantity
+      productData.unit,
+      productData.price,
+      productData.supermarket_id,
+      productData.product_date
+    ];
+
+    if (await this.hasProductColumn('source')) {
+      columns.push('source');
+      placeholders.push('?');
+      values.push('scraper');
+    }
+
+    if (await this.hasProductColumn('approval_status')) {
+      columns.push('approval_status');
+      placeholders.push('?');
+      values.push('approved');
+    }
+
+    if (await this.hasProductColumn('last_checked_at')) {
+      columns.push('last_checked_at');
+      placeholders.push('NOW()');
+    }
+
     return new Promise((resolve, reject) => {
-      const query = 'INSERT INTO products (name, quantity, unit, price, supermarket_id, product_date) VALUES (?, ?, ?, ?, ?, ?)';
-      this.connection.query(query, [
-        productData.name,
-        1, // default quantity
-        productData.unit,
-        productData.price,
-        productData.supermarket_id,
-        productData.product_date
-      ], (err, result) => {
+      const query = `INSERT INTO products (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
+      this.connection.query(query, values, (err, result) => {
         if (err) reject(err);
         else resolve(result);
       });
@@ -170,6 +209,32 @@ class DataCollectionService {
         else resolve(result);
       });
     });
+  }
+
+  async loadProductColumns() {
+    if (this.productColumns) {
+      return this.productColumns;
+    }
+
+    const rows = await new Promise((resolve, reject) => {
+      this.connection.query(
+        `
+          SELECT COLUMN_NAME
+          FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'products'
+        `,
+        (err, results) => (err ? reject(err) : resolve(results))
+      );
+    });
+
+    this.productColumns = new Set(rows.map((row) => row.COLUMN_NAME));
+    return this.productColumns;
+  }
+
+  async hasProductColumn(column) {
+    const columns = await this.loadProductColumns();
+    return columns.has(column);
   }
 
   // Schedule automatic data collection

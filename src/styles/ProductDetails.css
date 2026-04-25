@@ -51,6 +51,49 @@
   gap: 16px;
 }
 
+.product-trust-panel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trust-pill {
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 6px 9px;
+}
+
+.trust-pill.approved {
+  background: #218739;
+}
+
+.trust-pill.pending {
+  background: #a16207;
+}
+
+.trust-pill.rejected {
+  background: #b42318;
+}
+
+.trust-pill.unknown {
+  background: #64748b;
+}
+
+.trust-pill.source {
+  background: #334155;
+}
+
+.freshness-label {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 .supermarket-badge {
   background: #f7f7c7;
   color: #222;
@@ -90,8 +133,94 @@
 
 .product-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.report-issue-btn {
+  background: #334155;
+}
+
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.report-modal {
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+
+.report-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.report-modal-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+}
+
+.report-close-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.report-modal label {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.report-modal select,
+.report-modal input,
+.report-modal textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.report-modal textarea {
+  resize: vertical;
+}
+
+.report-feedback {
+  margin: 0;
+  color: #2438bc;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .product-price {

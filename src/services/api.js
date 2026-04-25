@@ -132,6 +132,11 @@ export const getProductDetails = async (productId) => {
   return data;
 };
 
+export const reportProductIssue = async (productId, reportData) => {
+  const { data } = await http.post(`/products/${productId}/reports`, reportData);
+  return data;
+};
+
 // -------- Dashboard / Admin --------
 
 export const getCollectionDates = async () => {
@@ -141,5 +146,32 @@ export const getCollectionDates = async () => {
 
 export const triggerDataCollection = async (supermarketId) => {
   const { data } = await http.post(`/admin/collect-data/${supermarketId}`);
+  return data;
+};
+
+export const getPendingProducts = async () => {
+  const { data } = await http.get(`/admin/products/pending`);
+  return data;
+};
+
+export const updateProductApproval = async (productId, approvalData) => {
+  const { data } = await http.put(`/admin/products/${productId}/approval`, approvalData);
+  return data;
+};
+
+export const getProductReports = async (status = "open") => {
+  const { data } = await http.get(`/admin/product-reports`, {
+    params: { status },
+  });
+  return data;
+};
+
+export const updateProductReport = async (reportId, reportData) => {
+  const { data } = await http.put(`/admin/product-reports/${reportId}`, reportData);
+  return data;
+};
+
+export const getMyProductSubmissions = async () => {
+  const { data } = await http.get(`/user/products/submissions`);
   return data;
 };

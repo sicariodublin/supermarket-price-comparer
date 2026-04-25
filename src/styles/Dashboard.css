@@ -148,6 +148,104 @@ h3 {
   margin-left: 10px;
 }
 
+.submissions-section {
+  margin: 20px 10px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.submissions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.submissions-header h3 {
+  margin: 0;
+}
+
+.refresh-submissions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #2438bc;
+  background: #ffffff;
+  color: #2438bc;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.refresh-submissions-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.submission-list {
+  display: grid;
+  gap: 12px;
+}
+
+.submission-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.submission-card strong,
+.submission-card span {
+  display: block;
+}
+
+.submission-card span {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 3px;
+}
+
+.submission-meta {
+  text-align: right;
+}
+
+.submission-status {
+  border-radius: 999px;
+  color: #ffffff !important;
+  display: inline-block !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  margin-top: 6px !important;
+  padding: 4px 8px;
+  text-transform: capitalize;
+}
+
+.submission-status.pending {
+  background: #a16207;
+}
+
+.submission-status.approved {
+  background: #218739;
+}
+
+.submission-status.rejected {
+  background: #b42318;
+}
+
+.submission-reason {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #b42318;
+  font-size: 14px;
+}
+
 .date-card {
   background-color: #f5f5f5;
   padding: 15px;
@@ -160,6 +258,288 @@ h3 {
   font-size: 16px;
   width: 50%;
   margin-bottom: 50px;
+}
+
+.moderation-section {
+  margin: 30px 10px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.moderation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.moderation-header h3 {
+  margin: 0;
+}
+
+.refresh-moderation-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #2438bc;
+  background: #ffffff;
+  color: #2438bc;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.refresh-moderation-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.moderation-message {
+  margin: 0 0 12px 0;
+  color: #2438bc;
+  font-weight: 600;
+}
+
+.moderation-table-wrap {
+  overflow-x: auto;
+}
+
+.moderation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.moderation-table th,
+.moderation-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.moderation-table th {
+  color: #334155;
+  font-size: 14px;
+  text-align: left;
+}
+
+.moderation-table td strong,
+.moderation-table td span {
+  display: block;
+}
+
+.moderation-table td span {
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.moderation-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.approve-btn,
+.reject-btn {
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.approve-btn {
+  background: #218739;
+}
+
+.reject-btn {
+  background: #b42318;
+}
+
+.reports-section {
+  margin: 30px 10px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.reports-header h3 {
+  margin: 0;
+}
+
+.reports-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reports-controls select {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.refresh-reports-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #2438bc;
+  background: #ffffff;
+  color: #2438bc;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.refresh-reports-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.reports-message {
+  margin: 0 0 12px 0;
+  color: #2438bc;
+  font-weight: 600;
+}
+
+.reports-list {
+  display: grid;
+  gap: 14px;
+}
+
+.report-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.report-card-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+}
+
+.report-card h4 {
+  margin: 6px 0 4px 0;
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.report-card p {
+  margin: 0;
+  color: #64748b;
+}
+
+.report-message-text {
+  margin-top: 8px !important;
+  color: #334155 !important;
+  line-height: 1.4;
+}
+
+.report-status {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  text-transform: capitalize;
+}
+
+.report-status.open {
+  background: #a16207;
+}
+
+.report-status.reviewed {
+  background: #2563eb;
+}
+
+.report-status.resolved {
+  background: #218739;
+}
+
+.report-status.dismissed {
+  background: #64748b;
+}
+
+.report-price-block {
+  min-width: 130px;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  text-align: right;
+}
+
+.report-price-block span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.report-price-block strong {
+  color: #1f2937;
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.report-card textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.report-review-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reviewed-btn,
+.resolved-btn,
+.dismiss-btn {
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.reviewed-btn {
+  background: #2563eb;
+}
+
+.resolved-btn {
+  background: #218739;
+}
+
+.dismiss-btn {
+  background: #64748b;
 }
 
 /* Seasonality Modal Styles */
@@ -516,6 +896,20 @@ h3 {
   .shopping-lists-grid {
     grid-template-columns: 1fr;
   }
+
+  .reports-header,
+  .report-card-main {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .report-price-block {
+    text-align: left;
+  }
   
   .shopping-list-card {
     padding: 15px;
@@ -595,6 +989,3 @@ h3 {
     width: 100%;
   }
 }
-
-
-
