@@ -26,9 +26,14 @@
     -->
     <title>React App</title>
     <script>
-      window.__API_URL = 'http://localhost:5001';
-      window.__BASIC_USER = 'admin';
-      window.__BASIC_PASS = 'changeme';
+      (function () {
+        var isLocal = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+        if (!isLocal) return;
+
+        window.__API_URL = "http://localhost:5001";
+        window.__BASIC_USER = "admin";
+        window.__BASIC_PASS = "changeme";
+      })();
     </script>
   </head>
   <body>

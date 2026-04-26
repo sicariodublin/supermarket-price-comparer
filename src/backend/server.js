@@ -229,7 +229,7 @@ const passwordSchema = z
   .max(128)
   .regex(/^(?=.*[A-Z])(?=.*[£$%&*\/\\@-]).{8,}$/, {
     message:
-      "Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*/\\@-).",
+      "Password must be at least 8 characters long, contain at least one uppercase letter, and one special character (£$%&*/@-).",
   });
 
 const schemas = {
@@ -820,9 +820,12 @@ app.post("/api/register", authLimiter, validateBody(schemas.register), async (re
               { expiresIn: "1d" }
             );
 
-            // Use FRONTEND_URL for the verification link
-            const frontendUrl = "http://localhost:4000";
-            const verificationUrl = `${frontendUrl}/verify-email?token=${verificationToken}`;
+            const frontendBase =
+              process.env.FRONTEND_URL ||
+              (process.env.NODE_ENV === "production"
+                ? "https://www.addandcompare.com"
+                : "http://localhost:4000");
+            const verificationUrl = `${frontendBase}/verify-email?token=${verificationToken}`;
 
             const emailOptions = {
               Messages: [
@@ -840,29 +843,56 @@ app.post("/api/register", authLimiter, validateBody(schemas.register), async (re
                   Subject: "Verify Your Email",
                   HTMLPart: `
             <h3>Welcome, ${username}!</h3>
-            <a href="${
-              process.env.FRONTEND_URL || "http://localhost:4000"
-            }/verify-email?token=${verificationToken}">Verify Email</a>
+            <a href="${verificationUrl}">Verify Email</a>
           `,
                 },
               ],
             };
 
-            mailjet
-              .post("send", { version: "v3.1" })
-              .request(emailOptions)
-              .then(() => {
-                console.log("Verification email sent successfully!");
-                res.status(200).json({
-                  message: "Registration successful! Please verify your email.",
+            (async () => {
+              try {
+                const sendResult = await mailjet
+                  .post("send", { version: "v3.1" })
+                  .request(emailOptions);
+
+                const msg = sendResult?.body?.Messages?.[0];
+                if (!msg || msg.Status !== "success") {
+                  console.error(
+                    "Verification email rejected by Mailjet:",
+                    sendResult?.body
+                  );
+                  return res
+                    .status(502)
+                    .json({ error: "Failed to send verification email" });
+                }
+
+                const toInfo = msg.To?.[0];
+                const messageId = toInfo?.MessageID || null;
+                const messageUuid = toInfo?.MessageUUID || null;
+
+                console.log("Verification email sent successfully:", {
+                  to: toInfo?.Email || email,
+                  messageId,
+                  messageUuid,
                 });
-              })
-              .catch((emailErr) => {
+
+                return res.status(200).json({
+                  message: "Registration successful! Please verify your email.",
+                  ...(process.env.NODE_ENV === "production"
+                    ? {}
+                    : {
+                        verification_url: verificationUrl,
+                        mailjet_message_id: messageId,
+                        mailjet_message_uuid: messageUuid,
+                      }),
+                });
+              } catch (emailErr) {
                 console.error("Error sending verification email:", emailErr);
-                res
+                return res
                   .status(500)
                   .json({ error: "Failed to send verification email" });
-              });
+              }
+            })();
           }
         }
       );
@@ -1486,25 +1516,58 @@ app.listen(PORT, () => {
 app.get("/api/products/new-or-back", async (req, res) => {
   try {
     await ensureProductSchemaLoaded();
-    const where = [
-      `(p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) 
-             OR p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY))`,
-    ];
+
+    const hasCreatedAt = hasProductColumn("created_at");
+    const hasBackInStock = hasProductColumn("back_in_stock_date");
+    const hasProductDate = hasProductColumn("product_date");
+
+    if (!hasCreatedAt && !hasProductDate && !hasBackInStock) {
+      return res.json([]);
+    }
+
+    const dateCol = hasCreatedAt ? "p.created_at" : "p.product_date";
+
+    const freshnessClauses = [];
+    if (hasCreatedAt || hasProductDate) {
+      freshnessClauses.push(`${dateCol} >= DATE_SUB(NOW(), INTERVAL 7 DAY)`);
+    }
+    if (hasBackInStock) {
+      freshnessClauses.push(
+        `p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)`
+      );
+    }
+
+    const where = [`(${freshnessClauses.join(" OR ")})`];
     const approvalClause = publicApprovalClause("p");
     if (approvalClause) where.push(approvalClause);
 
+    const statusCases = [];
+    if (hasCreatedAt || hasProductDate) {
+      statusCases.push(
+        `WHEN ${dateCol} >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'new'`
+      );
+    }
+    if (hasBackInStock) {
+      statusCases.push(
+        `WHEN p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'back'`
+      );
+    }
+
+    const orderParts = [];
+    if (hasCreatedAt || hasProductDate) orderParts.push(`${dateCol} DESC`);
+    if (hasBackInStock) orderParts.push(`p.back_in_stock_date DESC`);
+    if (!orderParts.length) orderParts.push("p.id DESC");
+
     const query = `
-      SELECT p.*, s.name as supermarket_name, 
-             CASE 
-               WHEN p.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'new'
-               WHEN p.back_in_stock_date >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 'back'
+      SELECT p.*, s.name as supermarket_name,
+             CASE
+               ${statusCases.join("\n               ")}
                ELSE NULL
-             END as status,
-             p.discount_percentage
+             END as status
       FROM products p
       JOIN supermarkets s ON p.supermarket_id = s.id
       WHERE ${where.join(" AND ")}
-      ORDER BY p.created_at DESC, p.back_in_stock_date DESC
+      ORDER BY ${orderParts.join(", ")}
       LIMIT 10
     `;
 
