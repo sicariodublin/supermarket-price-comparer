@@ -38,6 +38,8 @@ const Dashboard = () => {
   const [reportsLoading, setReportsLoading] = useState(false);
   const [reportsMessage, setReportsMessage] = useState("");
   const [reportStatusFilter, setReportStatusFilter] = useState("open");
+  const [reportTypeFilter, setReportTypeFilter] = useState("all");
+  const [reportQuery, setReportQuery] = useState("");
   const [reportNotes, setReportNotes] = useState({});
   const navigate = useNavigate();
   const { user } = useAuth(); // Get user from AuthContext
@@ -87,7 +89,11 @@ const Dashboard = () => {
     setReportsMessage("");
 
     try {
-      const reports = await getProductReports(reportStatusFilter);
+      const reports = await getProductReports({
+        status: reportStatusFilter,
+        report_type: reportTypeFilter,
+        q: reportQuery,
+      });
       setProductReports(reports);
       setShowReportsPanel(true);
     } catch (error) {
@@ -100,7 +106,7 @@ const Dashboard = () => {
     } finally {
       setReportsLoading(false);
     }
-  }, [reportStatusFilter]);
+  }, [reportQuery, reportStatusFilter, reportTypeFilter]);
 
   const fetchMySubmissions = useCallback(async () => {
     setSubmissionsLoading(true);
@@ -139,7 +145,11 @@ const Dashboard = () => {
   }, [fetchMySubmissions, fetchPendingProducts]);
 
   useEffect(() => {
-    fetchProductReports();
+    const timeout = setTimeout(() => {
+      fetchProductReports();
+    }, 350);
+
+    return () => clearTimeout(timeout);
   }, [fetchProductReports]);
   
   // Mock data (replace with API calls later)
@@ -249,16 +259,35 @@ const Dashboard = () => {
     }));
   };
 
-  const handleReportAction = async (reportId, status) => {
+  const handleReportAction = async (reportId, status, action = "none") => {
     setReportsMessage("");
+
+    const adminNotes = reportNotes[reportId] || "";
 
     try {
       await updateProductReport(reportId, {
         status,
-        admin_notes: reportNotes[reportId] || "",
+        admin_notes: adminNotes,
+        action,
       });
 
-      setProductReports((prev) => prev.filter((report) => report.id !== reportId));
+      setProductReports((prev) => {
+        const updated = prev.map((report) =>
+          report.id === reportId
+            ? {
+                ...report,
+                status,
+                admin_notes: adminNotes || report.admin_notes,
+                reviewed_at: new Date().toISOString(),
+                reviewed_by_email: user?.email || report.reviewed_by_email,
+              }
+            : report
+        );
+
+        if (reportStatusFilter === "all") return updated;
+        return updated.filter((report) => report.status === reportStatusFilter);
+      });
+
       setReportNotes((prev) => {
         const next = { ...prev };
         delete next[reportId];
@@ -464,6 +493,28 @@ const Dashboard = () => {
                 <option value="dismissed">Dismissed</option>
                 <option value="all">All</option>
               </select>
+
+              <select
+                value={reportTypeFilter}
+                onChange={(event) => setReportTypeFilter(event.target.value)}
+                aria-label="Filter report type"
+              >
+                <option value="all">All types</option>
+                <option value="incorrect_price">Incorrect price</option>
+                <option value="incorrect_details">Incorrect details</option>
+                <option value="not_available">Not available</option>
+                <option value="duplicate">Duplicate</option>
+                <option value="other">Other</option>
+              </select>
+
+              <input
+                type="text"
+                value={reportQuery}
+                onChange={(event) => setReportQuery(event.target.value)}
+                placeholder="Search (product, email, note, store)"
+                aria-label="Search product reports"
+              />
+
               <button
                 type="button"
                 className="refresh-reports-btn"
@@ -493,7 +544,19 @@ const Dashboard = () => {
                       <p>
                         {report.supermarket_name || "Unknown supermarket"} - {report.quantity || "-"} {report.unit || ""}
                       </p>
+                      {report.product_id ? (
+                        <button
+                          type="button"
+                          className="report-view-product"
+                          onClick={() => navigate(`/product/${report.product_id}`)}
+                        >
+                          View product
+                        </button>
+                      ) : null}
                       <p className="report-message-text">{report.message}</p>
+                      {report.admin_notes ? (
+                        <p className="report-admin-notes">{report.admin_notes}</p>
+                      ) : null}
                     </div>
                     <div className="report-price-block">
                       <span>Current</span>
@@ -511,6 +574,12 @@ const Dashboard = () => {
                     <span>{formatReportType(report.report_type)}</span>
                     <span>By {report.reported_by_email || "Unknown"}</span>
                     <span>{new Date(report.created_at).toLocaleString()}</span>
+                    {report.reviewed_by_email ? (
+                      <span>
+                        Reviewed by {report.reviewed_by_email}
+                        {report.reviewed_at ? ` (${new Date(report.reviewed_at).toLocaleString()})` : ""}
+                      </span>
+                    ) : null}
                   </div>
 
                   <textarea
@@ -528,6 +597,17 @@ const Dashboard = () => {
                     >
                       Reviewed
                     </button>
+
+                    {report.report_type === "incorrect_price" && report.reported_price != null && report.product_id ? (
+                      <button
+                        type="button"
+                        className="resolve-apply-btn"
+                        onClick={() => handleReportAction(report.id, "resolved", "apply_reported_price")}
+                      >
+                        Resolve + Apply Price
+                      </button>
+                    ) : null}
+
                     <button
                       type="button"
                       className="resolved-btn"

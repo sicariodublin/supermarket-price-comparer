@@ -394,6 +394,34 @@ h3 {
   padding: 8px 10px;
 }
 
+.reports-controls input {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-width: 240px;
+}
+
+.report-view-product {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #2438bc;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.report-admin-notes {
+  margin-top: 10px !important;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #1f2937 !important;
+}
+
 .refresh-reports-btn {
   display: inline-flex;
   align-items: center;
@@ -522,7 +550,8 @@ h3 {
 
 .reviewed-btn,
 .resolved-btn,
-.dismiss-btn {
+.dismiss-btn,
+.resolve-apply-btn {
   border: none;
   border-radius: 6px;
   color: #ffffff;
@@ -532,6 +561,10 @@ h3 {
 
 .reviewed-btn {
   background: #2563eb;
+}
+
+.resolve-apply-btn {
+  background: #0f766e;
 }
 
 .resolved-btn {

@@ -159,10 +159,20 @@ export const updateProductApproval = async (productId, approvalData) => {
   return data;
 };
 
-export const getProductReports = async (status = "open") => {
-  const { data } = await http.get(`/admin/product-reports`, {
-    params: { status },
-  });
+export const getProductReports = async (options = "open") => {
+  const params =
+    typeof options === "string"
+      ? { status: options }
+      : {
+          status: options?.status ?? "open",
+          q: options?.q || undefined,
+          report_type: options?.report_type || undefined,
+          product_id: options?.product_id || undefined,
+          limit: options?.limit || undefined,
+          offset: options?.offset || undefined,
+        };
+
+  const { data } = await http.get(`/admin/product-reports`, { params });
   return data;
 };
 

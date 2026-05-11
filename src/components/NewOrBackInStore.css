@@ -173,6 +173,51 @@
   right: 0;
 }
 
+.trust-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.trust-pill {
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 6px 9px;
+}
+
+.trust-pill.approved {
+  background: #218739;
+}
+
+.trust-pill.pending {
+  background: #a16207;
+}
+
+.trust-pill.rejected {
+  background: #b42318;
+}
+
+.trust-pill.unknown {
+  background: #64748b;
+}
+
+.trust-pill.source {
+  background: #334155;
+}
+
+.freshness-label {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
 .carousel-indicators {
   display: flex;
   justify-content: center;

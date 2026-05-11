@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getNewOrBackInStockProducts } from '../services/api';
 import './NewOrBackInStore.css';
+import {
+  getApprovalLabel,
+  getFreshnessLabel,
+  getSourceLabel,
+  getTrustClass,
+} from '../utilities/productTrust';
 
 import BionaGarlicImg from '../assets/images/Biona-Organic-Garlic-Paste.jpg';
 import TescoFinestBasmatiRiceImg from '../assets/images/Tesco-Finest-Basmati-Rice.jpg';
@@ -43,6 +49,10 @@ const NewOrBackInStore = ({ onProductClick }) => {
           isNew: product.status === 'new',
           isBackInStock: product.status === 'back',
           discount: product.discount_percentage,
+          approval_status: product.approval_status,
+          source: product.source,
+          last_checked_at: product.last_checked_at,
+          product_date: product.product_date,
         }));
 
         setNewProducts(normalizedProducts);
@@ -117,7 +127,7 @@ const NewOrBackInStore = ({ onProductClick }) => {
                     {product.isBackInStock && (
                       <span className="product-badge back-badge">BACK</span>
                     )}
-                    {product.discount && (
+                    {Number(product.discount) > 0 && (
                       <span className="new-or-back-discount-badge">-{product.discount}%</span>
                     )}
                   </div>
@@ -132,6 +142,16 @@ const NewOrBackInStore = ({ onProductClick }) => {
                     </div>
                     <div className="supermarket-info">
                       <span className="new-or-back-supermarket-name">{product.supermarket}</span>
+                    </div>
+
+                    <div className="trust-row">
+                      <span className={`trust-pill ${getTrustClass(product.approval_status)}`}>
+                        {getApprovalLabel(product.approval_status)}
+                      </span>
+                      <span className="trust-pill source">{getSourceLabel(product.source)}</span>
+                      <span className="freshness-label">
+                        {getFreshnessLabel(product.last_checked_at || product.product_date)}
+                      </span>
                     </div>
                   </div>
                 </Link>
