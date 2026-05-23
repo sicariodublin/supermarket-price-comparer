@@ -29,10 +29,9 @@
       (function () {
         var isLocal = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
         if (!isLocal) return;
-
         window.__API_URL = "http://localhost:5001";
-        window.__BASIC_USER = "admin";
-        window.__BASIC_PASS = "changeme";
+        // Basic Auth credentials are intentionally NOT hardcoded here.
+        // Set REACT_APP_BASIC_USER and REACT_APP_BASIC_PASS in .env if needed.
       })();
     </script>
   </head>

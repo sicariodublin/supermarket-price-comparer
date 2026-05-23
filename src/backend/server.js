@@ -102,12 +102,27 @@ app.options("*", cors(corsOptions));
 if (helmet) {
   app.use(
     helmet({
-      contentSecurityPolicy: false, // keep off unless CSP configured
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc:     ["'self'"],
+          scriptSrc:      ["'self'"],
+          styleSrc:       ["'self'", "'unsafe-inline'"], // React inlines critical styles
+          imgSrc:         ["'self'", "data:", "blob:"],
+          fontSrc:        ["'self'"],
+          connectSrc:     ["'self'", "https://addandcompare.com", "https://www.addandcompare.com"],
+          frameSrc:       ["'none'"],
+          frameAncestors: ["'none'"],
+          formAction:     ["'self'"],
+          objectSrc:      ["'none'"],
+          baseUri:        ["'self'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // keep off — may block legitimate embeds
     })
   );
   app.use(
     helmet.hsts({
-      maxAge: 31536000, // 1 year
+      maxAge: 31536000,
       includeSubDomains: true,
       preload: true,
     })
@@ -115,9 +130,22 @@ if (helmet) {
 }
 
 // HTTP Basic Auth protection (site-wide, skip CORS preflight)
-const BASIC_AUTH_ENABLED = (process.env.BASIC_AUTH_ENABLED || "true").toLowerCase() === "true";
-const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER || "admin";
-const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS || "changeme";
+const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER || "";
+const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS || "";
+const _basicAuthRequested = (process.env.BASIC_AUTH_ENABLED || "true").toLowerCase() === "true";
+
+let BASIC_AUTH_ENABLED = _basicAuthRequested;
+if (_basicAuthRequested && (!BASIC_AUTH_USER || !BASIC_AUTH_PASS)) {
+  if (!isDev) {
+    console.error(
+      "FATAL: BASIC_AUTH_ENABLED is true but BASIC_AUTH_USER or BASIC_AUTH_PASS is not set. " +
+      "Set these environment variables or set BASIC_AUTH_ENABLED=false."
+    );
+    process.exit(1);
+  }
+  console.warn("Basic Auth credentials not set — disabling Basic Auth in development. Set BASIC_AUTH_USER and BASIC_AUTH_PASS to enable it.");
+  BASIC_AUTH_ENABLED = false;
+}
 
 app.use((req, res, next) => {
   if (!BASIC_AUTH_ENABLED) return next();
@@ -398,6 +426,17 @@ const ensureProductReportsTable = async () => {
 
 const hasProductColumn = (column) => productSchema.columns.has(column);
 
+const recordPriceHistory = async (productId, price, source = "admin") => {
+  try {
+    await queryAsync(
+      "INSERT INTO price_history (product_id, price, source) VALUES (?, ?, ?)",
+      [productId, price, source]
+    );
+  } catch (err) {
+    console.warn("Could not record price history (table may not exist yet):", err.message);
+  }
+};
+
 function hasProductModeration() {
   return (
     hasProductColumn("source") &&
@@ -446,31 +485,20 @@ dataCollectionService.scheduleDataCollection();
 // Database connection is already established via pool
 // No need to call connect() on the pool
 
+// Returns the admin email list from env — used only for seeding, not runtime auth checks.
 const getAdminEmails = () =>
   (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 
-const isAdminRequest = (req) => {
-  const adminEmails = getAdminEmails();
-  const email = (req.userEmail || req.user?.email || "").toLowerCase();
-  return adminEmails.length > 0 && adminEmails.includes(email);
-};
+// Runtime admin check uses the role column set in the DB.
+const isAdminRequest = (req) => req.userRole === "admin";
 
 const requireAdmin = (req, res, next) => {
-  const adminEmails = getAdminEmails();
-
-  if (!adminEmails.length) {
-    return res.status(403).json({
-      error: "Admin access is not configured. Set ADMIN_EMAILS in the server environment.",
-    });
-  }
-
   if (!isAdminRequest(req)) {
     return res.status(403).json({ error: "Admin access required" });
   }
-
   next();
 };
 
@@ -750,6 +778,7 @@ app.put(
           return res.status(404).json({ error: "Product not found" });
         }
 
+        await recordPriceHistory(report.product_id, Number(report.reported_price), "admin");
         const actionNote = `Applied reported price: ${Number(report.reported_price)}`;
         mergedNotes = [mergedNotes.trim(), actionNote].filter(Boolean).join("\n");
         applied = { type: "apply_reported_price", price: Number(report.reported_price) };
@@ -780,23 +809,17 @@ app.put(
 );
 
 // Get collection dates endpoint
-app.get("/api/collection-dates", (req, res) => {
-  const query = `
-    SELECT id, name, last_updated 
-    FROM supermarkets 
-    ORDER BY name
-  `;
-
-  connection.query(query, (err, results) => {
-    if (err) {
-      res.status(500).json({ error: "Failed to fetch collection dates" });
-    } else {
-      res.json(results);
-    }
-  });
+app.get("/api/collection-dates", async (req, res) => {
+  try {
+    const results = await queryAsync("SELECT id, name, last_updated FROM supermarkets ORDER BY name");
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching collection dates:", err);
+    res.status(500).json({ error: "Failed to fetch collection dates" });
+  }
 });
 
-// Rota para enviar contact form
+// Contact form
 app.post("/api/contact", contactLimiter, validateBody(schemas.contact), async (req, res) => {
   const { name, email, subject, message } = req.body;
   const safeName = escapeHtml(name);
@@ -842,7 +865,7 @@ app.post("/api/contact", contactLimiter, validateBody(schemas.contact), async (r
   }
 });
 
-// Rota para enviar feedback
+// Feedback
 app.post("/api/feedback/sendFeedback", contactLimiter, validateBody(schemas.feedback), async (req, res) => {
   const { message } = req.body;
   const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
@@ -870,13 +893,13 @@ app.post("/api/feedback/sendFeedback", contactLimiter, validateBody(schemas.feed
     const result = await mailjet
       .post("send", { version: "v3.1" })
       .request(emailOptions);
-    console.log("E-mail de feedback enviado com sucesso:", result.body);
-    res.status(200).json({ message: "Feedback enviado com sucesso!" });
+    console.log("Feedback email sent successfully:", result.body);
+    res.status(200).json({ message: "Feedback submitted successfully!" });
   } catch (error) {
-    console.error("Erro ao enviar e-mail de feedback:", error);
+    console.error("Error sending feedback email:", error);
     res
       .status(500)
-      .json({ message: "Falha ao enviar feedback", error: error.message });
+      .json({ message: "Failed to submit feedback", error: error.message });
   }
 });
 
@@ -884,269 +907,219 @@ app.post("/api/feedback/sendFeedback", contactLimiter, validateBody(schemas.feed
 app.post("/api/register", authLimiter, validateBody(schemas.register), async (req, res) => {
   const { username, email, password } = req.body;
 
-  // Check if user already exists
-  const checkUserQuery = "SELECT * FROM users WHERE email = ?";
-  connection.query(checkUserQuery, [email], async (err, results) => {
-    if (err) {
-      console.error("Error during registration:", err);
-      res.status(500).json({ error: "Server error" });
-      return;
+  try {
+    const existing = await queryAsync("SELECT id FROM users WHERE email = ?", [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: "User already exists" });
     }
 
-    if (results.length > 0) {
-      res.status(400).json({ error: "User already exists" });
-    } else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const insertUserQuery =
-        "INSERT INTO users (username, email, password, isVerified) VALUES (?, ?, ?, FALSE)";
-      connection.query(
-        insertUserQuery,
-        [username, email, hashedPassword, false],
-        (err, result) => {
-          if (err) {
-            console.error("Error inserting user:", err);
-            res.status(500).json({ error: "Failed to register user" });
-          } else {
-            const userId = result.insertId;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await queryAsync(
+      "INSERT INTO users (username, email, password, isVerified) VALUES (?, ?, ?, FALSE)",
+      [username, email, hashedPassword]
+    );
+    const userId = result.insertId;
 
-            // Generate the verification token
-            const verificationToken = jwt.sign(
-              { id: userId, email },
-              process.env.JWT_SECRET,
-              { expiresIn: "1d" }
-            );
+    const verificationToken = jwt.sign(
+      { purpose: "email_verify", id: userId, email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
-            const frontendBase =
-              process.env.FRONTEND_URL ||
-              (process.env.NODE_ENV === "production"
-                ? "https://www.addandcompare.com"
-                : "http://localhost:4000");
-            const verificationUrl = `${frontendBase}/verify-email?token=${verificationToken}`;
+    const frontendBase =
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://www.addandcompare.com"
+        : "http://localhost:4000");
+    const verificationUrl = `${frontendBase}/verify-email?token=${verificationToken}`;
 
-            const emailOptions = {
-              Messages: [
-                {
-                  From: {
-                    Email: "addandcomparemessageus@hotmail.com",
-                    Name: "Support Team",
-                  },
-                  To: [
-                    {
-                      Email: email,
-                      Name: username,
-                    },
-                  ],
-                  Subject: "Verify Your Email",
-                  HTMLPart: `
-            <h3>Welcome, ${username}!</h3>
-            <a href="${verificationUrl}">Verify Email</a>
-          `,
-                },
-              ],
-            };
+    const emailOptions = {
+      Messages: [
+        {
+          From: { Email: "addandcomparemessageus@hotmail.com", Name: "Support Team" },
+          To: [{ Email: email, Name: username }],
+          Subject: "Verify Your Email",
+          HTMLPart: `<h3>Welcome, ${username}!</h3><a href="${verificationUrl}">Verify Email</a>`,
+        },
+      ],
+    };
 
-            (async () => {
-              try {
-                const sendResult = await mailjet
-                  .post("send", { version: "v3.1" })
-                  .request(emailOptions);
-
-                const msg = sendResult?.body?.Messages?.[0];
-                if (!msg || msg.Status !== "success") {
-                  console.error(
-                    "Verification email rejected by Mailjet:",
-                    sendResult?.body
-                  );
-                  return res
-                    .status(502)
-                    .json({ error: "Failed to send verification email" });
-                }
-
-                const toInfo = msg.To?.[0];
-                const messageId = toInfo?.MessageID || null;
-                const messageUuid = toInfo?.MessageUUID || null;
-
-                console.log("Verification email sent successfully:", {
-                  to: toInfo?.Email || email,
-                  messageId,
-                  messageUuid,
-                });
-
-                return res.status(200).json({
-                  message: "Registration successful! Please verify your email.",
-                  ...(process.env.NODE_ENV === "production"
-                    ? {}
-                    : {
-                        verification_url: verificationUrl,
-                        mailjet_message_id: messageId,
-                        mailjet_message_uuid: messageUuid,
-                      }),
-                });
-              } catch (emailErr) {
-                console.error("Error sending verification email:", emailErr);
-                return res
-                  .status(500)
-                  .json({ error: "Failed to send verification email" });
-              }
-            })();
-          }
-        }
-      );
+    const sendResult = await mailjet.post("send", { version: "v3.1" }).request(emailOptions);
+    const msg = sendResult?.body?.Messages?.[0];
+    if (!msg || msg.Status !== "success") {
+      console.error("Verification email rejected by Mailjet:", sendResult?.body);
+      return res.status(502).json({ error: "Failed to send verification email" });
     }
-  });
+
+    const toInfo = msg.To?.[0];
+    console.log("Verification email sent successfully:", {
+      to: toInfo?.Email || email,
+      messageId: toInfo?.MessageID || null,
+    });
+
+    return res.status(200).json({
+      message: "Registration successful! Please verify your email.",
+      ...(process.env.NODE_ENV === "production"
+        ? {}
+        : {
+            verification_url: verificationUrl,
+            mailjet_message_id: toInfo?.MessageID || null,
+            mailjet_message_uuid: toInfo?.MessageUUID || null,
+          }),
+    });
+  } catch (err) {
+    console.error("Error during registration:", err);
+    res.status(500).json({ error: "Failed to register user" });
+  }
 });
 
 // Route for user login
-app.post("/api/login", authLimiter, validateBody(schemas.login), (req, res) => {
+app.post("/api/login", authLimiter, validateBody(schemas.login), async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate request body
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
-  }
+  try {
+    const results = await queryAsync("SELECT * FROM users WHERE email = ?", [email]);
+    const user = results[0];
 
-  // Query database for user
-  connection.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email],
-    async (err, results) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-
-      const user = results[0];
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Verify password
-      try {
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) {
-          return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        if (!user.isVerified) {
-          return res.status(403).json({
-            message: "Please verify your email before logging in.",
-          });
-        }
-
-        // Update isLoggedIn status
-        connection.query(
-          "UPDATE users SET isLoggedIn = ? WHERE email = ?",
-          [1, email],
-          (updateErr) => {
-            if (updateErr) {
-              console.error("Error updating login status:", updateErr);
-            }
-          }
-        );
-
-        // Generate token with user ID and email
-        const token = jwt.sign(
-          {
-            id: user.id,
-            email: user.email,
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: "1h" }
-        );
-
-        console.log("User authenticated:", { id: user.id, email: user.email });
-
-        // Send response
-        res.json({
-          token,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          },
-        });
-      } catch (error) {
-        console.error("Authentication error:", error);
-        res.status(500).json({ message: "Authentication failed" });
-      }
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-  );
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+      });
+    }
+
+    await queryAsync("UPDATE users SET isLoggedIn = 1 WHERE email = ?", [email]);
+
+    const token = jwt.sign(
+      { purpose: "auth", id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    console.log("User authenticated:", { id: user.id, email: user.email });
+
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role || "user" },
+    });
+  } catch (error) {
+    console.error("Authentication error:", error);
+    res.status(500).json({ message: "Authentication failed" });
+  }
 });
 
 // Route for user logout
-app.post("/api/logout", (req, res) => {
+app.post("/api/logout", async (req, res) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    console.error("Authorization Header Missing or Invalid:", authHeader);
-    return res
-      .status(400)
-      .json({ message: "Invalid token or Authorization header missing" });
+    return res.status(400).json({ message: "Invalid token or Authorization header missing" });
   }
 
-  const token = authHeader.split(" ")[1]; // Extract token
-  console.log("Token received during logout:", token);
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const email = decoded.email;
-
-    const query = "UPDATE users SET isLoggedIn = FALSE WHERE email = ?";
-    connection.query(query, [email], (err) => {
-      // Removed `result`
-      if (err) {
-        console.error("Database error during logout:", err);
-        return res
-          .status(500)
-          .json({ message: "Database error during logout" });
-      }
-      console.log(`User ${email} logged out successfully.`);
-      return res.status(200).json({ message: "Logged out successfully" });
-    });
+    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+    if (decoded.purpose !== "auth") {
+      return res.status(400).json({ message: "Invalid token" });
+    }
+    await queryAsync("UPDATE users SET isLoggedIn = FALSE WHERE email = ?", [decoded.email]);
+    console.log(`User ${decoded.email} logged out successfully.`);
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.error("Token verification failed during logout:", error);
+    console.error("Logout error:", error);
     return res.status(400).json({ message: "Invalid token" });
   }
 });
 
-// Middleware to authenticate token
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ error: "Access token is missing or invalid" });
+const DEFAULT_NEWSLETTER = { weeklyDeals: true, priceAlerts: false, newProducts: true, seasonalTips: false };
+
+const parseUserData = (row) => ({
+  watchlist: row?.watchlist ? JSON.parse(row.watchlist) : [],
+  newsletterSettings: row?.newsletter_settings ? JSON.parse(row.newsletter_settings) : DEFAULT_NEWSLETTER,
+  weeklyShopBudget: row?.weekly_shop_budget ?? 150,
+  preferredSupermarkets: row?.preferred_supermarkets ? JSON.parse(row.preferred_supermarkets) : [],
+});
+
+app.get("/api/user/dashboard", verifyToken, async (req, res) => {
+  try {
+    const [profiles, prefs] = await Promise.all([
+      queryAsync("SELECT id, username, email FROM users WHERE id = ?", [req.userId]),
+      queryAsync("SELECT * FROM user_data WHERE user_id = ?", [req.userId]),
+    ]);
+
+    if (!profiles.length) return res.status(404).json({ error: "User not found" });
+
+    res.json({ ...profiles[0], ...parseUserData(prefs[0]) });
+  } catch (err) {
+    console.error("Error fetching user dashboard:", err);
+    res.status(500).json({ error: "Database error" });
   }
+});
 
-  const token = authHeader.split(" ")[1]; // Extract the token from "Bearer <token>"
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
-    }
+const userPrefsSchema = z.object({
+  watchlist: z.array(z.coerce.number().int().positive()).max(100).optional(),
+  newsletterSettings: z.object({
+    weeklyDeals: z.boolean().optional(),
+    priceAlerts: z.boolean().optional(),
+    newProducts: z.boolean().optional(),
+    seasonalTips: z.boolean().optional(),
+  }).optional(),
+  weeklyShopBudget: z.coerce.number().nonnegative().max(100000).optional(),
+  preferredSupermarkets: z.array(z.string().trim().max(80)).max(20).optional(),
+});
 
-    req.user = user; // Attach the user payload to the request
-    next();
-  });
-};
+app.put("/api/user/dashboard", verifyToken, validateBody(userPrefsSchema), async (req, res) => {
+  const { watchlist, newsletterSettings, weeklyShopBudget, preferredSupermarkets } = req.body;
 
-app.get("/api/user/dashboard", authenticateToken, (req, res) => {
-  const userId = req.user.id; // Extracted from the decoded JWT
+  try {
+    // Fetch existing row so we can merge partial updates
+    const existing = await queryAsync("SELECT * FROM user_data WHERE user_id = ?", [req.userId]);
+    const current = parseUserData(existing[0]);
 
-  const query = `
-    SELECT * FROM user_data WHERE user_id = ?;
-  `;
-  connection.query(query, [userId], (err, results) => {
-    if (err) {
-      res.status(500).json({ error: "Database error" });
-    } else {
-      res.json({ userData: results });
-    }
-  });
+    const merged = {
+      watchlist: watchlist ?? current.watchlist,
+      newsletter_settings: newsletterSettings
+        ? { ...current.newsletterSettings, ...newsletterSettings }
+        : current.newsletterSettings,
+      weekly_shop_budget: weeklyShopBudget ?? current.weeklyShopBudget,
+      preferred_supermarkets: preferredSupermarkets ?? current.preferredSupermarkets,
+    };
+
+    await queryAsync(
+      `INSERT INTO user_data (user_id, watchlist, newsletter_settings, weekly_shop_budget, preferred_supermarkets)
+       VALUES (?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         watchlist = VALUES(watchlist),
+         newsletter_settings = VALUES(newsletter_settings),
+         weekly_shop_budget = VALUES(weekly_shop_budget),
+         preferred_supermarkets = VALUES(preferred_supermarkets),
+         updated_at = NOW()`,
+      [
+        req.userId,
+        JSON.stringify(merged.watchlist),
+        JSON.stringify(merged.newsletter_settings),
+        merged.weekly_shop_budget,
+        JSON.stringify(merged.preferred_supermarkets),
+      ]
+    );
+
+    res.json({ message: "Preferences saved.", ...merged });
+  } catch (err) {
+    console.error("Error saving user preferences:", err);
+    res.status(500).json({ error: "Failed to save preferences" });
+  }
 });
 
 // Route to add a product
 app.post("/api/products", verifyToken, validateBody(schemas.product), async (req, res) => {
-  const { name, quantity, unit, price, supermarket_id, product_date } =
+  const { name, brand, quantity, unit, price, supermarket_id, product_date } =
     req.body;
   console.log("Received product data:", req.body);
 
@@ -1165,9 +1138,9 @@ app.post("/api/products", verifyToken, validateBody(schemas.product), async (req
   try {
     await ensureProductSchemaLoaded();
 
-    const columns = ["name", "quantity", "unit", "price", "supermarket_id", "product_date"];
-    const placeholders = ["?", "?", "?", "?", "?", "?"];
-    const values = [name, quantity, unit, price, supermarket_id, product_date];
+    const columns = ["name", "brand", "quantity", "unit", "price", "supermarket_id", "product_date"];
+    const placeholders = ["?", "?", "?", "?", "?", "?", "?"];
+    const values = [name, brand || "", quantity, unit, price, supermarket_id, product_date];
 
     if (hasProductModeration()) {
       columns.push("source", "approval_status", "created_by_user_id");
@@ -1184,6 +1157,33 @@ app.post("/api/products", verifyToken, validateBody(schemas.product), async (req
     const result = await queryAsync(query, values);
 
     console.log("Product saved successfully:", result);
+    await recordPriceHistory(result.insertId, price, "user");
+
+    // Notify admins of new pending submission (fire-and-forget — never block the response)
+    if (hasProductModeration()) {
+      const adminEmails = getAdminEmails();
+      if (adminEmails.length) {
+        const frontendBase =
+          process.env.FRONTEND_URL ||
+          (process.env.NODE_ENV === "production" ? "https://www.addandcompare.com" : "http://localhost:4000");
+
+        mailjet.post("send", { version: "v3.1" }).request({
+          Messages: [{
+            From: { Email: "addandcomparemessageus@hotmail.com", Name: "Add&Compare" },
+            To: adminEmails.map((e) => ({ Email: e })),
+            Subject: "New product submission pending review",
+            HTMLPart: `
+              <h3>New product pending review</h3>
+              <p><strong>Product:</strong> ${escapeHtml(name)}${brand ? ` (${escapeHtml(brand)})` : ""}</p>
+              <p><strong>Price:</strong> €${Number(price).toFixed(2)}</p>
+              <p><strong>Submitted by:</strong> ${escapeHtml(req.userEmail)}</p>
+              <p><a href="${frontendBase}/dashboard">Review in dashboard →</a></p>
+            `,
+          }],
+        }).catch((err) => console.error("Admin notification email failed:", err.message));
+      }
+    }
+
     res.json({
       id: result.insertId,
       approval_status: hasProductModeration() ? "pending" : "approved",
@@ -1234,18 +1234,23 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 // Route to search products by name
 app.get("/api/products/search", async (req, res) => {
   const searchName = req.query.name || "";
+  const supermarketId = req.query.supermarket_id ? parseInt(req.query.supermarket_id, 10) : null;
+  const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 200));
+  const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
 
   try {
     await ensureProductSchemaLoaded();
 
     let query = `
-SELECT 
-  products.id, 
-  products.name, 
-  products.quantity, 
-  products.unit, 
-  products.price, 
-  supermarkets.name AS supermarket_name, 
+SELECT
+  products.id,
+  products.name,
+  products.brand,
+  products.quantity,
+  products.unit,
+  products.price,
+  supermarkets.name AS supermarket_name,
+  supermarkets.id AS supermarket_id,
   products.product_date
   ${moderationSelectFields("products")}
 FROM products
@@ -1262,12 +1267,20 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
       queryParams.push(`%${searchName}%`);
     }
 
+    if (supermarketId && Number.isFinite(supermarketId) && supermarketId > 0) {
+      where.push("products.supermarket_id = ?");
+      queryParams.push(supermarketId);
+    }
+
     if (where.length) {
       query += ` WHERE ${where.join(" AND ")}`;
     }
 
+    query += ` ORDER BY products.name ASC LIMIT ? OFFSET ?`;
+    queryParams.push(limit, offset);
+
     const results = await queryAsync(query, queryParams);
-    res.json(results);
+    res.json({ results, limit, offset });
   } catch (err) {
     console.error("Error searching products:", err);
     res.status(500).json({ error: "Failed to search products" });
@@ -1277,7 +1290,7 @@ LEFT JOIN supermarkets ON products.supermarket_id = supermarkets.id
 // API route to update a product
 app.put("/api/products/:id", verifyToken, validateBody(schemas.product), async (req, res) => {
   const { id } = req.params;
-  const { name, quantity, unit, price, supermarket_id, product_date } =
+  const { name, brand, quantity, unit, price, supermarket_id, product_date } =
     req.body;
 
   try {
@@ -1285,13 +1298,14 @@ app.put("/api/products/:id", verifyToken, validateBody(schemas.product), async (
 
     const updates = [
       "name = ?",
+      "brand = ?",
       "quantity = ?",
       "unit = ?",
       "price = ?",
       "supermarket_id = ?",
       "product_date = ?",
     ];
-    const params = [name, quantity, unit, price, supermarket_id, product_date];
+    const params = [name, brand || "", quantity, unit, price, supermarket_id, product_date];
 
     if (hasProductModeration() && !isAdminRequest(req)) {
       updates.push("approval_status = 'pending'");
@@ -1317,6 +1331,9 @@ app.put("/api/products/:id", verifyToken, validateBody(schemas.product), async (
       });
     }
 
+    const source = isAdminRequest(req) ? "admin" : "user";
+    await recordPriceHistory(id, price, source);
+
     res.json({
       message: hasProductModeration() && !isAdminRequest(req)
         ? "Product updated and submitted for review."
@@ -1325,6 +1342,44 @@ app.put("/api/products/:id", verifyToken, validateBody(schemas.product), async (
   } catch (err) {
     console.error("Error updating product:", err);
     res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+// Delete a product — admin can delete any; users can only delete their own pending submissions
+app.delete("/api/products/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await ensureProductSchemaLoaded();
+
+    let query;
+    let params;
+
+    if (isAdminRequest(req)) {
+      query = "DELETE FROM products WHERE id = ?";
+      params = [id];
+    } else if (hasProductModeration()) {
+      // Regular users can only delete their own pending submissions
+      query = "DELETE FROM products WHERE id = ? AND created_by_user_id = ? AND approval_status = 'pending'";
+      params = [id, req.userId];
+    } else {
+      return res.status(403).json({ error: "You do not have permission to delete products." });
+    }
+
+    const result = await queryAsync(query, params);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: isAdminRequest(req)
+          ? "Product not found."
+          : "Product not found, or it has already been approved and cannot be deleted.",
+      });
+    }
+
+    res.json({ message: "Product deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).json({ error: "Failed to delete product" });
   }
 });
 
@@ -1449,7 +1504,52 @@ app.get("/api/user/products/submissions", verifyToken, async (req, res) => {
   }
 });
 
-app.get("/api/verify-email", (req, res) => {
+app.post("/api/resend-verification", authLimiter, async (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== "string") {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const users = await queryAsync(
+      "SELECT id, username, email, isVerified FROM users WHERE email = ?",
+      [email.trim().toLowerCase()]
+    );
+
+    // Always respond the same way to avoid leaking whether an email exists
+    if (!users.length || users[0].isVerified) {
+      return res.status(200).json({ message: "If that email exists and is unverified, a new link has been sent." });
+    }
+
+    const user = users[0];
+    const verificationToken = jwt.sign(
+      { purpose: "email_verify", id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    const frontendBase =
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production" ? "https://www.addandcompare.com" : "http://localhost:4000");
+    const verificationUrl = `${frontendBase}/verify-email?token=${verificationToken}`;
+
+    await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [{
+        From: { Email: "addandcomparemessageus@hotmail.com", Name: "Support Team" },
+        To: [{ Email: user.email, Name: user.username }],
+        Subject: "Verify Your Email — Add&Compare",
+        HTMLPart: `<h3>Hi ${user.username},</h3><p>Here is your new verification link:</p><a href="${verificationUrl}">Verify Email</a><p>This link expires in 24 hours.</p>`,
+      }],
+    });
+
+    res.status(200).json({ message: "If that email exists and is unverified, a new link has been sent." });
+  } catch (err) {
+    console.error("Error resending verification email:", err);
+    res.status(500).json({ message: "Failed to send verification email" });
+  }
+});
+
+app.get("/api/verify-email", async (req, res) => {
   const token = req.query.token;
 
   if (!token) {
@@ -1458,25 +1558,18 @@ app.get("/api/verify-email", (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
+    if (decoded.purpose !== "email_verify") {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    const result = await queryAsync("UPDATE users SET isVerified = TRUE WHERE id = ?", [decoded.id]);
 
-    const updateQuery = "UPDATE users SET isVerified = TRUE WHERE id = ?";
-    connection.query(updateQuery, [userId], (err, result) => {
-      if (err) {
-        console.error("Database error during verification:", err);
-        return res
-          .status(500)
-          .json({ message: "Database error during verification" });
-      }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.json({ message: "Email verified successfully. You can now log in." });
-    });
+    res.json({ message: "Email verified successfully. You can now log in." });
   } catch (err) {
-    console.error("Token verification failed:", err);
+    console.error("Email verification error:", err);
     res.status(400).json({ message: "Invalid or expired token" });
   }
 });
@@ -1494,7 +1587,7 @@ app.post("/api/password-reset", authLimiter, validateBody(schemas.passwordReset)
       return res.status(404).json({ message: "User not found" });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ purpose: "password_reset", userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     const frontendBase =
@@ -1545,78 +1638,42 @@ app.post("/api/password-reset/confirm", authLimiter, validateBody(schemas.passwo
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
+    if (decoded.purpose !== "password_reset" || !decoded.userId) {
+      return res.status(400).json({ message: "Invalid or expired token." });
+    }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const query = "UPDATE users SET password = ? WHERE id = ?";
-    connection.query(query, [hashedPassword, userId], (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Failed to reset password." });
-      }
-
-      res.status(200).json({ message: "Password reset successfully." });
-    });
+    await queryAsync("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, decoded.userId]);
+    res.status(200).json({ message: "Password reset successfully." });
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: "Invalid or expired token." });
   }
 });
 
-// Helper function to find a user in the database
-function findUserInDatabase(username, email) {
-  return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM users WHERE username = ? AND email = ?";
-    connection.query(query, [username, email], (err, results) => {
-      if (err) {
-        return reject(err);
-      }
-      if (results.length === 0) {
-        return resolve(null); // No user found
-      }
-      resolve(results[0]); // Return the first matched user
-    });
-  });
+async function findUserInDatabase(username, email) {
+  const results = await queryAsync(
+    "SELECT * FROM users WHERE username = ? AND email = ?",
+    [username, email]
+  );
+  return results[0] || null;
 }
 
-let users = [
-  {
-    id: "user-id-placeholder",
-    username: "Fsteyer",
-    email: "fsteyer@example.com",
-  },
-];
-
 // Delete Account Endpoint
-app.delete("/api/delete-account", verifyToken, (req, res) => {
-  console.log("Full request headers:", req.headers);
-  console.log("Full decoded token:", req.user);
-  console.log("UserID from request:", req.userId);
+app.delete("/api/delete-account", verifyToken, async (req, res) => {
+  try {
+    const result = await queryAsync("DELETE FROM users WHERE id = ?", [req.userId]);
 
-  const userId = req.userId; // Extracted from the token
-  if (!userId) {
-    console.error("UserID is undefined");
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
-  connection.query(
-    "DELETE FROM users WHERE id = ?",
-    [userId],
-    (err, result) => {
-      if (err) {
-        console.error("Error deleting user from database:", err);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-
-      if (result.affectedRows === 0) {
-        console.log("No user found with ID:", userId); // Log if no user is found
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      console.log("Deleted user with ID:", userId); // Log success
-      return res.status(200).json({ message: "Account deleted successfully" });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
     }
-  );
+
+    console.log("Deleted user with ID:", req.userId);
+    return res.status(200).json({ message: "Account deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Serve React build files
@@ -1815,13 +1872,14 @@ app.get("/api/products/:id/pricing-history", async (req, res) => {
     const approvalClause = publicApprovalClause("p");
 
     const query = `
-      SELECT ph.*, p.name as product_name, s.name as supermarket_name
+      SELECT ph.id, ph.price, ph.source, ph.recorded_at,
+             p.name as product_name, s.name as supermarket_name
       FROM price_history ph
       JOIN products p ON ph.product_id = p.id
       JOIN supermarkets s ON p.supermarket_id = s.id
       WHERE ph.product_id = ?
         ${approvalClause ? `AND ${approvalClause}` : ""}
-      ORDER BY ph.recorded_date DESC
+      ORDER BY ph.recorded_at DESC
       LIMIT 30
     `;
 

@@ -10,14 +10,16 @@ function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(""); // For error messages
-  const [verifiedMessage, setVerifiedMessage] = useState(""); // For success messages
+  const [errorMessage, setErrorMessage] = useState("");
+  const [verifiedMessage, setVerifiedMessage] = useState("");
+  const [showResend, setShowResend] = useState(false);
+  const [resendStatus, setResendStatus] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
 
-  const { login } = useAuth(); // Use AuthContext hook
-  const navigate = useNavigate(); // For navigation
-  const location = useLocation(); // For handling query parameters
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Check for email verification success message in query params
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get("verified") === "true") {
@@ -27,23 +29,34 @@ function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowResend(false);
+    setResendStatus("");
 
     try {
-      const { data } = await http.post("/login", {
-        email: username,
-        password,
-      });
-
-      console.log("Token received:", data.token);
+      const { data } = await http.post("/login", { email: username, password });
       setTimeout(() => {
         login(data.token, data.user);
         navigate("/search");
       }, 0);
     } catch (error) {
-      console.error("Login failed:", error);
-      const message =
-        error?.response?.data?.error || "Invalid login credentials";
-      setErrorMessage(message);
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Invalid login credentials";
+      setErrorMessage(msg);
+      if (error?.response?.status === 403 && msg.toLowerCase().includes("verify")) {
+        setShowResend(true);
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendStatus("");
+    try {
+      await http.post("/resend-verification", { email: username });
+      setResendStatus("A new verification link has been sent — please check your inbox.");
+    } catch {
+      setResendStatus("Could not send the link. Please try again later.");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -53,11 +66,10 @@ function LoginForm() {
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
-      {/* Keep banners OUTSIDE input groups so icons never shift */}
       <div className="form-message-slot">
         {verifiedMessage && (
           <div className="success-message">
-            <i className="bi bi-check-csrcle-fill me-2"></i>
+            <i className="bi bi-check-circle-fill me-2"></i>
             {verifiedMessage}
           </div>
         )}
@@ -65,6 +77,19 @@ function LoginForm() {
           <div className="error-message">
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             {errorMessage}
+            {showResend && (
+              <div style={{ marginTop: "0.5rem" }}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                >
+                  {resendLoading ? "Sending…" : "Resend verification email"}
+                </button>
+                {resendStatus && <p style={{ marginTop: "0.4rem", fontSize: "0.85rem" }}>{resendStatus}</p>}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -29,13 +29,13 @@ const verifyToken = async (req, res, next) => {
     return res.status(401).json({ message: "Invalid token" });
   }
 
-  if (!decoded.email) {
-    return res.status(401).json({ message: "Invalid token format" });
+  if (!decoded.email || decoded.purpose !== "auth") {
+    return res.status(401).json({ message: "Invalid token" });
   }
 
   try {
     const results = await queryAsync(
-      "SELECT id, email, isLoggedIn FROM users WHERE email = ?",
+      "SELECT id, email, role, isLoggedIn FROM users WHERE email = ?",
       [decoded.email]
     );
 
@@ -47,11 +47,13 @@ const verifyToken = async (req, res, next) => {
       await updateLoginStatus(decoded.email, 1);
     }
 
-    req.userId = results[0].id;
+    req.userId    = results[0].id;
     req.userEmail = decoded.email;
+    req.userRole  = results[0].role || "user";
     req.user = {
-      id: results[0].id,
-      email: decoded.email,
+      id:        results[0].id,
+      email:     decoded.email,
+      role:      results[0].role || "user",
       isLoggedIn: 1,
     };
 

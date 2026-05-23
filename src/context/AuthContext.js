@@ -68,6 +68,7 @@ export function AuthProvider({ children }) {
     clearTimeout(timeoutId);
     const newTimeout = setTimeout(() => {
       console.log("Logging out due to inactivity...");
+      setShowInactivityModal(true);
       logout();
     }, 55 * 60 * 1000); // 55 minutes
     setTimeoutId(newTimeout);

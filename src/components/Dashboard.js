@@ -16,6 +16,8 @@ import {
   getProductReports,
   updateProductApproval,
   updateProductReport,
+  getUserDashboard,
+  saveUserPreferences,
 } from '../services/api';
 import { formatEuro } from "../utilities/productTrust";
 
@@ -26,6 +28,12 @@ const Dashboard = () => {
   const [isWeeklyShopModalOpen, setIsWeeklyShopModalOpen] = useState(false);
   const [isSeasonalityModalOpen, setIsSeasonalityModalOpen] = useState(false);
   const [generatedShoppingLists, setGeneratedShoppingLists] = useState([]);
+  const [userPreferences, setUserPreferences] = useState({
+    watchlist: [],
+    newsletterSettings: { weeklyDeals: true, priceAlerts: false, newProducts: true, seasonalTips: false },
+    weeklyShopBudget: 150,
+    preferredSupermarkets: ["Aldi", "Tesco"],
+  });
   const [collectionDates, setCollectionDates] = useState([]);
   const [pendingProducts, setPendingProducts] = useState([]);
   const [productReports, setProductReports] = useState([]);
@@ -129,41 +137,47 @@ const Dashboard = () => {
         setCollectionDates(dates);
       } catch (error) {
         console.error('Error fetching collection dates:', error);
-        const mockData = [
+        setCollectionDates([
           { id: 1, name: "Aldi", last_updated: "2024-12-05" },
           { id: 2, name: "Dunnes Stores", last_updated: "2024-12-05" },
           { id: 3, name: "SuperValu", last_updated: "2024-12-05" },
           { id: 4, name: "Tesco", last_updated: "2024-12-05" },
-        ];
-        setCollectionDates(mockData);
+        ]);
       }
     };
-    
+
+    const fetchUserPreferences = async () => {
+      try {
+        const data = await getUserDashboard();
+        setUserPreferences({
+          watchlist: data.watchlist ?? [],
+          newsletterSettings: data.newsletterSettings ?? userPreferences.newsletterSettings,
+          weeklyShopBudget: data.weeklyShopBudget ?? 150,
+          preferredSupermarkets: data.preferredSupermarkets ?? [],
+        });
+      } catch (error) {
+        console.error('Error fetching user preferences:', error);
+      }
+    };
+
     fetchCollectionDates();
+    fetchUserPreferences();
     fetchMySubmissions();
-    fetchPendingProducts();
-  }, [fetchMySubmissions, fetchPendingProducts]);
+    if (user?.role === "admin") fetchPendingProducts();
+  }, [fetchMySubmissions, fetchPendingProducts, user?.role]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (user?.role !== "admin") return;
     const timeout = setTimeout(() => {
       fetchProductReports();
     }, 350);
 
     return () => clearTimeout(timeout);
-  }, [fetchProductReports]);
+  }, [fetchProductReports, user?.role]);
   
-  // Mock data (replace with API calls later)
   const userData = {
     name: getDisplayName(),
-    watchlist: [],
-    newsletterSettings: {
-      weeklyDeals: true,
-      priceAlerts: false,
-      newProducts: true,
-      seasonalTips: false
-    },
-    weeklyShopBudget: 150,
-    preferredSupermarkets: ["Aldi", "Tesco"]
+    ...userPreferences,
   };
 
   // Modal control handlers
@@ -190,20 +204,34 @@ const Dashboard = () => {
   };
 
   const handleConfirmDelete = () => {
-    console.log("Account deleted");
     setIsDeleteModalOpen(false);
-    // Call API to delete account here
+    navigate("/delete-account");
   };
 
-  const handleNewsletterSave = (settings) => {
-    console.log("Newsletter settings saved:", settings);
-    // Call API to save newsletter settings
+  const handleNewsletterSave = async (settings) => {
+    try {
+      await saveUserPreferences({ newsletterSettings: settings });
+      setUserPreferences((prev) => ({ ...prev, newsletterSettings: settings }));
+    } catch (error) {
+      console.error("Error saving newsletter settings:", error);
+    }
     setIsNewsletterModalOpen(false);
   };
 
-  const handleWeeklyShopSave = (data) => {
-    console.log("Weekly shop preferences saved:", data);
-    // Call API to save weekly shop preferences
+  const handleWeeklyShopSave = async (data) => {
+    try {
+      await saveUserPreferences({
+        weeklyShopBudget: data.budget,
+        preferredSupermarkets: data.supermarkets,
+      });
+      setUserPreferences((prev) => ({
+        ...prev,
+        weeklyShopBudget: data.budget,
+        preferredSupermarkets: data.supermarkets,
+      }));
+    } catch (error) {
+      console.error("Error saving weekly shop preferences:", error);
+    }
     setIsWeeklyShopModalOpen(false);
   };
 

@@ -1,26 +1,24 @@
 
 const express = require('express');
 const router = express.Router();
-const { verifyToken } = require('../middleware/authMiddleware'); // Path to your middleware file
+const { verifyToken } = require('../middleware/authMiddleware');
+const { queryAsync } = require('../db');
 
 // Fetch user details
 router.get('/dashboard', verifyToken, async (req, res) => {
   try {
-    // Replace this with your DB query logic
-    const query = 'SELECT id, username, emasil FROM users WHERE id = ?';
-    connection.query(query, [req.user.id], (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
+    const results = await queryAsync(
+      'SELECT id, username, email FROM users WHERE id = ?',
+      [req.user.id]
+    );
 
-      if (results.length === 0) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      res.json(results[0]);
-    });
+    res.json(results[0]);
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -30,21 +28,18 @@ router.put('/dashboard', verifyToken, async (req, res) => {
   try {
     const { name, email } = req.body;
 
-    // Replace this with your DB update logic
-    const query = 'UPDATE users SET username = ?, email = ? WHERE id = ?';
-    connection.query(query, [name, email, req.user.id], (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ message: 'Server error' });
-      }
+    const result = await queryAsync(
+      'UPDATE users SET username = ?, email = ? WHERE id = ?',
+      [name, email, req.user.id]
+    );
 
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-      res.json({ message: 'Profile updated successfully' });
-    });
+    res.json({ message: 'Profile updated successfully' });
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

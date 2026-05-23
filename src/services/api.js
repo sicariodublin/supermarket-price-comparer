@@ -78,14 +78,22 @@ export async function searchProductsByName(name) {
   const { data } = await http.get("/products/search", {
     params: { name },
   });
-  return data;
+  // API returns { results, limit, offset }; fall back to bare array for safety
+  return Array.isArray(data) ? data : (data.results ?? []);
 }
 
-export const getProducts = async (query = "") => {
+export const getProducts = async (query = "", options = {}) => {
   const { data } = await http.get(`/products/search`, {
-    params: { name: query },
+    params: { name: query, ...options },
   });
-  return data;
+  return Array.isArray(data) ? data : (data.results ?? []);
+};
+
+export const getProductsPaginated = async (query = "", options = {}) => {
+  const { data } = await http.get(`/products/search`, {
+    params: { name: query, ...options },
+  });
+  return Array.isArray(data) ? { results: data, limit: 50, offset: 0 } : data;
 };
 
 export const addProduct = async (productData) => {
@@ -183,5 +191,15 @@ export const updateProductReport = async (reportId, reportData) => {
 
 export const getMyProductSubmissions = async () => {
   const { data } = await http.get(`/user/products/submissions`);
+  return data;
+};
+
+export const getUserDashboard = async () => {
+  const { data } = await http.get(`/user/dashboard`);
+  return data;
+};
+
+export const saveUserPreferences = async (preferences) => {
+  const { data } = await http.put(`/user/dashboard`, preferences);
   return data;
 };
