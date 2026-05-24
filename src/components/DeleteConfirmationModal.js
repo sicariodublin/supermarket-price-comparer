@@ -4,15 +4,14 @@ import { useAuth } from "../context/AuthContext";
 import { http } from "../services/api";
 
 function DeleteConfirmationModal({ isOpen, onClose }) {
-  const { token, logout } = useAuth(); // Retrieve token and logout from AuthContext
+  const { logout } = useAuth();
 
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
     try {
-      await http.delete("/delete-account", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Auth cookie sent automatically via withCredentials
+      await http.delete("/delete-account");
       alert("Account deleted successfully!");
       logout(); // Log out the user after successful deletion
     } catch (error) {

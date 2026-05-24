@@ -45,6 +45,7 @@ const { verifyToken } = require("./middleware/authMiddleware");
 const { pool, connection, queryAsync, dbConfig, closePool } = require("./db");
 const path = require("path");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const { z } = require("zod");
 const mailjet = require("node-mailjet").apiConnect(
   process.env.MJ_APIKEY_PUBLIC,
@@ -169,8 +170,8 @@ app.use((req, res, next) => {
 
   const header = req.headers.authorization || "";
   
-  // Allow Bearer tokens to bypass Basic challenge (for JWT-protected endpoints)
-  if (header.startsWith("Bearer ")) {
+  // Allow cookie-authenticated and Bearer-authenticated requests through
+  if (req.cookies?.authToken || header.startsWith("Bearer ")) {
     return next();
   }
   
@@ -197,6 +198,7 @@ app.use((req, res, next) => {
   return next();
 });
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -1006,8 +1008,15 @@ app.post("/api/login", authLimiter, validateBody(schemas.login), async (req, res
 
     console.log("User authenticated:", { id: user.id, email: user.email });
 
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour, matches JWT expiry
+      path: "/",
+    });
+
     res.json({
-      token,
       user: { id: user.id, email: user.email, name: user.name, role: user.role || "user" },
     });
   } catch (error) {
@@ -1018,24 +1027,36 @@ app.post("/api/login", authLimiter, validateBody(schemas.login), async (req, res
 
 // Route for user logout
 app.post("/api/logout", async (req, res) => {
-  const authHeader = req.headers.authorization;
+  const rawToken = req.cookies?.authToken || (() => {
+    const h = req.headers.authorization || "";
+    return h.startsWith("Bearer ") ? h.split(" ")[1] : null;
+  })();
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(400).json({ message: "Invalid token or Authorization header missing" });
+  const clearAuth = () => res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: NODE_ENV === "production",
+    sameSite: NODE_ENV === "production" ? "strict" : "lax",
+    path: "/",
+  });
+
+  if (!rawToken) {
+    clearAuth();
+    return res.status(200).json({ message: "Logged out successfully" });
   }
 
   try {
-    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
-    if (decoded.purpose !== "auth") {
-      return res.status(400).json({ message: "Invalid token" });
+    const decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
+    if (decoded.purpose === "auth") {
+      await queryAsync("UPDATE users SET isLoggedIn = FALSE WHERE email = ?", [decoded.email]);
+      console.log(`User ${decoded.email} logged out successfully.`);
     }
-    await queryAsync("UPDATE users SET isLoggedIn = FALSE WHERE email = ?", [decoded.email]);
-    console.log(`User ${decoded.email} logged out successfully.`);
-    return res.status(200).json({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Logout error:", error);
-    return res.status(400).json({ message: "Invalid token" });
+  } catch {
+    // Invalid/expired token — still clear the cookie
+  } finally {
+    clearAuth();
   }
+
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 const DEFAULT_NEWSLETTER = { weeklyDeals: true, priceAlerts: false, newProducts: true, seasonalTips: false };

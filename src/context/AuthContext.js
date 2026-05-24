@@ -16,52 +16,42 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [timeoutId, setTimeoutId] = useState(null);
   const [showInactivityModal, setShowInactivityModal] = useState(false);
   const navigate = useNavigate();
 
-  // Check if token and user exist on app load
+  // Restore user data from localStorage on app load (token lives in HttpOnly cookie)
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-    if (storedUser && storedToken) {
+    if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-        setToken(storedToken);
         setIsAuthenticated(true);
-      } catch (error) {
+      } catch {
         setIsAuthenticated(false);
         setUser(null);
-        setToken(null);
+        localStorage.removeItem("user");
       }
-    } else {
-      setIsAuthenticated(false);
-      setUser(null);
-      setToken(null);
     }
   }, []);
 
   // Logout function to clear auth data
   const logout = useCallback(async () => {
     try {
-      await http.post("/logout", null, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
+      // Cookie is cleared server-side; withCredentials sends it automatically
+      await http.post("/logout");
     } catch (error) {
       console.error("Error during logout:", error.message);
     } finally {
-      localStorage.removeItem("token");
       localStorage.removeItem("user");
-      setToken(null);
       setUser(null);
       setIsAuthenticated(false);
       clearTimeout(timeoutId);
       setTimeoutId(null);
-      navigate("/"); // Redirect to Home
+      navigate("/");
     }
-  }, [navigate, timeoutId, token]);
+  }, [navigate, timeoutId]);
 
   // Start or restart inactivity timer
   const startInactivityTimer = useCallback(() => {
@@ -74,12 +64,10 @@ export function AuthProvider({ children }) {
     setTimeoutId(newTimeout);
   }, [timeoutId, logout]);
 
-  // Login function to set token and user data
-  const login = useCallback((newToken, userData) => {
-    setToken(newToken);
+  // Login function — token is set as HttpOnly cookie by the server
+  const login = useCallback((userData) => {
     setUser(userData);
     setIsAuthenticated(true);
-    localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
     startInactivityTimer();
     setShowInactivityModal(false);
@@ -108,11 +96,10 @@ export function AuthProvider({ children }) {
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     isAuthenticated,
-    token,
     user,
     login,
     logout
-  }), [isAuthenticated, token, user, login, logout]);
+  }), [isAuthenticated, user, login, logout]);
 
   return (
     <AuthContext.Provider value={contextValue}>

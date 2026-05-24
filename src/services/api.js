@@ -18,7 +18,8 @@ export const http = axios.create({
   withCredentials: true,
 });
 
-// Attach Basic Auth only if no Authorization header is already set (preserve Bearer)
+// Attach Basic Auth for site-wide staging protection when credentials are configured.
+// JWT auth is handled via HttpOnly cookie (sent automatically by the browser).
 const BASIC_USER =
   env.REACT_APP_BASIC_USER ||
   (typeof window !== "undefined" && window.__BASIC_USER) ||
@@ -31,39 +32,9 @@ const BASIC_PASS =
 if (BASIC_USER && BASIC_PASS) {
   http.interceptors.request.use((config) => {
     config.headers = config.headers || {};
-    const hasAuth =
-      typeof config.headers["Authorization"] === "string" &&
-      config.headers["Authorization"].length > 0;
-
-    const storedToken =
-      typeof window !== "undefined" ? window.localStorage.getItem("token") : "";
-
-    if (!hasAuth && storedToken) {
-      config.headers["Authorization"] = `Bearer ${storedToken}`;
-      return config;
+    if (!config.headers["Authorization"]) {
+      config.headers["Authorization"] = `Basic ${btoa(`${BASIC_USER}:${BASIC_PASS}`)}`;
     }
-
-    if (!hasAuth) {
-      const token = btoa(`${BASIC_USER}:${BASIC_PASS}`);
-      config.headers["Authorization"] = `Basic ${token}`;
-    }
-    return config;
-  });
-}
-
-if (!BASIC_USER || !BASIC_PASS) {
-  http.interceptors.request.use((config) => {
-    config.headers = config.headers || {};
-    const hasAuth =
-      typeof config.headers["Authorization"] === "string" &&
-      config.headers["Authorization"].length > 0;
-    const storedToken =
-      typeof window !== "undefined" ? window.localStorage.getItem("token") : "";
-
-    if (!hasAuth && storedToken) {
-      config.headers["Authorization"] = `Bearer ${storedToken}`;
-    }
-
     return config;
   });
 }

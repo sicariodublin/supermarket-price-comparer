@@ -12,15 +12,22 @@ const updateLoginStatus = (email, status) => {
 };
 
 const verifyToken = async (req, res, next) => {
+  // Prefer HttpOnly cookie (XSS-safe); fall back to Bearer header for API clients
+  const cookieToken = req.cookies?.authToken;
   const authHeader = req.headers.authorization;
 
-  if (!authHeader?.startsWith("Bearer ")) {
+  let rawToken;
+  if (cookieToken) {
+    rawToken = cookieToken;
+  } else if (authHeader?.startsWith("Bearer ")) {
+    rawToken = authHeader.split(" ")[1];
+  } else {
     return res.status(401).json({ message: "No token provided" });
   }
 
   let decoded;
   try {
-    decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+    decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
   } catch (error) {
     console.error("Token verification failed:", {
       name: error.name,

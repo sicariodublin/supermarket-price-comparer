@@ -35,7 +35,7 @@ function LoginForm() {
     try {
       const { data } = await http.post("/login", { email: username, password });
       setTimeout(() => {
-        login(data.token, data.user);
+        login(data.user);
         navigate("/search");
       }, 0);
     } catch (error) {
