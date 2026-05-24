@@ -11,6 +11,11 @@ function Login() {
           <h1>WELCOME</h1>
           <h1>BACK!</h1>
           <p className="welcome-subtitle">Continue your savings journey with us</p>
+          <ul className="auth-benefits-list">
+            <li><i className="fas fa-check"></i> Compare prices across 6 supermarkets</li>
+            <li><i className="fas fa-check"></i> Track products &amp; get price alerts</li>
+            <li><i className="fas fa-check"></i> Save money every week</li>
+          </ul>
         </div>
       </div>
       <div className="login-right-section">

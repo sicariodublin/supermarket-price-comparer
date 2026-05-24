@@ -433,6 +433,19 @@ class DataCollectionService {
 
   // ─── DB operations ──────────────────────────────────────────────────────────
 
+  async recordPriceHistory(productId, price, source = 'scraper') {
+    return new Promise((resolve) => {
+      this.connection.query(
+        'INSERT INTO price_history (product_id, price, source) VALUES (?, ?, ?)',
+        [productId, price, source],
+        (err) => {
+          if (err) console.error('Could not record price history:', err.message);
+          resolve();
+        }
+      );
+    });
+  }
+
   async updateProductPrices(supermarketId) {
     try {
       console.log(`Starting data collection for supermarket ${supermarketId}`);
@@ -442,8 +455,12 @@ class DataCollectionService {
         const existing = await this.findExistingProduct(product.name, supermarketId);
         if (existing) {
           await this.updateProduct(existing.id, product);
+          if (Number(existing.price) !== Number(product.price)) {
+            await this.recordPriceHistory(existing.id, product.price, 'scraper');
+          }
         } else {
-          await this.insertProduct(product);
+          const result = await this.insertProduct(product);
+          await this.recordPriceHistory(result.insertId, product.price, 'scraper');
         }
       }
 

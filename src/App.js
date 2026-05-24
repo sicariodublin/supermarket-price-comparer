@@ -24,10 +24,12 @@ import TermsOfService from "./pages/Terms-of-service";
 import DashboardReact from "./routes/dashboardReact";
 import ProductDetails from "./pages/ProductDetails";
 import FeaturedProducts from "./components/FeaturedProducts";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Header />
       <div className="main-content">
         <Routes>

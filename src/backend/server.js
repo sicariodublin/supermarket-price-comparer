@@ -916,11 +916,17 @@ app.post("/api/register", authLimiter, validateBody(schemas.register), async (re
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const isDev = process.env.NODE_ENV !== "production";
     const result = await queryAsync(
-      "INSERT INTO users (username, email, password, isVerified) VALUES (?, ?, ?, FALSE)",
-      [username, email, hashedPassword]
+      "INSERT INTO users (username, email, password, isVerified) VALUES (?, ?, ?, ?)",
+      [username, email, hashedPassword, isDev]
     );
     const userId = result.insertId;
+
+    if (isDev) {
+      console.log(`[DEV] Auto-verified account for ${email}`);
+      return res.status(200).json({ message: "Registration successful! You can log in now." });
+    }
 
     const verificationToken = jwt.sign(
       { purpose: "email_verify", id: userId, email },
@@ -938,10 +944,27 @@ app.post("/api/register", authLimiter, validateBody(schemas.register), async (re
     const emailOptions = {
       Messages: [
         {
-          From: { Email: "addandcomparemessageus@hotmail.com", Name: "Support Team" },
+          From: { Email: "addandcomparemessageus@hotmail.com", Name: "Add&Compare" },
           To: [{ Email: email, Name: username }],
-          Subject: "Verify Your Email",
-          HTMLPart: `<h3>Welcome, ${username}!</h3><a href="${verificationUrl}">Verify Email</a>`,
+          Subject: "Please verify your Add&Compare account",
+          TextPart: `Hi ${username},\n\nThanks for joining Add&Compare — Ireland's supermarket price comparison platform.\n\nPlease verify your email address by visiting the link below:\n${verificationUrl}\n\nThis link expires in 24 hours.\n\nIf you did not create this account, you can safely ignore this email.\n\nThe Add&Compare Team\naddandcompare.com`,
+          HTMLPart: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:32px 16px;">
+<div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#1e3a5f,#0f2440);padding:32px 36px;">
+    <h1 style="color:#ffffff;margin:0;font-size:22px;">Add&amp;Compare</h1>
+    <p style="color:#94a3b8;margin:6px 0 0;font-size:14px;">Ireland's supermarket price comparison</p>
+  </div>
+  <div style="padding:36px;">
+    <h2 style="color:#1e3a5f;margin:0 0 12px;font-size:20px;">Hi ${username}, welcome!</h2>
+    <p style="color:#475569;line-height:1.6;margin:0 0 24px;">Thanks for signing up. Please verify your email address to activate your account and start comparing prices.</p>
+    <a href="${verificationUrl}" style="display:inline-block;background:#f97316;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;">Verify My Email</a>
+    <p style="color:#94a3b8;font-size:13px;margin:24px 0 0;line-height:1.5;">This link expires in 24 hours. If you did not create an account, you can safely ignore this email.</p>
+  </div>
+  <div style="background:#f8fafc;padding:20px 36px;border-top:1px solid #e2e8f0;">
+    <p style="color:#94a3b8;font-size:12px;margin:0;">© ${new Date().getFullYear()} Add&amp;Compare · Dublin, Ireland</p>
+  </div>
+</div>
+</body></html>`,
         },
       ],
     };
@@ -1556,10 +1579,27 @@ app.post("/api/resend-verification", authLimiter, async (req, res) => {
 
     await mailjet.post("send", { version: "v3.1" }).request({
       Messages: [{
-        From: { Email: "addandcomparemessageus@hotmail.com", Name: "Support Team" },
+        From: { Email: "addandcomparemessageus@hotmail.com", Name: "Add&Compare" },
         To: [{ Email: user.email, Name: user.username }],
-        Subject: "Verify Your Email — Add&Compare",
-        HTMLPart: `<h3>Hi ${user.username},</h3><p>Here is your new verification link:</p><a href="${verificationUrl}">Verify Email</a><p>This link expires in 24 hours.</p>`,
+        Subject: "Your new verification link — Add&Compare",
+        TextPart: `Hi ${user.username},\n\nHere is your new email verification link:\n${verificationUrl}\n\nThis link expires in 24 hours.\n\nIf you did not request this, you can safely ignore this email.\n\nThe Add&Compare Team`,
+        HTMLPart: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:32px 16px;">
+<div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#1e3a5f,#0f2440);padding:32px 36px;">
+    <h1 style="color:#ffffff;margin:0;font-size:22px;">Add&amp;Compare</h1>
+    <p style="color:#94a3b8;margin:6px 0 0;font-size:14px;">Ireland's supermarket price comparison</p>
+  </div>
+  <div style="padding:36px;">
+    <h2 style="color:#1e3a5f;margin:0 0 12px;font-size:20px;">New verification link</h2>
+    <p style="color:#475569;line-height:1.6;margin:0 0 24px;">Hi ${user.username}, here is your new email verification link. Click the button below to verify your account.</p>
+    <a href="${verificationUrl}" style="display:inline-block;background:#f97316;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;">Verify My Email</a>
+    <p style="color:#94a3b8;font-size:13px;margin:24px 0 0;line-height:1.5;">This link expires in 24 hours. If you did not request this, you can safely ignore this email.</p>
+  </div>
+  <div style="background:#f8fafc;padding:20px 36px;border-top:1px solid #e2e8f0;">
+    <p style="color:#94a3b8;font-size:12px;margin:0;">© ${new Date().getFullYear()} Add&amp;Compare · Dublin, Ireland</p>
+  </div>
+</div>
+</body></html>`,
       }],
     });
 
@@ -1927,7 +1967,7 @@ app.get("/api/products/:id/details", async (req, res) => {
       FROM products p
       JOIN supermarkets s ON p.supermarket_id = s.id
       LEFT JOIN price_history ph ON p.id = ph.product_id 
-        AND ph.recorded_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        AND ph.recorded_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
       WHERE p.id = ?
         ${approvalClause ? `AND ${approvalClause}` : ""}
       GROUP BY p.id

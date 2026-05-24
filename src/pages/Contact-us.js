@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import "../styles/Contact-us.css";
 import { http } from "../services/api";
 
@@ -16,16 +15,16 @@ function ContactUs() {
     setIsLoading(true);
     try {
       const { data } = await http.post("/contact", { name, email, message });
-      setFeedback(data?.message || "Message sent successfully!");
+      setFeedback({ type: "success", text: data?.message || "Message sent! We'll be in touch soon." });
       setName("");
       setEmail("");
       setSubject("");
       setMessage("");
     } catch (error) {
-      console.error("Error sending message:", error);
-      setFeedback(
-        error?.response?.data?.message || "Failed to send message."
-      );
+      setFeedback({
+        type: "error",
+        text: error?.response?.data?.message || "Failed to send message. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -33,159 +32,145 @@ function ContactUs() {
 
   return (
     <div className="contact-page">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container">
-          <div className="hero-content">
-            <h1>Contact Us</h1>
-            <p className="hero-subtitle">
-              Feel free to contact us directly if you have any inquiries
-              regarding our services. We are very pleased that you are
-              considering us.
-            </p>
-          </div>
+
+      {/* Hero */}
+      <section className="contact-hero">
+        <div className="contact-container">
+          <span className="contact-badge">Get in touch</span>
+          <h1>Contact Us</h1>
+          <p>Have a question, spotted a pricing error, or just want to say hello? We'd love to hear from you.</p>
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="content-section">
-        <div className="container">
-          <div className="contact-content">
-            <div className="contact-grid">
-              {/* Contact Information */}
-              <div className="contact-info-section">
-                <div className="info-card">
-                  <h2>How can we help you today?</h2>
-                  <p>
-                    Feel free to contact us directly if you have any inquiries
-                    regarding our services. We would love to assist you.
-                  </p>
-                  <p>
-                    Simply fill in your personal data and let us get in touch
-                    with you. Normally, the support team answers within one
-                    business day, so that you don't have to wait. Or call us
-                    directly from the phone.
-                  </p>
-                </div>
+      {/* Body */}
+      <section className="contact-body">
+        <div className="contact-container">
+          <div className="contact-grid">
 
-                <div className="contact-details">
-                  <div className="detail-item">
-                    <span className="detail-icon"><span role="img" aria-label="house">🏠</span></span>
-                    <div className="detail-content">
-                      <h3>Address</h3>
-                      <p>To be Confirmed</p>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <div className="detail-icon"><span role="img" aria-label="telephone">📞</span></div>
-                    <div className="detail-content">
-                      <h3>Phone</h3>
-                      <p>To be Confirmed</p>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <div className="detail-icon"><span role="img" aria-label="telephone">📞</span></div>
-                    <div className="detail-content">
-                      <h3>Toll-Free</h3>
-                      <p>To be Confirmed</p>
-                    </div>
-                  </div>
-
-                  <div className="detail-item">
-                    <div className="detail-icon"><span role="img" aria-label="email">📧</span></div>
-                    <div className="detail-content">
-                      <h3>Email</h3>
-                      <p>addandcomparemessageus@hotmail.com</p>
-                    </div>
-                  </div>
-                </div>
+            {/* Left — info */}
+            <div className="contact-info-col">
+              <div className="contact-info-card">
+                <h2>How can we help?</h2>
+                <p>
+                  Whether it's a question about the service, a bug report, or
+                  feedback on pricing data — drop us a message and we'll get
+                  back to you as quickly as we can.
+                </p>
               </div>
 
-              {/* Contact Form */}
-              <div className="contact-form-section">
-                <div className="form-card">
-                  <h2>Contact Form</h2>
-                  <form onSubmit={handleSubmit} className="contact-form">
-                    <div className="form-group">
-                      <label htmlFor="name">Your Name:</label>
-                      <input
-                        type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        disabled={isLoading}
-                      />
-                    </div>
+              <div className="contact-details-card">
+                <div className="contact-detail-item">
+                  <div className="contact-detail-icon">
+                    <i className="fas fa-envelope"></i>
+                  </div>
+                  <div className="contact-detail-content">
+                    <h3>Email</h3>
+                    <p>addandcomparemessageus@hotmail.com</p>
+                  </div>
+                </div>
 
-                    <div className="form-group">
-                      <label htmlFor="email">Your Email:</label>
-                      <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={isLoading}
-                      />
-                    </div>
+                <div className="contact-detail-item">
+                  <div className="contact-detail-icon">
+                    <i className="fas fa-clock"></i>
+                  </div>
+                  <div className="contact-detail-content">
+                    <h3>Response Time</h3>
+                    <p>Within 1–2 business days</p>
+                  </div>
+                </div>
 
-                    <div className="form-group">
-                      <label htmlFor="subject">Subject:</label>
-                      <input
-                        type="text"
-                        id="subject"
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                        required
-                        disabled={isLoading}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="message">Message:</label>
-                      <textarea
-                        id="message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        required
-                        disabled={isLoading}
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="submit-btn"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Sending..." : "Send Message"}
-                    </button>
-                  </form>
-
-                  {feedback && (
-                    <div
-                      className={`feedback-message ${
-                        feedback.includes("successfully") ? "success" : "error"
-                      }`}
-                    >
-                      {feedback}
-                    </div>
-                  )}
+                <div className="contact-detail-item">
+                  <div className="contact-detail-icon">
+                    <i className="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div className="contact-detail-content">
+                    <h3>Based in</h3>
+                    <p>Ireland</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Right — form */}
+            <div className="contact-form-col">
+              <div className="contact-form-card">
+                <h2>Send a Message</h2>
+                <form onSubmit={handleSubmit} className="contact-form">
+
+                  <div className="contact-form-group">
+                    <label htmlFor="name">Your Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="John Smith"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="contact-form-group">
+                    <label htmlFor="email">Your Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="john@example.com"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="contact-form-group">
+                    <label htmlFor="subject">Subject</label>
+                    <input
+                      type="text"
+                      id="subject"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="What's this about?"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <div className="contact-form-group">
+                    <label htmlFor="message">Message</label>
+                    <textarea
+                      id="message"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Tell us more..."
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <button type="submit" className="contact-submit-btn" disabled={isLoading}>
+                    {isLoading ? (
+                      <><i className="fas fa-circle-notch fa-spin"></i> Sending…</>
+                    ) : (
+                      <><i className="fas fa-paper-plane"></i> Send Message</>
+                    )}
+                  </button>
+
+                  {feedback && (
+                    <div className={`contact-feedback ${feedback.type}`}>
+                      <i className={`fas ${feedback.type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}`}></i>
+                      {" "}{feedback.text}
+                    </div>
+                  )}
+
+                </form>
+              </div>
+            </div>
+
           </div>
-          <Link
-            to="/"
-            className="btn btn-secondary btn-large"
-            // style={{ padding: "8px 24px", fontSize: "1rem", }}
-          >
-            Back to Home
-          </Link>
         </div>
       </section>
+
     </div>
   );
 }

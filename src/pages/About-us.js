@@ -1,75 +1,97 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/About-us.css';
+
+const stats = [
+  { number: '6',    label: 'Supermarkets tracked' },
+  { number: '10K+', label: 'Products compared' },
+  { number: '2024', label: 'Founded in Ireland' },
+  { number: 'Free', label: 'Always free to use' },
+];
+
+const cards = [
+  {
+    icon: '🌱',
+    title: 'Our Origin',
+    body: 'Add&Compare started from a simple frustration — visiting multiple supermarkets just to find the best price on everyday groceries. We built a community-powered platform so shoppers never have to guess again.',
+  },
+  {
+    icon: '🛒',
+    title: 'What We Do',
+    body: 'We aggregate and compare grocery prices across Ireland\'s major supermarkets. Users can search any product, see where it\'s cheapest today, and contribute prices they find in-store to help the whole community.',
+  },
+  {
+    icon: '🎯',
+    title: 'Our Mission',
+    body: 'To empower every household in Ireland to make smarter, more informed shopping decisions — saving time, reducing food bills, and making comparison effortless.',
+  },
+  {
+    icon: '🤝',
+    title: 'Community First',
+    body: 'The platform is built on the idea that shoppers helping shoppers creates the most accurate, up-to-date data. Every price you add makes the app better for everyone.',
+  },
+];
 
 function AboutUs() {
   return (
     <div className="about-page">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container">
-          <div className="hero-content">
-            <h1>About Us</h1>
-            <p className="hero-subtitle">
-              Welcome to addandcompare.com! Established in 2024, our platform was born from a simple yet profound realization.
-            </p>
+
+      {/* Hero */}
+      <section className="about-hero">
+        <div className="about-container">
+          <span className="about-badge">About Us</span>
+          <h1>Built by Irish shoppers, for Irish shoppers</h1>
+          <p>
+            Add&amp;Compare was founded in 2024 with one goal: make grocery price comparison
+            effortless for everyone in Ireland.
+          </p>
+        </div>
+      </section>
+
+      {/* Stats strip */}
+      <section className="about-stats">
+        <div className="about-container">
+          <div className="about-stats-grid">
+            {stats.map((s) => (
+              <div key={s.label} className="about-stat">
+                <span className="about-stat-number">{s.number}</span>
+                <span className="about-stat-label">{s.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="content-section">
-        <div className="container">
-          <div className="about-content">
-            <div className="about-intro">
-              <p className="intro-text">
-                Our platform was born from routine grocery shopping trips and the challenges we all face in price comparison and saving money.
-              </p>
-            </div>
-
-            <div className="about-sections">
-              <div className="about-card">
-                <div className="card-icon"><span role="img" aria-label="seedling">🌱</span></div>
-                <h2>Our Origin</h2>
-                <p>
-                  Noticing the frequent to and fro to supermarkets challenges in price comparison, product quality assessment and save more money, the idea for addandcompare.com was conceived. Our founder envisioned a user-driven platform that leverages the collective insights of the shopping community.
-                </p>
+      {/* Story cards */}
+      <section className="about-cards-section">
+        <div className="about-container">
+          <h2 className="about-section-title">Our story</h2>
+          <div className="about-cards">
+            {cards.map((card) => (
+              <div key={card.title} className="about-card">
+                <div className="about-card-icon">{card.icon}</div>
+                <h3>{card.title}</h3>
+                <p>{card.body}</p>
               </div>
-
-              <div className="about-card featured">
-                <div className="card-icon"><span role="img" aria-label="shopping cart">🛒</span></div>
-                <h2>What We Do</h2>
-                <p>
-                  Addandcompare.com provides a unique web application where users can add, compare, and review their grocery shopping experiences. By contributing to and utilizing our database, users can make more informed decisions, saving time and money.
-                </p>
-              </div>
-
-              <div className="about-card">
-                <div className="card-icon"><span role="img" aria-label="target">🎯</span></div>
-                <h2>Our Mission</h2>
-                <p>
-                  Our mission is to empower consumers by providing a comprehensive and accessible platform for comparing grocery products across various supermarkets. We strive to simplify shopping decisions and enhance the shopping experience through technology and community input.
-                </p>
-              </div>
-
-              <div className="about-card">
-                <div className="card-icon"><span role="img" aria-label="handshake">🤝</span></div>
-                <h2>Join Us</h2>
-                <p>
-                  We invite you to be part of our community. Whether you're comparing prices, seeking the best deals, or sharing your shopping experiences, Addandcompare.com is your go-to resource for all things grocery.
-                </p>
-              </div>
-
-              <div className="about-card">
-                <div className="card-icon"><span role="img" aria-label="telephone">📞</span></div>
-                <h2>Contact Us</h2>
-                <p>
-                  If you have any inquiries or wish to connect with us, please don't hesitate to reach out. We are excited to grow with you and continue enhancing our services.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+
+      {/* CTA */}
+      <section className="about-cta">
+        <div className="about-container about-cta-inner">
+          <div>
+            <h3>Ready to start saving?</h3>
+            <p>Join thousands of Irish shoppers comparing prices every day.</p>
+          </div>
+          <div className="about-cta-btns">
+            <Link to="/register" className="about-btn-primary">Create Free Account</Link>
+            <Link to="/contact-us" className="about-btn-outline">Contact Us</Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

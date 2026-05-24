@@ -10,6 +10,11 @@ function Register() {
           <h1>JOIN</h1>
           <h1>US!</h1>
           <p className="welcome-subtitle">Start saving money on your groceries today</p>
+          <ul className="auth-benefits-list">
+            <li><i className="fas fa-check"></i> Free to join, no credit card needed</li>
+            <li><i className="fas fa-check"></i> Compare 6 supermarkets at a glance</li>
+            <li><i className="fas fa-check"></i> Start saving from day one</li>
+          </ul>
         </div>
       </div>
       <div className="register-right-section">

@@ -5,22 +5,23 @@ import { http } from "../services/api";
 function FeedbackForm() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState(null); // { type: 'success'|'error', text: '' }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    setStatus(null);
     try {
       const { data } = await http.post("/feedback/sendFeedback", { message });
-      alert(data?.message || 'Thank you for your feedback!');
+      setStatus({ type: 'success', text: data?.message || 'Thank you for your feedback!' });
       setMessage('');
     } catch (error) {
-      console.error('Error sending feedback:', error);
-      alert(
-        error?.response?.data?.message ||
-        'An error occurred. Please try again later.'
-      );
+      setStatus({
+        type: 'error',
+        text: error?.response?.data?.message || 'An error occurred. Please try again later.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -54,8 +55,8 @@ function FeedbackForm() {
                 required
               />
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="feedback-button"
               disabled={isSubmitting || !message.trim()}
             >
@@ -73,6 +74,12 @@ function FeedbackForm() {
             </button>
           </div>
         </form>
+        {status && (
+          <p className={`feedback-status ${status.type}`}>
+            <i className={`bi ${status.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'}`}></i>
+            {status.text}
+          </p>
+        )}
       </div>
     </div>
   );

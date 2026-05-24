@@ -1,85 +1,110 @@
-/* Modern Register Page Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* ── Register Page ─────────────────────────────────────── */
 .register-page {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
   width: 100%;
 }
 
+/* Left branded panel */
 .register-left-section {
-  flex: 1;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%),
-              url("../assets/images/supermarket.jpg") center/cover;
+  flex: 0 0 42%;
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.93) 0%, rgba(15, 36, 64, 0.93) 100%),
+              url("../assets/images/supermarket.jpg") center / cover;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 80px;
-  position: relative;
-}
-
-.welcome-content {
-  text-align: center;
-  color: white;
+  padding: 60px 48px;
 }
 
 .register-left-section h1 {
   font-size: 4rem;
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   font-family: "Caveat", cursive;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
   line-height: 1;
+  color: #fff;
+}
+
+.welcome-content {
+  text-align: center;
+  color: #fff;
 }
 
 .welcome-subtitle {
-  font-size: 1.2rem;
-  opacity: 0.9;
-  margin-top: 20px;
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-top: 18px;
   font-weight: 300;
+  color: #c8d8ec;
 }
 
+.auth-benefits-list {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  text-align: left;
+}
+
+.auth-benefits-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.auth-benefits-list li i {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(249, 115, 22, 0.25);
+  color: #f97316;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Right form panel */
 .register-right-section {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
-  padding: 50px;
+  background: #f8fafc;
+  padding: 48px 40px;
 }
 
 .register-container {
   width: 100%;
-  max-width: 450px;
-  background: white;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 440px;
+  background: #fff;
+  padding: 44px 40px;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(30, 58, 95, 0.1);
 }
 
 .register-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
 .register-header h2 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 10px;
-  font-weight: 600;
+  font-size: 1.9rem;
+  color: #1e293b;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .register-header p {
-  color: #666;
-  font-size: 1rem;
+  color: #64748b;
+  font-size: 0.95rem;
 }
 
-/* Form Styles */
+/* Form */
 .register-form {
   width: 100%;
   display: flex;
@@ -94,26 +119,27 @@
 }
 
 .input-group label {
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-  font-size: 0.9rem;
+  margin-bottom: 7px;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.88rem;
 }
 
 .input-group input {
-  padding: 15px;
-  border: 2px solid #e1e5e9;
+  padding: 13px 15px;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  background: #f8f9fa;
+  font-size: 0.97rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #f8fafc;
+  color: #1e293b;
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  background: white;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  background: #fff;
 }
 
 .icon-container {
@@ -121,90 +147,76 @@
   right: 15px;
   top: 43px;
   cursor: pointer;
-  color: #667eea;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
+  color: #1e3a5f;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
 }
 
-.icon-container:hover {
-  color: #5a6fd8;
-}
+.icon-container:hover { color: #f97316; }
 
+/* Submit button */
 .register-button {
-  padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 14px;
+  background: #f97316;
+  color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  margin-top: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 8px;
+  letter-spacing: 0.01em;
 }
 
 .register-button:hover {
+  background: #ea6c0a;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.3);
 }
 
+/* Links */
 .additional-options {
   text-align: center;
   margin-top: 20px;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .additional-options a {
-  color: #667eea;
+  color: #1e3a5f;
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }
 
 .additional-options a:hover {
-  color: #5a6fd8;
+  color: #f97316;
   text-decoration: underline;
 }
 
-/* Responsive Design */
+/* ── Responsive ──────────────────────────────────────── */
+
 @media (max-width: 768px) {
-  .register-page {
-    flex-direction: column;
-    min-height: auto;
-  }
-  
+  .register-page { flex-direction: column; }
+
   .register-left-section {
-    padding: 40px 20px;
-    min-height: 300px;
+    flex: 0 0 auto;
+    padding: 44px 24px 36px;
+    min-height: 220px;
   }
-  
-  .register-left-section h1 {
-    font-size: 3rem;
-  }
-  
-  .welcome-subtitle {
-    font-size: 1rem;
-  }
-  
-  .register-right-section {
-    padding: 40px 20px;
-  }
-  
-  .register-container {
-    padding: 30px 20px;
-  }
+
+  .register-left-section h1 { font-size: 3rem; }
+
+  .auth-benefits-list { display: none; }
+
+  .register-right-section { padding: 36px 20px; }
+
+  .register-container { padding: 32px 24px; }
 }
 
 @media (max-width: 480px) {
-  .register-left-section h1 {
-    font-size: 2.5rem;
-  }
-  
-  .register-header h2 {
-    font-size: 1.5rem;
-  }
-  
-  .register-container {
-    padding: 25px 15px;
-  }
+  .register-left-section h1 { font-size: 2.4rem; }
+  .register-header h2 { font-size: 1.5rem; }
+  .register-container { padding: 24px 16px; }
 }
-

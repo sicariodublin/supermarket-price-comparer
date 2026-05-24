@@ -13,8 +13,8 @@ const LogoOption1 = ({ width = 200, height = 60, className = "" }) => {
     >
       <defs>
         <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#667eea" />
-          <stop offset="100%" stopColor="#764ba2" />
+          <stop offset="0%" stopColor="#1e3a5f" />
+          <stop offset="100%" stopColor="#0f2440" />
         </linearGradient>
       </defs>
 
@@ -46,7 +46,7 @@ const LogoOption1 = ({ width = 200, height = 60, className = "" }) => {
         <g transform="translate(20, 5)">
           <path
             d="M0 1 L15 1 L20 8 L15 16 L0 16 Z"
-            fill="#ff6b6b"
+            fill="#f97316"
             stroke="#fff"
             strokeWidth="1"
           />
@@ -67,17 +67,17 @@ const LogoOption1 = ({ width = 200, height = 60, className = "" }) => {
       <text
         x="55"
         y="25"
-        fill="#333"
+        fill="#1e293b"
         fontSize="20.5"
         fontWeight="700"
         fontFamily="Inter, sans-serif"
       >
-        Add&Compare
+        Add&amp;Compare
       </text>
       <text
         x="60"
         y="40"
-        fill="#667eea"
+        fill="#f97316"
         fontSize="12"
         fontWeight="500"
         fontFamily="Inter, sans-serif"

@@ -1,14 +1,14 @@
 /* Modern Color Scheme and Global Styles */
 :root {
   /* Primary Colors */
-  --primary-color: #667eea;
-  --primary-dark: #5a6fd8;
-  --primary-light: #8fa4f3;
-  
+  --primary-color: #1e3a5f;
+  --primary-dark: #162d4e;
+  --primary-light: #2d5a8e;
+
   /* Secondary Colors */
-  --secondary-color: #764ba2;
-  --accent-color: #ff6b6b;
-  --accent-dark: #ff5252;
+  --secondary-color: #0f2440;
+  --accent-color: #f97316;
+  --accent-dark: #ea6c0a;
   
   /* Success & Error Colors */
   --success-color: #4caf50;
@@ -39,8 +39,8 @@
   --shadow-dark: rgba(0, 0, 0, 0.25);
   
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+  --gradient-primary: linear-gradient(135deg, #1e3a5f 0%, #0f2440 100%);
+  --gradient-accent: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%);
   --gradient-success: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
   
   /* Spacing */
@@ -110,7 +110,12 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+}
+
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -240,16 +245,16 @@ a:hover {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--accent-color);
   color: var(--text-light);
-  border-color: var(--primary-color);
+  border-color: var(--accent-color);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
 }
 
 .btn-secondary {

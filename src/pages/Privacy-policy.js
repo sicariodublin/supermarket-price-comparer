@@ -1,98 +1,106 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Privacypolicy.css';
+
+const sections = [
+  {
+    id: 'collect',
+    icon: '📊',
+    title: 'What We Collect',
+    body: 'We collect information you provide directly: your email address and username when you register, and any product data you submit. We also collect non-personal technical data such as your IP address and browser type for security and analytics purposes.',
+  },
+  {
+    id: 'why',
+    icon: '🎯',
+    title: 'Why We Collect It',
+    body: 'Your information is used to provide and improve the service — including account management, email verification, personalised dashboards, and price alerts. We do not sell your data to third parties.',
+  },
+  {
+    id: 'sharing',
+    icon: '🔒',
+    title: 'Sharing & Disclosure',
+    body: 'We do not share your personal information with third parties except where required by law, or as strictly necessary to operate the platform (e.g. our transactional email provider Mailjet, used solely to send verification and reset emails).',
+  },
+  {
+    id: 'cookies',
+    icon: '🍪',
+    title: 'Cookies & Sessions',
+    body: 'We use an HttpOnly session cookie to keep you logged in securely. This cookie cannot be read by JavaScript and expires after 1 hour of activity. We do not use third-party advertising or tracking cookies.',
+  },
+  {
+    id: 'security',
+    icon: '🛡️',
+    title: 'Security',
+    body: 'Passwords are hashed using bcrypt. Connections are encrypted with HTTPS/TLS. Session tokens are stored in HttpOnly cookies to protect against cross-site scripting. We take reasonable measures to protect your data, though no system is 100% secure.',
+  },
+  {
+    id: 'rights',
+    icon: '⚖️',
+    title: 'Your Rights',
+    body: 'Under GDPR you have the right to access, correct, or delete your personal data at any time. You can delete your account from the Dashboard settings page. For data export requests or other enquiries, contact us directly.',
+  },
+  {
+    id: 'changes',
+    icon: '🔄',
+    title: 'Changes to This Policy',
+    body: 'We may update this policy periodically. We will notify registered users of any material changes by email. The date at the top of this page always reflects the most recent revision.',
+  },
+  {
+    id: 'contact',
+    icon: '📞',
+    title: 'Contact Us',
+    body: 'For any privacy-related questions, requests, or concerns please reach out via our Contact Us page. We take all enquiries seriously and aim to respond within 5 business days.',
+  },
+];
 
 function PrivacyPolicy() {
   return (
-    <div className="privacy-page">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container">
-          <div className="hero-content">
-            <h1>Privacy Policy</h1>
-            <p className="hero-subtitle">
-              Your privacy is important to us. Learn how we protect and handle your information.
-            </p>
-          </div>
+    <div className="legal-page">
+
+      {/* Hero */}
+      <section className="legal-hero">
+        <div className="legal-container">
+          <span className="legal-badge">Legal</span>
+          <h1>Privacy Policy</h1>
+          <p>Last updated: January 2025 &nbsp;·&nbsp; GDPR compliant</p>
         </div>
       </section>
 
-      {/* Content Section */}
-      <section className="content-section">
-        <div className="container">
-          <div className="privacy-content">
-            <div className="privacy-intro">
-              <p className="intro-text">
-                Your privacy is important to us. It is our policy to respect your
-                privacy regarding any information we may collect from you across our
-                website.
-              </p>
-            </div>
+      {/* Two-column layout */}
+      <section className="legal-body">
+        <div className="legal-container legal-layout">
 
-            <div className="privacy-sections">
-              <div className="privacy-card">
-                <div className="card-icon"><span role="img" aria-label="chart">📊</span></div>
-                <h2>Information we collect</h2>
-                <p>
-                  We collect information you voluntarily provide to us, such as your
-                  email address at sign-up, product search queries and any other
-                  personal information you provide through the Addandcompare.com
-                  website. We also collect non-personally identifiable information,
-                  such as your IP address.
-                </p>
-              </div>
+          {/* Sticky TOC */}
+          <aside className="legal-toc">
+            <p className="legal-toc-heading">Contents</p>
+            <ul>
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a href={`#${s.id}`}>{s.title}</a>
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-              <div className="privacy-card">
-                <div className="card-icon"><span role="img" aria-label="magnifying glass">🎯</span></div>
-                <h2>Why we collect this information</h2>
-                <p>
-                  The information you provide to us enables us to fulfill your service
-                  expectations. The provided information is used in various ways to
-                  improve our website's interaction with the user, via newsletters or
-                  personalised product displays.
-                </p>
+          {/* Sections */}
+          <div className="legal-sections">
+            {sections.map((s) => (
+              <div key={s.id} id={s.id} className="legal-section">
+                <div className="legal-section-header">
+                  <span className="legal-section-icon">{s.icon}</span>
+                  <h2>{s.title}</h2>
+                </div>
+                <p>{s.body}</p>
               </div>
+            ))}
 
-              <div className="privacy-card">
-                <div className="card-icon"><span role="img" aria-label="closed lock">🔒</span></div>
-                <h2>Information sharing and disclosure</h2>
-                <p>
-                  We do not share or disclose your personal information to any third
-                  parties, except as required by law or as necessary to provide you
-                  with the services you request.
-                </p>
-              </div>
-
-              <div className="privacy-card">
-                <div className="card-icon"><span role="img" aria-label="shield">🛡️</span></div>
-                <h2>Security</h2>
-                <p>
-                  We take reasonable measures to protect your personal information
-                  from unauthorized access, use, or disclosure. However, we cannot
-                  guarantee that your information will be completely secure.
-                </p>
-              </div>
-
-              <div className="privacy-card">
-                <div className="card-icon"><span role="img" aria-label="recycling symbol">🔄</span></div>
-                <h2>Changes to this policy</h2>
-                <p>
-                  We may update this policy from time to time. We will notify you of
-                  any changes by posting the new policy on our website.
-                </p>
-              </div>
-
-              <div className="privacy-card featured">
-                <div className="card-icon"><span role="img" aria-label="telephone">📞</span></div>
-                <h2>Contact us</h2>
-                <p>
-                  If you have any questions or concerns about our privacy policy,
-                  please feel free to reach out to us, we are always happy to help!
-                </p>
-              </div>
+            <div className="legal-footer-note">
+              Questions? <Link to="/contact-us">Get in touch with us</Link>.
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
